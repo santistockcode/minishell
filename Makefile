@@ -1,4 +1,4 @@
-NAME = ./minishell
+NAME = minishell
 
 # Var
 
@@ -21,7 +21,7 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = 
+FILES = main
 
 
 # Files add

@@ -5,6 +5,13 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "../Libft/include/libft.h"
+
+typedef struct s_shell
+{
+	int i;
+} t_shell;
+
 
 # define SUCCESS 0
 # define MALLOC_ERROR -1
