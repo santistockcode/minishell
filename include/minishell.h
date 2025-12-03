@@ -6,10 +6,23 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "../Libft/include/libft.h"
+#include "log.h"
+
+// do we deep copy envp?
+// typedef struct s_env
+// {
+//     char            *key;
+//     char            *value;
+//     struct s_env    *next;
+// }   t_env;
+
 
 typedef struct s_shell
 {
 	int i;
+	// t_env   	*env;
+    // int      last_status; // last $? value
+    // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
 
 
