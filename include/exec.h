@@ -14,20 +14,19 @@ typedef struct s_redir {
     int               fd;            // usually 0 or 1
     char             *target;        // filename or heredoc delimiter
     int               delim_quoted;  // for heredoc; 1 if delimiter was quoted
-    struct s_redir   *next;
 }   t_redir;
 
 // one simple command in a pipeline
 typedef struct s_cmd {
     char           **argv;        // NULL-terminated; raw words (already de-quoted)
-    t_redir        *redirs;       // linked list, or NULL
-    struct s_cmd   *next;         // next command in same pipeline (right of '|')
+    t_list        *redirs;       // linked list, or NULL
 }   t_cmd;
 
 
 // "backend"
-int    exec_pipeline(t_shell *sh, t_cmd *first);
-void   free_pipeline(t_cmd *first);
+int    exec_pipeline(t_shell *sh, t_list *cmd_first);
+void   free_pipeline(t_list *cmd_first);
+
 
 
 #endif

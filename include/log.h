@@ -11,4 +11,4 @@
   #define MSH_LOG(fmt, ...) do { } while (0)
 #endif
 
-#endif /* MINISHELL_LOG_H */
+#endif
