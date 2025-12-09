@@ -13,7 +13,7 @@ typedef struct s_redir {
     t_redir_type      type;
     int               fd;            // usually 0 or 1
     char             *target;        // filename or heredoc delimiter
-    int               delim_quoted;  // for heredoc; 1 if delimiter was quoted
+    int               quoted;  // for heredoc; 1 if delimiter was quoted
 }   t_redir;
 
 // one simple command in a pipeline
