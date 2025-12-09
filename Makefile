@@ -30,8 +30,12 @@ SRC = $(addprefix $(SRC_DIR), $(addsuffix .c, $(FILES)))
 
 OBJ = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(FILES)))
 
-# 1 rule
+# 1st rule
 all: $(NAME)
+
+# Debug rule
+debug: CFLAGS += -g3 -O0 -DDEBUG
+debug: $(NAME)
 
 # Comp bin
 $(NAME): $(OBJ) $(LIBFT_NAME)
