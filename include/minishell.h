@@ -5,6 +5,12 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <errno.h>
+
 #include "../Libft/include/libft.h"
 #include "log.h"
 
@@ -24,6 +30,7 @@ typedef struct s_shell
     // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
 
+void septup_signal();
 
 # define SUCCESS 0
 # define MALLOC_ERROR -1
