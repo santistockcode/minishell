@@ -56,3 +56,6 @@ dkms.conf
 
 # Docs private
 docs-private/
+
+# python venv
+.env/

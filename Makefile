@@ -21,7 +21,7 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main
+FILES = main build_pipeline
 
 
 # Files add
@@ -38,9 +38,11 @@ debug: CFLAGS += -g3 -O0 -DDEBUG
 debug: $(NAME)
 
 # Comp bin
+READLINE_LIBS = -lreadline
+
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(READLINE_LIBS) -o $@
 
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
@@ -50,6 +52,7 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 # Compilar la libft
 $(LIBFT_NAME):
 	$(MAKE) -C $(LIBFT_DIR)
+
 
 # clean OBJ
 clean:
