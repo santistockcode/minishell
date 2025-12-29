@@ -3,10 +3,10 @@
 #include "minishell.h"
 
 typedef enum e_redir_type {
-    R_IN,          // <
-    R_OUT_TRUNC,   // >
-    R_OUT_APPEND,  // >>
-    R_HEREDOC      // <<
+	R_IN,          // <
+	R_OUT_TRUNC,   // >
+	R_OUT_APPEND,  // >>
+	R_HEREDOC      // <<
 }   t_redir_type;
 
 /*
@@ -17,10 +17,10 @@ typedef enum e_redir_type {
 ** - quoted: for heredoc; 1 if delimiter was quoted (no expansion), 0 otherwise
 */
 typedef struct s_redir {
-    t_redir_type      type;
-    int               fd;
-    char             *target; // path or delimiter for here doc
-    int               quoted;
+	t_redir_type      type;
+	int               fd;
+	char             *target; // path or delimiter for here doc
+	int               quoted;
 }   t_redir;
 
 // one simple command in a pipeline
@@ -29,18 +29,43 @@ typedef struct s_redir {
 ** - redirs: list of t_redir* nodes (or NULL)
 */
 typedef struct s_cmd {
-    char           **argv;
-    t_list         *redirs;
+	char           **argv;
+	t_list         *redirs;
 }   t_cmd;
 
 
 /* Backend */
-/* Execute a pipeline (list of t_cmd*). Returns the exit status of the last
+/* Execute a cmds (pipeline list of t_cmd* or unique cmd). Returns the exit status of the last
 ** command (0 on success), and updates sh->last_status accordingly. */
-int    exec_pipeline(t_shell *sh, t_list *cmd_first);
+int	exec_cmds(t_shell *sh, t_list *cmd_first);
 
-/* Free an entire pipeline list, including argv strings, redirs and list nodes. */
-void   free_pipeline(t_list *cmd_first);
+/* Free an entire cmds list, including argv strings, redirs and list nodes. */
+void	free_cmds(t_list *cmd_first);
+
+/* Execute pipeline when pipelines are involved*/
+int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages);
+
+/* 
+** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
+*/
+typedef enum e_out_mode { OM_PIPE = 0, OM_TRUNC = 1, OM_APPEND = 2 } t_out_mode;
+
+typedef struct s_stage_io {
+	int        in_fd;     /* input fd (or -1 if none) */
+	int        out_fd;    /* output fd (or -1 if none) */
+	t_out_mode out_mode;  /* how the output was opened */
+} t_stage_io;
+
+/* Execute a stage in pipeline: applies redirs (already prepared), runs builtin or external. */
+int	msh_exec_stage(t_shell *sh, t_cmd *cmd, const t_stage_io *io, t_list *env);
+
+/*Execute simple command (no pipelines involved)*/
+int	msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
+/*
+Previous function makes use of:
+int msh_apply_redirs_parent(t_cmd *cmd, int *save_in, int *save_out); 
+and void msh_restore_stdio(int save_in, int save_out);
+*/
 
 /* Heredoc */
 /* Process all heredocs in the pipeline. On success returns 0 and prepares
@@ -76,31 +101,6 @@ void   msh_emit_error_cmd(const char *cmd, const char *msg);
 
 /* Emit an errno-based error for an operation on a path (uses strerror/perror). */
 void   msh_emit_errno_path(const char *op, const char *path);
-
-/* Pipeline stage execution
-** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
-*/
-typedef enum e_out_mode { OM_PIPE = 0, OM_TRUNC = 1, OM_APPEND = 2 } t_out_mode;
-
-typedef struct s_stage_io {
-    int        in_fd;     /* input fd (or -1 if none) */
-    int        out_fd;    /* output fd (or -1 if none) */
-    t_out_mode out_mode;  /* how the output was opened */
-} t_stage_io;
-
-/* Execute pipeline when pipelines are involved*/
-int msh_exec_pipeline_multi(t_shell *sh, t_list *cmd_first, int nstages);
-
-/* Execute a stage in compound cmds list: applies redirs (already prepared), runs builtin or external. */
-int    msh_exec_stage(t_shell *sh, t_cmd *cmd, const t_stage_io *io, t_list *env);
-
-/*Execute simple command (no pipelines involved)*/
-int msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
-/*
-Previous function makes use of:
-int msh_apply_redirs_parent(t_cmd *cmd, int *save_in, int *save_out); 
-and void msh_restore_stdio(int save_in, int save_out);
-*/
 
 /* Exec helpers */
 /* Return 1 if name is a builtin, 0 otherwise. */

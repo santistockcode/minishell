@@ -21,7 +21,7 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main build_pipeline
+FILES = main exec_cmds
 
 
 # Files add

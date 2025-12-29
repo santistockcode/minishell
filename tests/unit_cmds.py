@@ -31,7 +31,7 @@ class TestRunner:
         self.keep_binaries = keep_binaries
         # project_root = repo root (parent of tests/)
         self.project_root = Path(__file__).parent.parent
-        self.unit_tests_dir = self.project_root / "tests" / "pipeline_tests"
+        self.unit_tests_dir = self.project_root / "tests" / "cmds_tests"
         self.src_dir = self.project_root / "src"
         self.include_dir = self.project_root / "include"
         self.libft_dir = self.project_root / "Libft"
@@ -89,7 +89,7 @@ class TestRunner:
         """Get project source dependencies to link into the test binary."""
         deps: List[Path] = []
         # exec_pipeline tests need the backend impl
-        deps.append(self.src_dir / "build_pipeline.c")
+        deps.append(self.src_dir / "exec_cmds.c")
         # Add other sources here if future tests require them
         return deps
     
@@ -186,19 +186,16 @@ def main():
         epilog="""
 Examples:
   # Run unit tests
-  python3 tests/unit_pipeline.py --unit
+  python3 tests/unit_pipeline.py
   # Keep compiled binaries for manual execution
-  python3 tests/unit_pipeline.py --unit --keep-binaries
+python3 tests/unit_pipeline.py --keep-binaries
   # Debug build (adds -DDEBUG -g3 -O0)
-  python3 tests/unit_pipeline.py --unit --debug
+  python3 tests/unit_pipeline.py --debug
         """
     )
-    
-    parser.add_argument(
-        '--unit',
-        action='store_true',
-        help='Run unit tests (Criterion)'
-    )
+
+    # The --help argument is automatically added by argparse, so no need to define it manually.
+
     parser.add_argument(
         '--debug',
         action='store_true',
@@ -213,18 +210,20 @@ Examples:
     
     args = parser.parse_args()
     
-    if not args.unit:
-        parser.print_help()
-        return 1
+    # If args is none go on with unit tests
+    if args is None:
+        args = argparse.Namespace()
+        args.unit = True
+        args.keep_binaries = False
+        args.debug = False
 
     runner = TestRunner(keep_binaries=args.keep_binaries, debug=args.debug)
 
     success = True
     
-    # Run unit tests
-    if args.unit:
-        if not runner.run_unit_tests():
-            success = False
+
+    if not runner.run_unit_tests():
+        success = False
     
     return 0 if success else 1
 

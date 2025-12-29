@@ -21,24 +21,6 @@ static void free_cmd(t_cmd *cmd) {
 	free(cmd);
 }
 
-int exec_pipeline(t_shell *sh, t_list *cmd_first)
-{
-	int idx = 0;
-	for (t_list *node = cmd_first; node; node = node->next) {
-		t_cmd *cmd = (t_cmd*)node->content;
-		if (!cmd || !cmd->argv) continue;
-		printf("CMD[%d]:", idx);
-		for (size_t i = 0; cmd->argv[i]; ++i) {
-			printf(" %s", cmd->argv[i]);
-		}
-		printf("\n");
-		idx++;
-	}
-	MSH_LOG("Printed %d commands", idx);
-	if (sh) sh->last_status = 0;
-	return 0;
-}
-
 void free_pipeline(t_list *cmd_first)
 {
 	t_list *node = cmd_first;
