@@ -11,23 +11,31 @@ static void free_redir(void *redir_ptr) {
     free(redir);
 }
 
-static void free_cmd(t_cmd *cmd) {
-	if (!cmd) return;
-	if (cmd->argv) {
-		for (size_t i = 0; cmd->argv[i]; ++i) free(cmd->argv[i]);
+void free_cmd_struct(void *input) 
+{
+	t_cmd *cmd;
+	char **argv;
+	
+	cmd = (t_cmd *)input;
+	if (!cmd) 
+		return;
+	if (cmd->argv) 
+	{
+		argv = cmd->argv;
+		while (*argv) 
+		{
+			free(*argv);
+			argv++;
+		}
 		free(cmd->argv);
 	}
-	if (cmd->redirs) ft_lstclear(&cmd->redirs, free_redir);
+	if (cmd->redirs) 
+		ft_lstclear(&cmd->redirs, free_redir);
 	free(cmd);
 }
 
-void free_pipeline(t_list *cmd_first)
+void free_cmds(t_list *cmd_first)
 {
 	t_list *node = cmd_first;
-	while (node) {
-		t_list *next = node->next;
-		free_cmd((t_cmd*)node->content);
-		free(node);
-		node = next;
-	}
+	ft_lstclear(&node, &free_cmd_struct);
 }

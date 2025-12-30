@@ -29,7 +29,7 @@ typedef struct s_redir {
 ** - redirs: list of t_redir* nodes (or NULL)
 */
 typedef struct s_cmd {
-	char           **argv;
+	char     **argv;
 	t_list         *redirs;
 }   t_cmd;
 
@@ -41,6 +41,8 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first);
 
 /* Free an entire cmds list, including argv strings, redirs and list nodes. */
 void	free_cmds(t_list *cmd_first);
+
+void free_cmd_struct(void *input);
 
 /* Execute pipeline when pipelines are involved*/
 int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages);

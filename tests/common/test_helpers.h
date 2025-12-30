@@ -1,0 +1,15 @@
+#ifndef TEST_HELPERS_H
+#define TEST_HELPERS_H
+
+#include "../../include/exec.h"
+#include "../../include/minishell.h"
+
+char **dup_argv(const char *const *argv_in, size_t argc);
+t_cmd  *new_cmd_from_args(const char *const *argv_in, size_t argc);
+t_redir *make_redir(t_redir_type type, const char *target, int quoted, int fd);
+
+t_list *deep_copy_env(const char **envp);
+void    free_env_struct(void *env);
+void    free_shell(t_shell *sh);
+
+#endif /* TEST_HELPERS_H */

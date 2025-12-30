@@ -10,12 +10,17 @@ int exec_cmds(t_shell *sh, t_list *cmd_first)
 {
 	int nstages;
 
-	sh->last_status = 0; // only for testing purposes
+	sh->last_status = 0; // REMOVE AFTER TESTING
 
 	nstages = ft_lstsize(cmd_first);
 	if (nstages < 1) {
 		MSH_LOG("No commands to execute");
 		return 0;
+	}
+	// manage here docs
+	if (set_here_doc(sh, cmd_first) == (-1)) {
+		MSH_LOG("Failed to set here_doc");
+		return -1;
 	}
 	if (nstages > 1) {
 		MSH_LOG("Executing pipeline with %d stages", nstages);

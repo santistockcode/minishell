@@ -23,7 +23,7 @@ int     chdir_wrap(const char *path);
 char   *getcwd_wrap(char *buf, size_t size);
 int     unlink_wrap(const char *path);
 int     execve_wrap(const char *path, char *const argv[], char *const envp[]);
-
+char    *readline_wrap(const char *prompt);
 
 /* Optional setters to override behavior (tests can inject stubs) */
 typedef int     (*pipe_fn_t)(int p[2]);
@@ -41,6 +41,7 @@ typedef int     (*chdir_fn_t)(const char*);
 typedef char*   (*getcwd_fn_t)(char*, size_t);
 typedef int     (*unlink_fn_t)(const char*);
 typedef int     (*execve_fn_t)(const char *path, char *const argv[], char *const envp[]);
+typedef char*   (*readline_fn_t)(const char *prompt);
 
 void    syswrap_set_pipe(pipe_fn_t fn);
 void    syswrap_set_fork(fork_fn_t fn);
@@ -57,6 +58,6 @@ void    syswrap_set_chdir(chdir_fn_t fn);
 void    syswrap_set_getcwd(getcwd_fn_t fn);
 void    syswrap_set_unlink(unlink_fn_t fn);
 void    syswrap_set_execve(execve_fn_t fn);
-
+void    syswrap_set_readline(readline_fn_t fn);
 
 #endif /* SYSWRAP_H */

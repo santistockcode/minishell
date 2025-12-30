@@ -26,7 +26,7 @@ static chdir_fn_t   s_chdir_fn   = NULL;
 static getcwd_fn_t  s_getcwd_fn  = NULL;
 static unlink_fn_t  s_unlink_fn  = NULL;
 static execve_fn_t  s_execve_fn  = NULL;
-
+static readline_fn_t s_readline_fn = NULL;
 
 void syswrap_set_pipe(pipe_fn_t fn)     { s_pipe_fn = fn; }
 void syswrap_set_fork(fork_fn_t fn)     { s_fork_fn = fn; }
@@ -43,6 +43,7 @@ void syswrap_set_chdir(chdir_fn_t fn)   { s_chdir_fn = fn; }
 void syswrap_set_getcwd(getcwd_fn_t fn) { s_getcwd_fn = fn; }
 void syswrap_set_unlink(unlink_fn_t fn) { s_unlink_fn = fn; }
 void syswrap_set_execve(execve_fn_t fn) { s_execve_fn = fn; }
+void syswrap_set_readline(readline_fn_t fn) { s_readline_fn = fn; }
 
 int pipe_wrap(int p[2]) {
     if (s_pipe_fn) return s_pipe_fn(p);
@@ -123,10 +124,7 @@ int execve_wrap(const char *path, char *const argv[], char *const envp[]) {
     return execve(path, argv, envp);
 }
 
-/* Helper to free argv vector */
-static void free_argv(char **argv) {
-    if (!argv) return;
-    for (size_t i = 0; argv[i]; ++i) free(argv[i]);
-    free(argv);
+char *readline_wrap(const char *prompt) {
+    if (s_readline_fn) return s_readline_fn(prompt);
+    return readline(prompt);
 }
-

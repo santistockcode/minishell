@@ -50,8 +50,10 @@ class TestRunner:
             f"-I{self.include_dir}",
             f"-I{self.libft_dir}/include",
         ]
-        # Link Criterion first, then project static lib
-        self.libs = ["-lcriterion", str(self.libft_lib), "-lm"]
+        # Link miunit and common test helpers
+        self.libs = [str(self.libft_lib), "-lm"]
+        self.includes.append(f"-I{self.project_root}/tests/third_party")
+        self.includes.append(f"-I{self.project_root}/tests/common")
     
     def log(self, message: str, color: str = ""):
         """Print a log message."""
@@ -90,6 +92,12 @@ class TestRunner:
         deps: List[Path] = []
         # exec_pipeline tests need the backend impl
         deps.append(self.src_dir / "exec_cmds.c")
+        deps.append(self.src_dir / "set_here_doc.c")
+        deps.append(self.src_dir / "free_cmds.c")
+
+        # common test helpers
+        deps.append(self.project_root / "tests" / "common" / "test_helpers.c")
+
         # Add other sources here if future tests require them
         return deps
     
@@ -178,6 +186,18 @@ class TestRunner:
         return success
 
 
+def cleanup_binaries(self):
+    """Clean up compiled binaries in previous executions."""
+    if self.keep_binaries:
+        return
+
+    for binary in self.compiled_binaries:
+        if binary.exists():
+            try:
+                binary.unlink()
+            except Exception:
+                pass
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -185,17 +205,19 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run unit tests
-  python3 tests/unit_pipeline.py
-  # Keep compiled binaries for manual execution
-python3 tests/unit_pipeline.py --keep-binaries
-  # Debug build (adds -DDEBUG -g3 -O0)
-  python3 tests/unit_pipeline.py --debug
+    # Run unit tests
+    python3 tests/unit_cmds.py
+    # Keep compiled binaries for manual execution
+    python3 tests/unit_cmds.py --keep-binaries
+    # Debug build (adds -DDEBUG -g3 -O0)
+    python3 tests/unit_cmds.py --debug
+    # Clean binaries
+    python3 tests/unit_cmds.py --clean
         """
     )
 
     # The --help argument is automatically added by argparse, so no need to define it manually.
-
+    
     parser.add_argument(
         '--debug',
         action='store_true',
@@ -207,7 +229,13 @@ python3 tests/unit_pipeline.py --keep-binaries
         action='store_true',
         help='Keep compiled test binaries (for manual testing)'
     )
-    
+
+    parser.add_argument(
+        '--clean',
+        action='store_true',
+        help='Clean up compiled test binaries'
+    )
+
     args = parser.parse_args()
     
     # If args is none go on with unit tests
@@ -220,7 +248,9 @@ python3 tests/unit_pipeline.py --keep-binaries
     runner = TestRunner(keep_binaries=args.keep_binaries, debug=args.debug)
 
     success = True
-    
+
+    if args.clean:
+        runner.cleanup_binaries()
 
     if not runner.run_unit_tests():
         success = False

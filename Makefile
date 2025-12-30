@@ -21,7 +21,7 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main exec_cmds
+FILES = main exec_cmds set_here_doc free_cmds
 
 
 # Files add
