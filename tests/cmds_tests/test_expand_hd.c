@@ -79,6 +79,7 @@ static int expect_expand(t_list *env, const char *input, const char *expected, i
 /* Simple text */
 static int test_simple_abc(void)
 {
+    printf("Test: test_simple_abc\n");
     t_list *env = NULL;
     int rc = expect_expand(env, "abc", "abc", 0);
     env_free(&env);
@@ -87,6 +88,7 @@ static int test_simple_abc(void)
 
 static int test_simple_empty(void)
 {
+    printf("Test: test_simple_empty\n");
     t_list *env = NULL;
     int rc = expect_expand(env, "", "", 0);
     env_free(&env);
@@ -96,9 +98,9 @@ static int test_simple_empty(void)
 // /* Variable expansion */
 static int test_home_set(void)
 {
+    printf("Test: test_home_set\n");
     t_list *env = NULL;
     env_add(&env, "HOME", "/Users/tester");
-    // VOY POR AQUÍ + QUE PASE VALGRIND Y NORMINETTE
     int rc = expect_expand(env, "$HOME", "/Users/tester", 0);
     env_free(&env);
     return rc;
@@ -107,6 +109,7 @@ static int test_home_set(void)
 
 static int test_home_missing(void)
 {
+    printf("Test: test_home_missing\n");
     t_list *env = NULL;
     /* No HOME in env -> should omit and yield empty string */
     int rc = expect_expand(env, "$HOME", "", 0);
@@ -117,6 +120,7 @@ static int test_home_missing(void)
 /* Special cases */
 static int test_status_qmark(void)
 {
+    printf("Test: test_status_qmark\n");
     t_list *env = NULL;
     /* Provide $? via a special key "?" */
     env_add(&env, "?", "42");
@@ -127,6 +131,7 @@ static int test_status_qmark(void)
 
 static int test_dollar_dollar(void)
 {
+    printf("Test: test_dollar_dollar\n");
     t_list *env = NULL;
     /* Treat $$ as literal '$' followed by invalid var -> result is "" */
     int rc = expect_expand(env, "$$", "$$", 0);
@@ -136,6 +141,7 @@ static int test_dollar_dollar(void)
 
 static int test_dollar_odd_number(void)
 {
+    printf("Test: test_dollar_odd_number\n");
     t_list *env = NULL;
     /* Invalid var name after $ -> keep literal "" */
     int rc = expect_expand(env, "$$$", "$$$", 0);
@@ -146,6 +152,7 @@ static int test_dollar_odd_number(void)
 /* Edge cases */
 static int test_dollar_space(void)
 {
+    printf("Test: test_dollar_space\n");
     t_list *env = NULL;
     int rc = expect_expand(env, "$ ", "$ ", 0);
     env_free(&env);
@@ -154,6 +161,7 @@ static int test_dollar_space(void)
 
 static int test_dollar_dash(void)
 {
+    printf("Test: test_dollar_dash\n");
     t_list *env = NULL;
     /* Invalid var name after $ -> keep literal "" */
     int rc = expect_expand(env, "$-", "", 0);
@@ -163,6 +171,7 @@ static int test_dollar_dash(void)
 
 static int test_dollar_at_end(void)
 {
+    printf("Test: test_dollar_at_end\n");
     t_list *env = NULL;
     int rc = expect_expand(env, "$", "$", 0);
     env_free(&env);
@@ -171,6 +180,7 @@ static int test_dollar_at_end(void)
 
 static int test_concat_unfound_var(void)
 {
+    printf("Test: test_concat_unfound_var\n");
     t_list *env = NULL;
     /* Even if HOME exists, var parsed as HOMEdef (alnum run); missing -> removed */
     env_add(&env, "HOME", "/Users/tester");
@@ -182,6 +192,7 @@ static int test_concat_unfound_var(void)
 /* Multiple variables */
 static int test_multi_AB(void)
 {
+    printf("Test: test_multi_AB\n");
     t_list *env = NULL;
     env_add(&env, "A", "foo");
     env_add(&env, "B", "bar");
@@ -192,6 +203,7 @@ static int test_multi_AB(void)
 
 static int test_multi_A_text_B(void)
 {
+    printf("Test: test_multi_A_text_B\n");
     t_list *env = NULL;
     env_add(&env, "A", "alpha");
     env_add(&env, "B", "beta");
@@ -202,6 +214,7 @@ static int test_multi_A_text_B(void)
 
 static int test_multi_ABC_all_present(void)
 {
+    printf("Test: test_multi_ABC_all_present\n");
     t_list *env = NULL;
     env_add(&env, "A", "1");
     env_add(&env, "B", "2");
@@ -213,6 +226,7 @@ static int test_multi_ABC_all_present(void)
 
 static int test_multi_some_missing(void)
 {
+    printf("Test: test_multi_some_missing\n");
     t_list *env = NULL;
     env_add(&env, "A", "X");
     /* B missing */
@@ -224,6 +238,7 @@ static int test_multi_some_missing(void)
 
 static int test_multi_none_present(void)
 {
+    printf("Test: test_multi_none_present\n");
     t_list *env = NULL;
     int rc = expect_expand(env, "$A$B$C", "", 0);
     env_free(&env);
@@ -234,6 +249,7 @@ static int test_multi_none_present(void)
 
 static int test_underscore_var(void)
 {
+    printf("Test: test_underscore_var\n");
     t_list *env = NULL;
     env_add(&env, "MY_VAR", "value");
     int rc = expect_expand(env, "$MY_VAR", "value", 0);
@@ -243,6 +259,7 @@ static int test_underscore_var(void)
 
 static int test_digit_var(void)
 {
+    printf("Test: test_digit_var\n");
     t_list *env = NULL;
     env_add(&env, "1", "one");
     int rc = expect_expand(env, "$1", "one", 0);
@@ -252,6 +269,7 @@ static int test_digit_var(void)
 
 static int test_var_with_digits_in_name(void)
 {
+    printf("Test: test_var_with_digits_in_name\n");
     t_list *env = NULL;
     env_add(&env, "VAR123", "v123");
     int rc = expect_expand(env, "$VAR123", "v123", 0);
@@ -261,6 +279,7 @@ static int test_var_with_digits_in_name(void)
 
 static int test_var_followed_by_equals(void)
 {
+    printf("Test: test_var_followed_by_equals\n");
     t_list *env = NULL;
     env_add(&env, "VAR", "val");
     int rc = expect_expand(env, "$VAR=tail", "", 0);
@@ -270,6 +289,7 @@ static int test_var_followed_by_equals(void)
 
 static int test_zero_var(void)
 {
+    printf("Test: test_zero_var\n");
     t_list *env = NULL;
     env_add(&env, "0", "prog");
     int rc = expect_expand(env, "$0", "prog", 0);
@@ -279,6 +299,7 @@ static int test_zero_var(void)
 
 static int test_long_name_with_underscores_and_digits(void)
 {
+    printf("Test: test_long_name_with_underscores_and_digits\n");
     t_list *env = NULL;
     env_add(&env, "__X1", "ok");
     int rc = expect_expand(env, "$__X1", "ok", 0);
@@ -288,6 +309,7 @@ static int test_long_name_with_underscores_and_digits(void)
 
 static int test_var_followed_by_colon(void)
 {
+    printf("Test: test_var_followed_by_colon\n");
     t_list *env = NULL;
     env_add(&env, "X", "val");
     int rc = expect_expand(env, "$X:rest", "", 0);

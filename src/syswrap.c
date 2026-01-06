@@ -48,85 +48,85 @@ void syswrap_set_execve(t_execve_fn fn) { s_execve_fn = fn; }
 void syswrap_set_readline(t_readline_fn fn) { s_readline_fn = fn; }
 
 int pipe_wrap(int p[2]) {
-    if (s_pipe_fn) return s_pipe_fn(p);
-    return pipe(p);
+	if (s_pipe_fn) return s_pipe_fn(p);
+	return pipe(p);
 }
 
 pid_t fork_wrap(void) {
-    if (s_fork_fn) return s_fork_fn();
-    return fork();
+	if (s_fork_fn) return s_fork_fn();
+	return fork();
 }
 
 int dup_wrap(int oldfd) {
-    if (s_dup_fn) return s_dup_fn(oldfd);
-    return dup(oldfd);
+	if (s_dup_fn) return s_dup_fn(oldfd);
+	return dup(oldfd);
 }
 
 int dup2_wrap(int oldfd, int newfd) {
-    if (s_dup2_fn) return s_dup2_fn(oldfd, newfd);
-    return dup2(oldfd, newfd);
+	if (s_dup2_fn) return s_dup2_fn(oldfd, newfd);
+	return dup2(oldfd, newfd);
 }
 
 int open_wrap(const char *path, int oflag, ...) {
-    if (s_open_fn) {
-        /* open() has optional mode; tests overriding must ignore extra args */
-        return s_open_fn(path, oflag);
-    }
-    /* Forward to real open with variadic mode for O_CREAT (not used here) */
-    return open(path, oflag);
+	if (s_open_fn) {
+		/* open() has optional mode; tests overriding must ignore extra args */
+		return s_open_fn(path, oflag);
+	}
+	/* Forward to real open with variadic mode for O_CREAT (not used here) */
+	return open(path, oflag);
 }
 
 int close_wrap(int fd) {
-    if (s_close_fn) return s_close_fn(fd);
-    return close(fd);
+	if (s_close_fn) return s_close_fn(fd);
+	return close(fd);
 }
 
 ssize_t read_wrap(int fd, void *buf, size_t count) {
-    if (s_read_fn) return s_read_fn(fd, buf, count);
-    return read(fd, buf, count);
+	if (s_read_fn) return s_read_fn(fd, buf, count);
+	return read(fd, buf, count);
 }
 
 ssize_t write_wrap(int fd, const void *buf, size_t count) {
-    if (s_write_fn) return s_write_fn(fd, buf, count);
-    return write(fd, buf, count);
+	if (s_write_fn) return s_write_fn(fd, buf, count);
+	return write(fd, buf, count);
 }
 
 int access_wrap(const char *path, int mode) {
-    if (s_access_fn) return s_access_fn(path, mode);
-    return access(path, mode);
+	if (s_access_fn) return s_access_fn(path, mode);
+	return access(path, mode);
 }
 
 pid_t wait_wrap(int *wstatus) {
-    if (s_wait_fn) return s_wait_fn(wstatus);
-    return wait(wstatus);
+	if (s_wait_fn) return s_wait_fn(wstatus);
+	return wait(wstatus);
 }
 
 pid_t waitpid_wrap(pid_t pid, int *wstatus, int options) {
-    if (s_waitpid_fn) return s_waitpid_fn(pid, wstatus, options);
-    return waitpid(pid, wstatus, options);
+	if (s_waitpid_fn) return s_waitpid_fn(pid, wstatus, options);
+	return waitpid(pid, wstatus, options);
 }
 
 int chdir_wrap(const char *path) {
-    if (s_chdir_fn) return s_chdir_fn(path);
-    return chdir(path);
+	if (s_chdir_fn) return s_chdir_fn(path);
+	return chdir(path);
 }
 
 char *getcwd_wrap(char *buf, size_t size) {
-    if (s_getcwd_fn) return s_getcwd_fn(buf, size);
-    return getcwd(buf, size);
+	if (s_getcwd_fn) return s_getcwd_fn(buf, size);
+	return getcwd(buf, size);
 }
 
 int unlink_wrap(const char *path) {
-    if (s_unlink_fn) return s_unlink_fn(path);
-    return unlink(path);
+	if (s_unlink_fn) return s_unlink_fn(path);
+	return unlink(path);
 }
 
 int execve_wrap(const char *path, char *const argv[], char *const envp[]) {
-    if (s_execve_fn) return s_execve_fn(path, argv, envp);
-    return execve(path, argv, envp);
+	if (s_execve_fn) return s_execve_fn(path, argv, envp);
+	return execve(path, argv, envp);
 }
 
 char *readline_wrap(const char *prompt) {
-    if (s_readline_fn) return s_readline_fn(prompt);
-    return readline(prompt);
+	if (s_readline_fn) return s_readline_fn(prompt);
+	return readline(prompt);
 }

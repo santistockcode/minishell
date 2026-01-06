@@ -101,6 +101,7 @@ class TestRunner:
         deps.append(self.src_dir / "fetch_hd_from_user.c")
         deps.append(self.src_dir / "expand_hd.c")
         deps.append(self.src_dir / "expand_hd_utils.c")
+        deps.append(self.src_dir / "unlink_hds.c")
 
         # common test helpers
         deps.append(self.project_root / "tests" / "common" / "test_helpers.c")

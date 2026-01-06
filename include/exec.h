@@ -91,8 +91,8 @@ int					set_here_doc(t_shell *sh, t_list *cmd_first);
 
 /* Read heredoc from user until delim. If should_expand==1, perform variable
 ** expansion using sh->env; otherwise keep literal content.
-Buffers output to a temporary file. */
-char					*fetch_hd_from_user(t_shell *sh, const char *delim,
+Buffers output to a temporary file. Returns -1 in case of sysfail */
+int					fetch_hd_from_user(t_shell *sh, char **delim,
 						int should_expand, int suffix);
 
 /* Expansion helpers */
@@ -104,6 +104,7 @@ int 				add_char_to_list(char c, t_list **chars_list);
 int 				add_string_to_list(char *str, t_list **chars_list);
 void 				free_aux_list(t_list **lst);
 char 				*list_to_alloc_string(t_list *chars_list);
+void 				unlink_hds(t_list *cmds);
 
 /* Error and status mapping (execution) */
 /* Conventional shell status codes */

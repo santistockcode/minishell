@@ -25,8 +25,9 @@ int	set_here_doc(t_shell *sh, t_list *cmd_first)
 			if (redir && redir->type == R_HEREDOC)
 			{
 				MSH_LOG("Found heredoc redirection");
-				free(redir->target);
-				redir->target = fetch_hd_from_user(sh, redir->target, !(redir->quoted), suffix++);
+				if (fetch_hd_from_user(sh, &(redir->target),
+						!(redir->quoted), suffix++) == -1)
+					return (-1);
 				break ;
 			}
 			else

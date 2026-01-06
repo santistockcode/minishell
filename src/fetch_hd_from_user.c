@@ -3,6 +3,9 @@
 #include "../include/syswrap.h"
 #include <readline/readline.h>
 
+/*
+FIXME: What should I do if readline fails? 
+*/
 void	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 {
 	char	*line;
@@ -11,9 +14,6 @@ void	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	while (1)
 	{
 		line = readline_wrap("> ");
-		if (!line)
-			break ;
-		// FIXME: esto no funciona con readline
 		if (ft_strncmp(line, delim, ft_strlen(delim)) == 0)
 		{
 			free(line);
@@ -21,8 +21,12 @@ void	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 		}
 		if (should_expand == 1)
 		{
-			MSH_LOG("Expanding here_doc, delimiter: %s", delim);
 			expanded_line = expand_hd((const char *) line, sh);
+			if (!expanded_line)
+			{
+				free(line);
+				break ;
+			}
 			free(line);
 			line = expanded_line;
 		}
@@ -31,7 +35,7 @@ void	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	}
 }
 
-char	*fetch_hd_from_user(t_shell *sh, const char *delim,
+int	fetch_hd_from_user(t_shell *sh, char **delim,
 	int should_expand, int suffix)
 {
 	int		fd;
@@ -40,16 +44,21 @@ char	*fetch_hd_from_user(t_shell *sh, const char *delim,
 
 	tmp_sfx = ft_itoa(suffix);
 	if (!tmp_sfx)
-		return (NULL);
+		return (-1);
 	here_doc_name = ft_strjoin(".here_doc_", tmp_sfx);
+	if (!here_doc_name)
+		return (free(tmp_sfx), -1);
 	free(tmp_sfx);
-	fd = open(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	fd = open_wrap(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fd == -1)
 	{
 		free(here_doc_name);
-		return (NULL);
+		return (-1);
 	}
-	repl_here_doc(sh, delim, should_expand, fd);
-	close(fd);
-	return (here_doc_name);
+	repl_here_doc(sh, *delim, should_expand, fd);
+	close_wrap(fd);
+	free(*delim);
+	*delim = NULL;
+	*delim = here_doc_name;
+	return (0);
 }

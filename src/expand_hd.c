@@ -6,17 +6,24 @@ int	expand_variable_from(char *line, t_list **chars_list, t_list *env)
 	int		var_size;
 	char	*var_value;
 	int		i;
+	char	*tmp_no_dollar;
 
 	var_size = 0;
 	i = 0;
 	while (line[var_size] && !ft_isspace(line[var_size])
 		&& line[var_size] != '$')
 		var_size++;
-	var_value = get_env_from_key(ft_substr(line, 0, var_size), env);
+	tmp_no_dollar = ft_substr(line, 0, var_size);
+	if (!tmp_no_dollar)
+		return (0);
+	var_value = get_env_from_key(tmp_no_dollar, env);
 	if (!var_value)
 		return (1);
 	else
-		add_string_to_list(var_value, chars_list);
+	{
+		if (add_string_to_list(var_value, chars_list) == 0)
+			return (free(var_value), 0);
+	}
 	free(var_value);
 	return (1);
 }
@@ -51,7 +58,7 @@ int	special_dollar_cases(const char *content, int i, t_list **chars_list,
 		tmp_last_status = ft_itoa(sh->last_status);
 		if (!tmp_last_status)
 			return (-1);
-		if (!add_string_to_list(tmp_last_status, chars_list))
+		if (add_string_to_list(tmp_last_status, chars_list) == 0)
 			return (-1);
 		i += 2;
 		free(tmp_last_status);
@@ -59,14 +66,16 @@ int	special_dollar_cases(const char *content, int i, t_list **chars_list,
 	return (i);
 }
 
+/*
+*/
 t_list	*expand_heredoc_content_to_list(const char *content, t_shell *sh)
 {
-	t_list	*chars_list;
 	int		i;
 	char	current_char;
+	t_list	*chars_list;
 
-	chars_list = NULL;
 	i = 0;
+	chars_list = NULL;
 	while (content[i] != '\0')
 	{
 		current_char = content[i];
@@ -88,12 +97,27 @@ t_list	*expand_heredoc_content_to_list(const char *content, t_shell *sh)
 	return (chars_list);
 }
 
+/*
+FIXME: expand_heredoc_content_to_list is both scanning and expanding, 
+though syscall failure is not managable (empty list is ugly as fuck)
+*/
 char	*expand_hd(const char *content, t_shell *sh)
 {
 	t_list	*chars_list;
 	char	*final_line;
 
-	chars_list = expand_heredoc_content_to_list(content, sh);
+	if (!content || *content == '\0')
+	{
+		chars_list = ft_lstnew(NULL);
+		if (!chars_list)
+			return (NULL);
+	}
+	else
+		chars_list = expand_heredoc_content_to_list(content, sh);
+	if ((content && *content != '\0') && !chars_list)
+		chars_list = ft_lstnew(NULL);
+	if (!chars_list)
+		return (NULL);
 	final_line = list_to_alloc_string(chars_list);
 	if (!final_line)
 		return (free_aux_list(&chars_list), NULL);

@@ -29,7 +29,8 @@ free_cmds \
 syswrap \
 fetch_hd_from_user \
 expand_hd \
-expand_hd_utils
+expand_hd_utils \
+unlink_hds
 
 
 # Files add

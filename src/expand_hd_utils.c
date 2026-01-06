@@ -57,7 +57,7 @@ int	add_string_to_list(char *str, t_list **chars_list)
 	i = 0;
 	while (str[i] != '\0')
 	{
-		if (!add_char_to_list(str[i], chars_list))
+		if (add_char_to_list(str[i], chars_list) == 0)
 			return (0);
 		i++;
 	}
@@ -69,6 +69,7 @@ char	*get_env_from_key(char *key, t_list *env)
 	t_list	*current;
 	t_env	*pair;
 	char	*original_key;
+	char	*tmp_value;
 
 	current = env;
 	original_key = key;
@@ -76,7 +77,12 @@ char	*get_env_from_key(char *key, t_list *env)
 	{
 		pair = (t_env *)current->content;
 		if (ft_strncmp(pair->key, key, ft_strlen(key)) == 0)
-			return (free (original_key), ft_strdup(pair->value));
+		{
+			tmp_value = ft_strdup(pair->value);
+			if (!tmp_value)
+				return (free (original_key), NULL);
+			return (free (original_key), tmp_value);
+		}
 		current = current->next;
 	}
 	free (original_key);
