@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <readline/readline.h>
 
 /*
  * Minimal syscall wrapper indirection. Defaults call the real syscalls,
@@ -11,39 +13,39 @@
  * during tests, malloc_commands() builds a pipeline from env var MSH_CMDS.
  */
 
-static pipe_fn_t    s_pipe_fn    = NULL;
-static fork_fn_t    s_fork_fn    = NULL;
-static dup_fn_t     s_dup_fn     = NULL;
-static dup2_fn_t    s_dup2_fn    = NULL;
-static open_fn_t    s_open_fn    = NULL;
-static close_fn_t   s_close_fn   = NULL;
-static read_fn_t    s_read_fn    = NULL;
-static write_fn_t   s_write_fn   = NULL;
-static access_fn_t  s_access_fn  = NULL;
-static wait_fn_t    s_wait_fn    = NULL;
-static waitpid_fn_t s_waitpid_fn = NULL;
-static chdir_fn_t   s_chdir_fn   = NULL;
-static getcwd_fn_t  s_getcwd_fn  = NULL;
-static unlink_fn_t  s_unlink_fn  = NULL;
-static execve_fn_t  s_execve_fn  = NULL;
-static readline_fn_t s_readline_fn = NULL;
+static t_pipe_fn    s_pipe_fn    = NULL;
+static t_fork_fn    s_fork_fn    = NULL;
+static t_dup_fn     s_dup_fn     = NULL;
+static t_dup2_fn    s_dup2_fn    = NULL;
+static t_open_fn    s_open_fn    = NULL;
+static t_close_fn   s_close_fn   = NULL;
+static t_read_fn    s_read_fn    = NULL;
+static t_write_fn   s_write_fn   = NULL;
+static t_access_fn  s_access_fn  = NULL;
+static t_wait_fn    s_wait_fn    = NULL;
+static t_waitpid_fn s_waitpid_fn = NULL;
+static t_chdir_fn   s_chdir_fn   = NULL;
+static t_getcwd_fn  s_getcwd_fn  = NULL;
+static t_unlink_fn  s_unlink_fn  = NULL;
+static t_execve_fn  s_execve_fn  = NULL;
+static t_readline_fn s_readline_fn = NULL;
 
-void syswrap_set_pipe(pipe_fn_t fn)     { s_pipe_fn = fn; }
-void syswrap_set_fork(fork_fn_t fn)     { s_fork_fn = fn; }
-void syswrap_set_dup(dup_fn_t fn)       { s_dup_fn = fn; }
-void syswrap_set_dup2(dup2_fn_t fn)     { s_dup2_fn = fn; }
-void syswrap_set_open(open_fn_t fn)     { s_open_fn = fn; }
-void syswrap_set_close(close_fn_t fn)   { s_close_fn = fn; }
-void syswrap_set_read(read_fn_t fn)     { s_read_fn = fn; }
-void syswrap_set_write(write_fn_t fn)   { s_write_fn = fn; }
-void syswrap_set_access(access_fn_t fn) { s_access_fn = fn; }
-void syswrap_set_wait(wait_fn_t fn)     { s_wait_fn = fn; }
-void syswrap_set_waitpid(waitpid_fn_t fn){ s_waitpid_fn = fn; }
-void syswrap_set_chdir(chdir_fn_t fn)   { s_chdir_fn = fn; }
-void syswrap_set_getcwd(getcwd_fn_t fn) { s_getcwd_fn = fn; }
-void syswrap_set_unlink(unlink_fn_t fn) { s_unlink_fn = fn; }
-void syswrap_set_execve(execve_fn_t fn) { s_execve_fn = fn; }
-void syswrap_set_readline(readline_fn_t fn) { s_readline_fn = fn; }
+void syswrap_set_pipe(t_pipe_fn fn)     { s_pipe_fn = fn; }
+void syswrap_set_fork(t_fork_fn fn)     { s_fork_fn = fn; }
+void syswrap_set_dup(t_dup_fn fn)       { s_dup_fn = fn; }
+void syswrap_set_dup2(t_dup2_fn fn)     { s_dup2_fn = fn; }
+void syswrap_set_open(t_open_fn fn)     { s_open_fn = fn; }
+void syswrap_set_close(t_close_fn fn)   { s_close_fn = fn; }
+void syswrap_set_read(t_read_fn fn)     { s_read_fn = fn; }
+void syswrap_set_write(t_write_fn fn)   { s_write_fn = fn; }
+void syswrap_set_access(t_access_fn fn) { s_access_fn = fn; }
+void syswrap_set_wait(t_wait_fn fn)     { s_wait_fn = fn; }
+void syswrap_set_waitpid(t_waitpid_fn fn){ s_waitpid_fn = fn; }
+void syswrap_set_chdir(t_chdir_fn fn)   { s_chdir_fn = fn; }
+void syswrap_set_getcwd(t_getcwd_fn fn) { s_getcwd_fn = fn; }
+void syswrap_set_unlink(t_unlink_fn fn) { s_unlink_fn = fn; }
+void syswrap_set_execve(t_execve_fn fn) { s_execve_fn = fn; }
+void syswrap_set_readline(t_readline_fn fn) { s_readline_fn = fn; }
 
 int pipe_wrap(int p[2]) {
     if (s_pipe_fn) return s_pipe_fn(p);

@@ -54,7 +54,10 @@ class TestRunner:
         self.libs = [str(self.libft_lib), "-lm"]
         self.includes.append(f"-I{self.project_root}/tests/third_party")
         self.includes.append(f"-I{self.project_root}/tests/common")
-    
+
+        # Link readline
+        self.libs.append("-lreadline")
+
     def log(self, message: str, color: str = ""):
         """Print a log message."""
         if color:
@@ -94,6 +97,10 @@ class TestRunner:
         deps.append(self.src_dir / "exec_cmds.c")
         deps.append(self.src_dir / "set_here_doc.c")
         deps.append(self.src_dir / "free_cmds.c")
+        deps.append(self.src_dir / "syswrap.c")
+        deps.append(self.src_dir / "fetch_hd_from_user.c")
+        deps.append(self.src_dir / "expand_hd.c")
+        deps.append(self.src_dir / "expand_hd_utils.c")
 
         # common test helpers
         deps.append(self.project_root / "tests" / "common" / "test_helpers.c")

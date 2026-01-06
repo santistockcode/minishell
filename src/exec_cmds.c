@@ -17,7 +17,7 @@ int exec_cmds(t_shell *sh, t_list *cmd_first)
 		MSH_LOG("No commands to execute");
 		return 0;
 	}
-	// manage here docs
+	// create here docs with expanded variables
 	if (set_here_doc(sh, cmd_first) == (-1)) {
 		MSH_LOG("Failed to set here_doc");
 		return -1;

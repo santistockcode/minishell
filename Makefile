@@ -21,7 +21,15 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main exec_cmds set_here_doc free_cmds
+FILES = \
+main \
+exec_cmds \
+set_here_doc \
+free_cmds \
+syswrap \
+fetch_hd_from_user \
+expand_hd \
+expand_hd_utils
 
 
 # Files add
