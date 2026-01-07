@@ -1,9 +1,7 @@
 #include "../include/minishell.h"
 
-int init_minishell(t_shell *minishell,char **envp)
-{
 
-}
+int	exit_status = 0;
 
 int main(int argc, char** argv,char **envp)
 {
@@ -16,9 +14,10 @@ int main(int argc, char** argv,char **envp)
 		return (MALLOC_ERROR);
 	minishell->i = 10;
 	MSH_LOG("Minishell initialized with i = %d", minishell->i);
+	septup_signal();
 	while(1)
 	{
-			
+
 	}
 	free(minishell);
 	return (0);

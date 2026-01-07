@@ -1,6 +1,8 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -20,6 +22,7 @@
 //     char            *key;
 //     char            *value;
 // }   t_env;
+extern int exit_status;
 
 
 typedef struct s_shell
@@ -29,8 +32,12 @@ typedef struct s_shell
     // int      last_status; // last $? value
     // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
-
 void septup_signal();
+
+void	ft_ctrl_mini(int signal);
+void	ft_ctrl_quit(int signal);
+
+
 
 # define SUCCESS 0
 # define MALLOC_ERROR -1
