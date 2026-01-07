@@ -18,7 +18,7 @@ int main(int argc, char** argv,char **envp)
 	MSH_LOG("Minishell initialized with i = %d", minishell->i);
 	while(1)
 	{
-		
+			
 	}
 	free(minishell);
 	return (0);

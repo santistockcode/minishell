@@ -1,27 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signals.c                                          :+:      :+:    :+:   */
+/*   crtl.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/12 14:15:00 by mario             #+#    #+#             */
-/*   Updated: 2026/01/07 23:11:26 by mario            ###   ########.fr       */
+/*   Created: 2026/01/04 22:08:46 by mario             #+#    #+#             */
+/*   Updated: 2026/01/04 22:08:58 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/minishell.h"
-
-extern int	g_exit_status;
-
-void septup_signal(void )
+void	ft_ctrl_mini(int signal)
 {
-	struct sigaction	sa;
-	ft_memset(&sa, 0, sizeof(sa));
-	sa.sa_flag = SA_RESTART;
-	sa.sa_handler = ft_crtl_mini() ;
-	sigaction(SIGINT, &sa, NULL);
-	sa.sa_handler = ft_ctr_quit();
-	sigaction(SIGQUIT, &sa, NULL);
+	(void)signal;
+	write(1, "\n", 1);
+	rl_replace_line("", 0);
+	rl_on_new_line();
+	rl_redisplay();
+	g_exit_status = 130;
+}
 
+void	ft_ctrl_heredoc(int signal)
+{
+	(void)signal;
+	write(1, "\n", 1);
+	rl_replace_line("", 0);
+	rl_on_new_line();
+	close(STDIN_FILENO);
+	g_exit_status = 130;
+}
+
+void	ft_ctrl_quit(int signal)
+{
+	(void)signal;
+	rl_on_new_line();
+	rl_redisplay();
 }
