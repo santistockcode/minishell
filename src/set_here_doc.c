@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+This functions iterates over commands and if finds one with redir 
+R_HEREDOC, it will fetch the heredoc content from the user and set it as the target.
+
+Doesn't pass norminette but it will depend largely on how do I manage errors
+*/
 int	set_here_doc(t_shell *sh, t_list *cmd_first)
 {
 	t_list	*cmd_list;
@@ -12,7 +18,6 @@ int	set_here_doc(t_shell *sh, t_list *cmd_first)
 	t_redir	*redir;
 	int		suffix;
 
-	MSH_LOG("Looking for here_doc and setting target if found");
 	cmd_list = cmd_first;
 	suffix = 0;
 	while (cmd_list)
@@ -24,18 +29,15 @@ int	set_here_doc(t_shell *sh, t_list *cmd_first)
 			redir = (t_redir *)redir_list->content;
 			if (redir && redir->type == R_HEREDOC)
 			{
-				MSH_LOG("Found heredoc redirection");
+				MSH_LOG("Heredoc specified for cmd number %d", suffix);
 				if (fetch_hd_from_user(sh, &(redir->target),
 						!(redir->quoted), suffix++) == -1)
 					return (-1);
 				break ;
 			}
-			else
-				MSH_LOG("No heredoc redirection found in this redir");
 			redir_list = redir_list->next;
 		}
 		cmd_list = cmd_list->next;
 	}
-	// in case of error returns (-1) and frees everything if that's the case
 	return (0);
 }

@@ -10,41 +10,6 @@
 #include "../../include/syswrap.h"
 #include "../../Libft/include/libft.h"
 
-// BRAINSTORMING
-
-/*
-Try this manual test
-saalarco@c2r14s6:~/Dev/minishell$ wc << EOF
-> K
-> EOF
-      1       1       2
-saalarco@c2r14s6:~/Dev/minishell$ wc << EOF
-K
-K  
-> EOF
-      3       2       5
-saalarco@c2r14s6:~/Dev/minishell$ wc << EOF
-EOF
-      0       0       0
-
-should here_doc return an empty string or NULL on direct delimiter?
-*/
-
-// README con el test manual anterior si es necesario u otros
-
-// README with readline leaks
-
-// README spec file for expand_hd
-
-// refactor current tests to make them scalable
-
-// Test , should fetch here_doc happen in a subprocess? how does it works in bash? is there a posix spec about it? 
-/*
-In bash, here documents are typically processed in a subshell. 
-This means that any changes to the environment (like variable assignments) made within the here document will not affect the parent shell. 
-The POSIX specification does not explicitly state this behavior, but it is a widely accepted convention in Unix-like systems.
-*/
-
 // TESTS
 
 // Mock env for tests
@@ -55,113 +20,199 @@ const char *test_env[] = {
     NULL
 };
 
+// ============================================================================
+// Generic readline mock generator
+// ============================================================================
 
-static const char *heredoc_data_test_2 = "line1\nline2\n";
-char *readline_wrap_test_2(const char *prompt)
+typedef struct s_readline_mock {
+    const char **lines;
+    size_t call_count;
+} t_readline_mock;
+
+static t_readline_mock g_mock = {NULL, 0};
+
+static char *generic_readline_mock(const char *prompt)
 {
-    static size_t call_count = 0;
-    char *line = NULL;
-
-    (void)prompt; // unused
-
-    if (call_count == 0) {
-        line = strdup("line1\0");
-    } else if (call_count == 1) {
-        line = strdup("line2\0");
-    } else if (call_count == 2) {
-        line = strdup("EOF\0");
-    } else {
-        line = NULL; // Simulate EOF
-    }
-
-    call_count++;
+    (void)prompt;
+    
+    if (!g_mock.lines || !g_mock.lines[g_mock.call_count])
+        return NULL;
+    
+    char *line = strdup(g_mock.lines[g_mock.call_count]);
+    g_mock.call_count++;
     return line;
 }
 
-static const char *heredoc_data_test_3 = "";
-char *readline_wrap_test_3(const char *prompt)
+static void setup_readline_mock(const char **lines)
 {
-    static size_t call_count = 0;
-    char *line = NULL;
-
-    (void)prompt; // unused
-
-    if (call_count == 0) {
-        line = strdup("EOF\0");
-    } else {
-        line = NULL; // Simulate EOF
-    }
-
-    call_count++;
-    return line;
+    g_mock.lines = lines;
+    g_mock.call_count = 0;
+    syswrap_set_readline(generic_readline_mock);
 }
 
-static const char *heredoc_data_test_4 = "\n\n\n\n";
-char *readline_wrap_test_4(const char *prompt)
+static void teardown_readline_mock(void)
 {
-    static size_t call_count = 0;
-    char *line = NULL;
-
-    (void)prompt; // unused
-
-    if (call_count == 0) {
-        line = strdup("");
-    } else if (call_count == 1) {
-        line = strdup("");
-    } else if (call_count == 2) {
-        line = strdup("");
-    } else if (call_count == 3) {
-        line = strdup("");
-    } else if (call_count == 4) {
-        line = strdup("EOF\0");
-    } else {
-        line = NULL; // Simulate EOF
-    }
-
-    call_count++;
-    return line;
+    syswrap_set_readline(NULL);
+    g_mock.lines = NULL;
+    g_mock.call_count = 0;
 }
 
-/*
-** set_here_doc.c
-*/
+// ============================================================================
+// Test helpers for test_here_doc
+// ============================================================================
 
-//1. Test on various cmds with no R_HEREDOC redir, target doesn't change
-static int test_various_cmds_no_here_doc_unchanges_returns_0(void)
+
+static int verify_heredoc_content(const char *path, const char *expected)
 {
-    printf("Test: test_various_cmds_no_here_doc_unchanges_returns_0\n");
-    t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
-    mu_assert("malloc shell failed", sh != NULL);
-    sh->last_status = 0;
-    sh->should_exit = 0;
-    sh->env = deep_copy_env(test_env);
+    int fd = open(path, O_RDONLY);
+    if (fd < 0)
+        return -1;
+    
+    size_t expected_len = strlen(expected);
+    char *buffer = malloc(expected_len + 1);
+    if (!buffer) {
+        close(fd);
+        return -1;
+    }
+    
+    ssize_t bytes_read = read(fd, buffer, expected_len);
+    buffer[bytes_read] = '\0';
+    close(fd);
+    
+    int match = strcmp(buffer, expected) == 0;
+    free(buffer);
+    
+    return match ? 0 : -1;
+}
 
-    // Build: wc -l < infile | ls (no here_doc redirs)
-    const char *argv1[] = {"wc", "-l"};
+static t_list *build_generic_pipeline_with_heredoc_first_command(const char *delimiter, int quoted)
+{
+    const char *argv1[] = {"wc"};
     const char *argv2[] = {"ls"};
-
-    // cmd1: wc -l < infile
-    char *target1 = "infile";
-    t_redir *redir1 = make_redir(R_IN, target1, 0, 0);
-    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    
+    // cmd1: wc -l << EOF
+    t_redir *redir1 = make_redir(R_HEREDOC, (char*)delimiter, quoted, 0);
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 1);
+    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
+    
     // cmd2: ls
     t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
-    // list redirs
-    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
     
     t_list *pipe_head = NULL;
     ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
     ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
+    
+    return pipe_head;
+}
 
+static t_list *build_generic_pipeline_with_heredoc_second_command(const char *delimiter, int quoted)
+{
+    const char *argv1[] = {"wc"};
+    const char *argv2[] = {"ls"};
+
+    // cmd1: wc
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 1);
+    
+    // cmd2: ls << EOF
+    t_redir *redir1 = make_redir(R_HEREDOC, (char*)delimiter, quoted, 0);
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmd2->redirs, ft_lstnew(redir1));
+
+    t_list *pipe_head = NULL;
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
+
+    return pipe_head;
+}
+
+static t_list *build_pipeline_no_heredoc(void)
+{
+    const char *argv1[] = {"wc", "-l"};
+    const char *argv2[] = {"ls"};
+    
+    // cmd1: wc -l < infile
+    t_redir *redir1 = make_redir(R_IN, "infile", 0, 0);
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
+    
+    // cmd2: ls
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    
+    t_list *pipe_head = NULL;
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
+    
+    return pipe_head;
+}
+
+// builds generic pipeline with 6 commands and 3 here_docs
+static t_list *build_generic_pipeline_various_heredocs(const char *delimiter1, int quoted1,
+    const char *delimiter2, int quoted2, const char *delimiter3, int quoted3)
+{
+    const char *argv1[] = {"wc", "-l"}; // HEREDOC
+    const char *argv2[] = {"ls"}; // HEREDOC
+    const char *argv3[] = {"grep", "test"};
+    const char *argv4[] = {"sort"}; // HEREDOC
+    const char *argv5[] = {"uniq"};
+
+    // cmd1: wc -l << EOF
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    t_redir *redir1 = make_redir(R_HEREDOC, (char*)delimiter1, quoted1, 0);
+    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
+
+    // cmd2: ls << EOF
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    t_redir *redir2 = make_redir(R_HEREDOC, (char*)delimiter2, quoted2, 0);
+    ft_lstadd_back(&cmd2->redirs, ft_lstnew(redir2));
+
+    // cmd3: grep test
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 2);
+
+    // cmd4: sort << EOF
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 1);
+    t_redir *redir4 = make_redir(R_HEREDOC, (char*)delimiter3, quoted3, 0);
+    ft_lstadd_back(&cmd4->redirs, ft_lstnew(redir4));
+
+    // cmd5: uniq
+    t_cmd *cmd5 = new_cmd_from_args(argv5, 1);
+
+    t_list *pipe_head = NULL;
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd3));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd4));
+    ft_lstadd_back(&pipe_head, ft_lstnew(cmd5));
+
+    return pipe_head;
+}
+
+
+// ============================================================================
+// TESTS
+// ============================================================================
+
+// Test 1: Commands without heredoc remain unchanged
+static int test_various_cmds_no_here_doc_unchanges_returns_0(void)
+{
+    printf("Test: test_various_cmds_no_here_doc_unchanges_returns_0\n");
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_pipeline_no_heredoc();
+    const char *original_target = "infile";
+    
     set_here_doc(sh, pipe_head);
-
-    t_redir *redir_1_after_set_here_doc = ft_lstlast(cmd1->redirs)->content;
-    mu_assert_strcmp("target has changed when no here_doc involved", redir_1_after_set_here_doc->target, target1);
-    mu_assert("fd has changed when no here_doc involved", 1 == 1);
-
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert_strcmp("target changed when no heredoc involved", 
+                     redir_after->target, original_target);
+    
     free_cmds(pipe_head);
     free_shell(sh);
-
+    
     return 0;
 }
 
@@ -170,174 +221,612 @@ static int test_various_cmds_no_here_doc_unchanges_returns_0(void)
 ** fetch_here_doc_from_user.c
 */
 
-// 2. Test on various cmds with heredoc redir target changes
-static int test_various_cmds_with_here_doc_changes_returns_0(void)
+// Test 2: Heredoc on first command, multiple lines, no expansion
+static int test_heredoc_first_command_multiple_lines_no_expansion(void)
 {
-    printf("Test: test_various_cmds_with_here_doc_changes_returns_0\n");
+    printf("Test: test_heredoc_first_command_multiple_lines_no_expansion\n");
+    
+    const char *user_input[] = {"line1", "$HOME", "EOF", NULL};
+    const char *expected_content = "line1\n$HOME\n";
+    
+    setup_readline_mock(user_input);
 
-    /* inject custom readline */
-    syswrap_set_readline(readline_wrap_test_2);
-
-    t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
+    t_shell *sh = create_test_shell(test_env, 0);
     mu_assert("malloc shell failed", sh != NULL);
-    sh->last_status = 0;
-    sh->should_exit = 0;
-    sh->env = deep_copy_env(test_env);
-
-    // Build: wc -l << EOF | ls
-    const char *argv1[] = {"wc", "-l"};
-    const char *argv2[] = {"ls"};
-
-    // cmd1: wc -l << EOF
-    char *delimiter = "EOF";
-    t_redir *redir1 = make_redir(R_HEREDOC, delimiter, 1, 0);
-    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
-    // cmd2: ls
-    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
-    // list redirs
-    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
-
-    t_list *pipe_head = NULL;
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
-
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
+    
     set_here_doc(sh, pipe_head);
-
-    t_redir *redir_1_after_set_here_doc = ft_lstlast(cmd1->redirs)->content;
-    mu_assert("fd changed when setting here_doc", redir_1_after_set_here_doc->fd == 0);
-
-    char *path = redir_1_after_set_here_doc->target;
-    int fd = open(path, O_RDONLY);
-    char buffer[ft_strlen(heredoc_data_test_2) + 1];
-    ssize_t bytes_read = read(fd, buffer, ft_strlen(heredoc_data_test_2));
-    buffer[bytes_read] = '\0';
-    mu_assert_strcmp("here_doc content mismatch", heredoc_data_test_2, buffer);
-
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
     unlink_hds(pipe_head);
     free_cmds(pipe_head);
     free_shell(sh);
-
-    /* restore original readline */
-    syswrap_set_readline(NULL);
-
-
+    teardown_readline_mock();
+    
     return 0;
 }
 
-// 3. Test empty heredoc, user just introduces the delimiter
+
+// Test 3: Heredoc on first command, multiple lines, with expansion
+static int test_heredoc_first_command_multiple_lines_with_expansion(void)
+{
+    printf("Test: test_heredoc_first_command_multiple_lines_with_expansion\n");
+
+    const char *user_input[] = {"line1", "I'm $HOME", "EOF", NULL};
+    const char *expected_content = "line1\nI'm /home/saalarco\n";
+
+    setup_readline_mock(user_input);
+    
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
+
+// Test 4: Heredoc on first command, 4 lines, with expansion on last one
+static int test_various_cmds_with_heredoc_changes_returns_0(void)
+{
+    printf("Test: test_various_cmds_with_heredoc_changes_returns_0\n");
+
+    const char *user_input[] = {"line1", "line2", "line3", "$HOME", "EOF", NULL};
+    const char *expected_content = "line1\nline2\nline3\n/home/saalarco\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
+
+// Test 5: Empty heredoc (delimiter immediately), no expansion
 static int test_empty_heredoc_user_introduces_delimiter(void)
 {
     printf("Test: test_empty_heredoc_user_introduces_delimiter\n");
+    
+    const char *user_input[] = {"EOF", NULL};
+    const char *expected_content = "";
+    
+    setup_readline_mock(user_input);
 
-    /* inject custom readline */
-    syswrap_set_readline(readline_wrap_test_3);
-
-    t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
+    t_shell *sh = create_test_shell(test_env, 0);
     mu_assert("malloc shell failed", sh != NULL);
-    sh->last_status = 0;
-    sh->should_exit = 0;
-    sh->env = deep_copy_env(test_env);
-
-    // Build: wc -l << EOF | ls
-    const char *argv1[] = {"wc", "-l"};
-    const char *argv2[] = {"ls"};
-
-    // cmd1: wc -l << EOF
-    char *delimiter = "EOF";
-    t_redir *redir1 = make_redir(R_HEREDOC, delimiter, 1, 0);
-    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
-    // cmd2: ls
-    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
-    // list redirs
-    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
-
-    t_list *pipe_head = NULL;
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
-
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
+    
     set_here_doc(sh, pipe_head);
-
-    t_redir *redir_1_after_set_here_doc = ft_lstlast(cmd1->redirs)->content;
-    mu_assert("fd changed when setting here_doc", redir_1_after_set_here_doc->fd == 0);
-
-    char *path = redir_1_after_set_here_doc->target;
-    int fd = open(path, O_RDONLY);
-    char buffer[ft_strlen(heredoc_data_test_3) + 1];
-    ssize_t bytes_read = read(fd, buffer, ft_strlen(heredoc_data_test_3));
-    buffer[bytes_read] = '\0';
-    mu_assert_strcmp("here_doc content mismatch", heredoc_data_test_3, buffer);
-
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
     unlink_hds(pipe_head);
     free_cmds(pipe_head);
     free_shell(sh);
-
-    /* restore original readline */
-    syswrap_set_readline(NULL);
-
+    teardown_readline_mock();
+    
     return 0;
 }
 
-// Test 4: User intruces several empty lines
+// Test 6: Empty heredoc (delimiter immediately), with expansion
+static int test_empty_heredoc_user_introduces_delimiter_with_expansion(void)
+{
+    printf("Test: test_empty_heredoc_user_introduces_delimiter_with_expansion\n");
+
+    const char *user_input[] = {"EOF", NULL};
+    const char *expected_content = "";
+    
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
+
+// Test 7: Heredoc with multiple empty lines
 static int test_various_cmds_with_empty_lines(void)
 {
     printf("Test: test_various_cmds_with_empty_lines\n");
+    
+    const char *user_input[] = {"", "", "", "", "EOF", NULL};
+    const char *expected_content = "\n\n\n\n";
+    
+    setup_readline_mock(user_input);
 
-    /* inject custom readline */
-    syswrap_set_readline(readline_wrap_test_4);
-
-    t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
+    t_shell *sh = create_test_shell(test_env, 0);
     mu_assert("malloc shell failed", sh != NULL);
-    sh->last_status = 0;
-    sh->should_exit = 0;
-    sh->env = deep_copy_env(test_env);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
 
-    // Build: wc -l << EOF | ls
-    const char *argv1[] = {"wc", "-l"};
-    const char *argv2[] = {"ls"};
+// Test 8: Heredoc on second command, multiple lines, no expansion
+static int test_heredoc_second_command_multiple_lines_no_expansion(void)
+{
+    printf("Test: test_heredoc_second_command_multiple_lines_no_expansion\n");
 
-    // cmd1: wc -l << EOF
-    char *delimiter = "EOF";
-    t_redir *redir1 = make_redir(R_HEREDOC, delimiter, 1, 0);
-    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
-    // cmd2: ls
-    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
-    // list redirs
-    ft_lstadd_back(&cmd1->redirs, ft_lstnew(redir1));
+    const char *user_input[] = {"line 1", "$HOME", "EOF", NULL};
+    const char *expected_content = "line 1\n$HOME\n";
 
-    t_list *pipe_head = NULL;
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd1));
-    ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 1);
 
     set_here_doc(sh, pipe_head);
 
-    t_redir *redir_1_after_set_here_doc = ft_lstlast(cmd1->redirs)->content;
-    mu_assert("fd changed when setting here_doc", redir_1_after_set_here_doc->fd == 0);
+    t_cmd *cmd2 = (t_cmd*)ft_lstlast(pipe_head)->content;
+    t_redir *redir_after = ft_lstlast(cmd2->redirs)->content;
 
-    char *path = redir_1_after_set_here_doc->target;
-    int fd = open(path, O_RDONLY);
-    char buffer[ft_strlen(heredoc_data_test_4) + 1];
-    ssize_t bytes_read = read(fd, buffer, ft_strlen(heredoc_data_test_4));
-    buffer[bytes_read] = '\0';
-    mu_assert_strcmp("here_doc content mismatch", heredoc_data_test_4, buffer);
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch",
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
 
     unlink_hds(pipe_head);
     free_cmds(pipe_head);
     free_shell(sh);
-
-    /* restore original readline */
-    syswrap_set_readline(NULL);
+    teardown_readline_mock();
 
     return 0;
 }
 
-// Test 5: Various HERE_DOCS included in the pipe. (after refactoring this file ojocuidao)
+// Test 9: Heredoc on second command, multiple lines, expanded
+static int test_heredoc_second_command_multiple_lines_with_expansion(void)
+{
+    printf("Test: test_heredoc_second_command_multiple_lines_with_expansion\n");
 
+    const char *user_input[] = {"line 1", "$USER", "EOF", NULL};
+    const char *expected_content = "line 1\nsaalarco\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    t_cmd *cmd2 = (t_cmd*)ft_lstlast(pipe_head)->content;
+    t_redir *redir_after = ft_lstlast(cmd2->redirs)->content;
+
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch",
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 10: 3 heredocs, multiple lines, no expansion
+static int test_heredoc_multiple_commands_multiple_lines_no_expansion(void)
+{
+    printf("Test: test_heredoc_multiple_commands_multiple_lines_no_expansion\n");
+
+    const char *user_input[] = {
+        "line1", "line2", "EOF",
+        "line1", "line2", "EOF",
+        "line1", "line2", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\nline2\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    // segmentation fault when returning
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 1, "EOF", 1, "EOF", 1);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content) == 0);
+
+    t_cmd *cmd2 = (t_cmd*)pipe_head->next->content;
+    t_redir *redir2_after = ft_lstlast(cmd2->redirs)->content;
+    mu_assert("heredoc content mismatch cmd2", verify_heredoc_content(redir2_after->target, expected_content) == 0);
+
+    t_cmd *cmd4 = (t_cmd*)pipe_head->next->next->next->content;
+    t_redir *redir4_after = ft_lstlast(cmd4->redirs)->content;
+    mu_assert("heredoc content mismatch cmd4", verify_heredoc_content(redir4_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 11: 3 heredocs, multiple lines, expanded
+static int test_heredoc_multiple_commands_multiple_lines_with_expansion(void)
+{
+    printf("Test: test_heredoc_multiple_commands_multiple_lines_with_expansion\n");
+
+    const char *user_input[] = {
+        "line1", "$USER", "EOF",
+        "line1", "$USER", "EOF",
+        "line1", "$USER", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\nsaalarco\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content) == 0);
+
+    t_cmd *cmd2 = (t_cmd*)pipe_head->next->content;
+    t_redir *redir2_after = ft_lstlast(cmd2->redirs)->content;
+    mu_assert("heredoc content mismatch cmd2", verify_heredoc_content(redir2_after->target, expected_content) == 0);
+
+    t_cmd *cmd4 = (t_cmd*)pipe_head->next->next->next->content;
+    t_redir *redir4_after = ft_lstlast(cmd4->redirs)->content;
+    mu_assert("heredoc content mismatch cmd4", verify_heredoc_content(redir4_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 12: test that last status code is expanded correctly to 0
+static int test_last_status_expanded_to_0(void)
+{
+    printf("Test: test_last_status_expanded_to_0\n");
+
+    const char *user_input[] = {
+        "line1", "$?", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\n0\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 13: test that last status code is expanded correctly to 127
+static int test_last_status_expanded_to_127(void)
+{
+    printf("Test: test_last_status_expanded_to_127\n");
+
+    const char *user_input[] = {
+        "line1", "$?", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\n127\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 127);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 13: test that last status code is expanded correctly to 127 on second command
+static int test_last_status_expanded_to_127_second_command(void)
+{
+    printf("Test: test_last_status_expanded_to_127\n");
+
+    const char *user_input[] = {
+        "line1", "$?", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\n127\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 127);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd2 = (t_cmd*)pipe_head->next->content;
+    t_redir *redir2_after = ft_lstlast(cmd2->redirs)->content;
+    mu_assert("heredoc content mismatch cmd2", verify_heredoc_content(redir2_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 15: test that last status code is NOT expanded to 127 when quoted
+static int test_last_status_not_expanded_when_quoted(void)
+{
+    printf("Test: test_last_status_not_expanded_when_quoted\n");
+
+    const char *user_input[] = {
+        "line1", "\"$?\"", "EOF",
+        NULL
+    };
+    const char *expected_content = "line1\n\"$?\"\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 127);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+// Test 16: miscellanea 6 commands, various here docs, expanded and not expanded, with and without last_status
+static int test_miscellanea_6_commands(void)
+{
+    printf("Test: test_miscellanea_6_commands\n");
+
+    const char *user_input[] = {
+        "line1", "$?", "hey $USER", "EOF",
+        "$?", "$?", "EOF",
+        "$HOME and", "Invalid: $NON last status is: $?", "I'm $USER , last status was $? and I'm using $SHELL", "EOF",
+        NULL
+    };
+    const char *expected_content1 = "line1\n127\nhey saalarco\n";
+    const char *expected_content2 = "$?\n$?\n";
+    const char *expected_content3 = "/home/saalarco and\nInvalid:  last status is: 127\nI'm saalarco , last status was 127 and I'm using /bin/bash\n";
+
+    setup_readline_mock(user_input);
+
+    t_shell *sh = create_test_shell(test_env, 127);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 1, "EOF", 0);
+
+    set_here_doc(sh, pipe_head);
+
+    // verify path vs expected for every command
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir1_after = ft_lstlast(cmd1->redirs)->content;
+    mu_assert("heredoc content mismatch cmd1", verify_heredoc_content(redir1_after->target, expected_content1) == 0);
+
+    t_cmd *cmd2 = (t_cmd*)pipe_head->next->content;
+    t_redir *redir2_after = ft_lstlast(cmd2->redirs)->content;
+    mu_assert("heredoc content mismatch cmd2", verify_heredoc_content(redir2_after->target, expected_content2) == 0);
+
+    t_cmd *cmd4 = (t_cmd*)pipe_head->next->next->next->content;
+    t_redir *redir4_after = ft_lstlast(cmd4->redirs)->content;
+    mu_assert("heredoc content mismatch cmd4", verify_heredoc_content(redir4_after->target, expected_content3) == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
+
+// Test 17: Heredoc on first command, multiple lines, with expansion $ is keep as literal
+static int test_heredoc_first_command_dollar_sign(void)
+{
+    printf("Test: test_heredoc_first_command_dollar_sign\n");
+
+    const char *user_input[] = {"line1", "$", "EOF", NULL};
+    const char *expected_content = "line1\n$\n";
+
+    setup_readline_mock(user_input);
+    
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
+
+// Test 18: Heredoc on first command, multiple lines, with expansion $$ is keep as literal
+static int test_heredoc_first_command_double_dollar_sign(void)
+{
+    printf("Test: test_heredoc_first_command_double_dollar_sign\n");
+
+    const char *user_input[] = {"line1", "$$ HELLO $", "EOF", NULL};
+    const char *expected_content = "line1\n$$ HELLO $\n";
+
+    setup_readline_mock(user_input);
+    
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+    
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+    
+    set_here_doc(sh, pipe_head);
+    
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+    
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+    mu_assert("heredoc content mismatch", 
+              verify_heredoc_content(redir_after->target, expected_content) == 0);
+    
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    
+    return 0;
+}
 
 int main(void)
 {
     mu_run_test(test_various_cmds_no_here_doc_unchanges_returns_0);
-    mu_run_test(test_various_cmds_with_here_doc_changes_returns_0);
+    mu_run_test(test_heredoc_first_command_multiple_lines_no_expansion);
+    mu_run_test(test_heredoc_first_command_multiple_lines_with_expansion);
+    mu_run_test(test_various_cmds_with_heredoc_changes_returns_0);
     mu_run_test(test_empty_heredoc_user_introduces_delimiter);
+    mu_run_test(test_empty_heredoc_user_introduces_delimiter_with_expansion);
     mu_run_test(test_various_cmds_with_empty_lines);
+    mu_run_test(test_heredoc_second_command_multiple_lines_no_expansion);
+    mu_run_test(test_heredoc_second_command_multiple_lines_with_expansion);
+    mu_run_test(test_heredoc_multiple_commands_multiple_lines_no_expansion);
+    mu_run_test(test_heredoc_multiple_commands_multiple_lines_with_expansion);
+    mu_run_test(test_last_status_expanded_to_0);
+    mu_run_test(test_last_status_expanded_to_127);
+    mu_run_test(test_last_status_expanded_to_127_second_command);
+    mu_run_test(test_last_status_not_expanded_when_quoted);
+    mu_run_test(test_miscellanea_6_commands);
+    mu_run_test(test_heredoc_first_command_dollar_sign);
+    mu_run_test(test_heredoc_first_command_double_dollar_sign);
+
     mu_summary();
 }

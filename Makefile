@@ -46,6 +46,10 @@ all: $(NAME)
 debug: CFLAGS += -g3 -O0 -DDEBUG
 debug: $(NAME)
 
+# Fsanitize rule
+fsanitize: CFLAGS += -fsanitize=address
+fsanitize: $(NAME)
+
 # Comp bin
 READLINE_LIBS = -lreadline
 

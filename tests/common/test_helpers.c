@@ -79,3 +79,16 @@ void free_shell(t_shell *sh)
     ft_lstclear(&sh->env, free_env_struct);
     free(sh);
 }
+
+
+t_shell *create_test_shell(const char **test_env, int last_status)
+{
+    t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
+    if (!sh)
+        return NULL;
+
+    sh->last_status = last_status;
+    sh->should_exit = 0;
+    sh->env = deep_copy_env(test_env);
+    return sh;
+}

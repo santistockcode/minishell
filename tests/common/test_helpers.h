@@ -11,5 +11,6 @@ t_redir *make_redir(t_redir_type type, const char *target, int quoted, int fd);
 t_list *deep_copy_env(const char **envp);
 void    free_env_struct(void *env);
 void    free_shell(t_shell *sh);
+t_shell *create_test_shell(const char **test_env, int last_status);
 
 #endif /* TEST_HELPERS_H */
