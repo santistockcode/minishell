@@ -121,64 +121,100 @@ gdb ./binary-to-run
 - To prove readline has leaks, just comment out setup_readline_mock and teardown_readline_mock on any test in test_set_here_doc and run executable (--keep-binaries flag on python script to keep executables) with valgrind. Compare this with running valgrind against original executable (readline injected) or just read valgrind logs to assert that leaks comes from readline function. 
 
 
-## Error handling on exec part PRIOR TO EXECUTING PIPELINE (set here doc)
+## Error handling on exec part here_doc (prior to pipeline execution)
 
-Any syscall error prior to multiprocessing should interrupt pipeline altogether.
+Any syscall error prior to multiprocessing should interrupt pipeline altogether, That means top level exec_cmds must print something like: 
+"minishell: malloc: <strerror(errno)>", set status code and return (-1)
+so that caller knows what to clean.
 
 ### Libft calls (string management)
-Pipex isn't protecting string management. Minishell should.
+- Is protected? ✅
+- Are errors descriptive to users?
+- Is exit code set correctly?
 
 ### Malloc and free
-Pipex printed something like malloc: strerror(errno) and exited with code '1'. Free was not protected. In minishell we shall not exit. 
+- Is protected? ✅
+- Are errors descriptive to users?
+- Is exit code set correctly?
 
 ### Readline
+- Is protected?
+- Are errors descriptive to users?
+- Is exit code set correctly?
+- Are multiple error options included in tests?
+- Does those test pass valgrind?
 
 ### Open
+- Is protected?
+- Are errors descriptive to users?
+- Is exit code set correctly?
+- Are multiple error options included in tests?
+- Does those test pass valgrind?
 
 ### Close
+- Is protected?
+- Are errors descriptive to users?
+- Is exit code set correctly?
+- Are multiple error options included in tests?
+- Does those test pass valgrind?
 
 ### Unlink
+- Is protected?
+- Are errors descriptive to users?
+- Is exit code set correctly?
+- Are multiple error options included in tests?
+- Does those test pass valgrind?
+
 
 #### Proposed pattern
 ```c
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
-#include "../include/exec.h" // contains t_shell
+
+/*
+typedef struct s_shell
+{
+	int		i;
+	t_list	*env;
+	int		last_status;
+	int		should_exit;
+    char    *last_err_op;
+
+}			t_shell;
+*/
+
 
 // call this in the failing low-level function before returning -1
-void msh_set_error(t_shell *sh, const char *op, int errnum)
+void msh_set_error(t_shell *sh, const char *op)
 {
+    char *tmp_op;
+
     if (!sh)
         return;
-    free(sh->last_err_op); // if you allocate previously
-    sh->last_err_op = op ? strdup(op) : NULL;
-    sh->last_errno = errnum;
+    free(sh->last_err_op);
+    tmp_op = ft_strdup(op);
+    if (!tmp_op)
+        sh->last_err_op = NULL;
+    else
+        sh->last_err_op = tmp_op;
 }
 
 // top level printing helper
-void msh_print_last_error(t_shell *sh, const char *prefix)
+void msh_print_last_error(t_shell *sh)
 {
-    const char *op = sh && sh->last_err_op ? sh->last_err_op : prefix;
-    int errnum = sh ? sh->last_errno : errno;
-    if (op && errnum)
-        fprintf(stderr, "minishell: %s: %s\n", op, strerror(errnum));
+    char *op;
+
+    if (sh && sh->last_err_op)
+        op = sh->last_err_op;
+    if (op && errno)
+        fprintf(stderr, "minishell: %s: %s\n", op, strerror(errno));
     else if (op)
         fprintf(stderr, "minishell: %s\n", op);
     else
-        fprintf(stderr, "minishell: error\n");
+        fprintf(stderr, "minishell: unknown error\n");
 }
 ```
 
-## Exit spec file
+## TODO: Error handling on execution (after here_doc management)
 
-Proposal (pending to check against pipex): 
-Internal/fatal (OOM / invariant broken): EXIT_FAILURE (1) — bash behaves like this for many internal failures.
-Command redirection/open failure: set last_status = 1 and do not exit the shell (bash reports the error and the command fails).
-Command not found: 127
-Command found but not executable: 126
-SIGINT interrupted job: 130 (You do not need to mirror errno numerically as exit codes.)
 
 ### LOG
 - 12/10/2025 init team and project in 42 servers

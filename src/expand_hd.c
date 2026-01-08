@@ -5,11 +5,9 @@ int	expand_variable_from(char *line, t_list **chars_list, t_list *env)
 {
 	int		var_size;
 	char	*var_value;
-	int		i;
 	char	*tmp_no_dollar;
 
 	var_size = 0;
-	i = 0;
 	while (line[var_size] && !ft_isspace(line[var_size])
 		&& line[var_size] != '$')
 		var_size++;

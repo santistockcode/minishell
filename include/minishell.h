@@ -7,6 +7,8 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
+#include <errno.h>
+
 
 // envp deep copy
 typedef struct s_env
@@ -21,6 +23,7 @@ typedef struct s_shell
 	t_list	*env;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
+	char	*last_err_op; // last operation that caused an error
 }			t_shell;
 
 # define SUCCESS 0
