@@ -125,13 +125,7 @@ gdb ./binary-to-run
 
 Any syscall error prior to multiprocessing should interrupt pipeline altogether, That means top level exec_cmds must print something like: 
 "minishell: malloc: <strerror(errno)>", set status code and return (-1)
-so that caller knows what to clean. Update:
-0 is okay
-anything other than 0 is information for top level : 
-# define MALLOC_ERROR -1
-# define INPUT_ERROR -2
-# define FILE_ERROR -3
-maybe a READLINE_ERROR
+so that caller knows what to clean. 
 
 
 
@@ -191,7 +185,7 @@ typedef struct s_shell
 
 
 // call this in the failing low-level function before returning -1
-void msh_set_error(t_shell *sh, const char *op)
+void msh_set_error(t_shell *sh, const char *op, int saved_errno)
 {
     char *tmp_op;
 

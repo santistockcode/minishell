@@ -8,6 +8,12 @@
 #include "../../Libft/include/libft.h"
 
 
+/*
+Actions of exec cmds: 
+    - evolve cmds list to manage here_docs (already tested)
+    - execute commands (pending)
+*/
+
 static int test_empty_pipeline_returns_zero(void)
 {
     printf("Test: test_empty_pipeline_returns_zero\n");

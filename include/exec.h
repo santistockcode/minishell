@@ -1,6 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.h                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
+/*   Updated: 2026/01/09 15:08:54 by saalarco         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef EXEC_H
 # define EXEC_H
 # include "minishell.h"
+
+// TODO: Implement pipes and redirections after here_docs
 
 typedef enum e_redir_type
 {
@@ -46,10 +60,9 @@ int					exec_cmds(t_shell *sh, t_list *cmd_first);
 
 /* Free an entire cmds list, including argv strings, redirs and list nodes. */
 void				free_cmds(t_list *cmd_first);
-
 void				free_cmd_struct(void *input);
 
-/* Execute pipeline when pipelines are involved*/
+/* Execute pipeline when there are pipes*/
 int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 						int nstages);
 
@@ -84,33 +97,40 @@ int	msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
 and void			msh_restore_stdio(int save_in, int save_out);
 */
 
-/* Heredoc */
+/* 
+** Heredoc (prior to exec commands) 
+*/
+
 /* Process all heredocs in the pipeline. On success returns 0 and prepares
 ** per-command input (e.g. temp file paths). Returns -1 on error. */
-int					set_here_doc(t_shell *sh, t_list *cmd_first);
+int					set_here_docs(t_shell *sh, t_list *cmd_first);
 
-/* Read heredoc from user until delim. If should_expand==1, perform variable
-** expansion using sh->env; otherwise keep literal content.
-Buffers output to a temporary file. Returns -1 in case of sysfail */
-int					fetch_hd_from_user(t_shell *sh, char **delim,
-						int should_expand, int suffix);
-
-/* Expansion helpers */
 /* Expand variables in heredoc content when needed (quoted==0).
 ** Returns a heap string with expansions applied using env; caller frees. */
 char				*expand_hd(const char *content, t_shell *sh);
-char 				*get_env_from_key(char *key, t_list *env);
-int 				add_char_to_list(char c, t_list **chars_list);
-int 				add_string_to_list(char *str, t_list **chars_list);
-void 				free_aux_list(t_list **lst);
-char 				*list_to_alloc_string(t_list *chars_list);
-void 				unlink_hds(t_list *cmds);
 
-/*
-Basic here_doc part (prior to execution) error handling
-*/
-void msh_set_error(t_shell *sh, const char *op);
-void msh_print_last_error(t_shell *sh);
+// Expand variables in heredoc utils
+int					get_env_from_key(char *key, t_list *env, char **res_value);
+int					add_char_to_list(char c, t_list **chars_list);
+int					add_string_to_list(char *str, t_list **chars_list);
+void				free_aux_list(t_list **lst);
+char				*list_to_alloc_string(t_list *chars_list);
+
+// Unlink all temporary files used for here_docs
+void				unlink_hds(t_list *cmds);
+
+// Basic here_doc part (prior to execution) error handling
+void				msh_set_error(t_shell *sh, const char *op);
+void				msh_print_last_error(t_shell *sh);
+
+// FIXME: norminette error handling macros
+# define MALLOC_OP_ERR msh_set_error(sh, "malloc")
+# define READLINE_OP_ERR msh_set_error(sh, "readline")
+# define OPEN_OP_ERR msh_set_error(sh, "open")
+# define CLOSE_OP_ERR msh_set_error(sh, "close")
+# define UNLINK_OP_ERR msh_set_error(sh, "unlink")
+
+// TODO: errors in execution part
 
 /* Error and status mapping (execution) */
 /* Conventional shell status codes */

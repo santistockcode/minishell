@@ -67,14 +67,24 @@ int dup2_wrap(int oldfd, int newfd) {
 	return dup2(oldfd, newfd);
 }
 
-int open_wrap(const char *path, int oflag, ...) {
-	if (s_open_fn) {
-		/* open() has optional mode; tests overriding must ignore extra args */
-		return s_open_fn(path, oflag);
-	}
-	/* Forward to real open with variadic mode for O_CREAT (not used here) */
-	return open(path, oflag);
+int open_wrap(const char *path, int oflag, ...) 
+{
+
+    int mode = 0;
+    if (oflag & O_CREAT)
+    {
+        va_list ap;
+        va_start(ap, oflag);
+        mode = va_arg(ap, int);
+        va_end(ap);
+    }
+    if (s_open_fn)
+        return s_open_fn(path, oflag, mode);
+    if (oflag & O_CREAT)
+        return open(path, oflag, mode);
+    return open(path, oflag);
 }
+
 
 int close_wrap(int fd) {
 	if (s_close_fn) return s_close_fn(fd);

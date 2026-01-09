@@ -5,7 +5,7 @@
             "name": "Debug Current Test Binary",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/tests/cmds_tests/test_set_here_doc",
+            "program": "${workspaceFolder}/tests/cmds_tests/test_set_here_docs",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

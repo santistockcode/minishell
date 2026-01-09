@@ -96,10 +96,9 @@ class TestRunner:
         deps: List[Path] = []
         # exec_pipeline tests need the backend impl
         deps.append(self.src_dir / "exec_cmds.c")
-        deps.append(self.src_dir / "set_here_doc.c")
+        deps.append(self.src_dir / "set_here_docs.c")
         deps.append(self.src_dir / "free_cmds.c")
         deps.append(self.src_dir / "syswrap.c")
-        deps.append(self.src_dir / "fetch_hd_from_user.c")
         deps.append(self.src_dir / "expand_hd.c")
         deps.append(self.src_dir / "expand_hd_utils.c")
         deps.append(self.src_dir / "unlink_hds.c")

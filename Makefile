@@ -24,13 +24,13 @@ INCLUDE_DIR = include/
 FILES = \
 main \
 exec_cmds \
-set_here_doc \
+set_here_docs \
 free_cmds \
 syswrap \
-fetch_hd_from_user \
 expand_hd \
 expand_hd_utils \
-unlink_hds
+unlink_hds \
+exec_errors
 
 
 # Files add

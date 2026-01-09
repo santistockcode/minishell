@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_cmds.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
+/*   Updated: 2026/01/09 15:11:01 by saalarco         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/exec.h"
 #include "../include/log.h"
 #include "../Libft/include/libft.h"
@@ -5,10 +17,9 @@
 #include <stdlib.h>
 
 /*
-How can I manage errors from set_here_doc?
-set a mapped status and abort if needed.
+TODO: exec_cmds returns status code, but is already set in sh. 
+Discuss with parser part where to set error status.
 */
-
 int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {
 	int	nstages;
@@ -16,16 +27,16 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	nstages = ft_lstsize(cmd_first);
 	if (nstages < 1)
 	{
-		MSH_LOG("No commands to execute");
+		MSH_LOG("No commands to execute, you sure parser is working ok?");
 		return (0);
 	}
-	// create here docs with expanded variables
-	if (set_here_doc(sh, cmd_first) == (-1))
+	if (set_here_docs(sh, cmd_first) == (-1))
 	{
-		MSH_LOG("Failed to set here_doc");
+		MSH_LOG("Failed to set here_docs");
 		sh->last_status = 1;
 		msh_print_last_error(sh);
-		return (-1);
+		unlink_hds(cmd_first);
+		return (1);
 	}
 	if (nstages > 1)
 	{
@@ -35,6 +46,6 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	}
 	MSH_LOG("Executing simple command");
 	// TODO: return msh_exec_simple(sh, (t_cmd*)cmd_first->content, sh->env);
-	// unlink here_doc files
+	unlink_hds(cmd_first);
 	return (1);
 }

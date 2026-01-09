@@ -27,9 +27,10 @@ const char *test_env[] = {
 typedef struct s_readline_mock {
     const char **lines;
     size_t call_count;
+    size_t fail_at;
 } t_readline_mock;
 
-static t_readline_mock g_mock = {NULL, 0};
+static t_readline_mock g_mock = {NULL, 0, 0};
 
 static char *generic_readline_mock(const char *prompt)
 {
@@ -43,6 +44,21 @@ static char *generic_readline_mock(const char *prompt)
     return line;
 }
 
+static char *generic_readline_mock_fails(const char *prompt)
+{
+    (void)prompt;
+    if (g_mock.call_count == g_mock.fail_at)
+    {
+        errno = ENOMEM;
+        return NULL;
+    }
+    if (!g_mock.lines || !g_mock.lines[g_mock.call_count])
+        return NULL;
+    char *line = strdup(g_mock.lines[g_mock.call_count]);
+    g_mock.call_count++;
+    return line;
+}
+
 static void setup_readline_mock(const char **lines)
 {
     g_mock.lines = lines;
@@ -50,11 +66,49 @@ static void setup_readline_mock(const char **lines)
     syswrap_set_readline(generic_readline_mock);
 }
 
+static void setup_readline_to_fail_at(const char **lines, int fail_at)
+{
+    g_mock.lines = lines;
+    g_mock.call_count = 0;
+    g_mock.fail_at = fail_at;
+    syswrap_set_readline(generic_readline_mock_fails);
+}
+
 static void teardown_readline_mock(void)
 {
     syswrap_set_readline(NULL);
     g_mock.lines = NULL;
     g_mock.call_count = 0;
+}
+
+// ============================================================================
+// Generic open mock and utils
+// ============================================================================
+
+typedef struct s_open_mock {
+    int (*open_func)(const char *, int, int);
+    int call_count;
+    int fail_at;
+} t_open_mock;
+
+static t_open_mock g_open_mock = {NULL, 0, 0};
+
+int open_wrap_eaccess(const char *path, int oflag, int mode) 
+{
+    if (g_open_mock.call_count == g_open_mock.fail_at)
+    {
+        errno = EACCES;
+        return -1;
+    }
+    g_open_mock.call_count++;
+    return open(path, oflag, mode);
+}
+
+static void setup_open_fails_at_call(int (*open_func)(const char *, int, int), int fail_at)
+{
+    g_open_mock.call_count = 0;
+    g_open_mock.fail_at = fail_at;
+    syswrap_set_open((t_open_fn)open_func);
 }
 
 // ============================================================================
@@ -202,7 +256,7 @@ static int test_various_cmds_no_here_doc_unchanges_returns_0(void)
     t_list *pipe_head = build_pipeline_no_heredoc();
     const char *original_target = "infile";
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -215,11 +269,6 @@ static int test_various_cmds_no_here_doc_unchanges_returns_0(void)
     
     return 0;
 }
-
-/*
-** set_here_doc.c
-** fetch_here_doc_from_user.c
-*/
 
 // Test 2: Heredoc on first command, multiple lines, no expansion
 static int test_heredoc_first_command_multiple_lines_no_expansion(void)
@@ -236,7 +285,7 @@ static int test_heredoc_first_command_multiple_lines_no_expansion(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -269,7 +318,7 @@ static int test_heredoc_first_command_multiple_lines_with_expansion(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -301,7 +350,7 @@ static int test_various_cmds_with_heredoc_changes_returns_0(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -333,7 +382,7 @@ static int test_empty_heredoc_user_introduces_delimiter(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -365,7 +414,7 @@ static int test_empty_heredoc_user_introduces_delimiter_with_expansion(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -397,7 +446,7 @@ static int test_various_cmds_with_empty_lines(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -429,7 +478,7 @@ static int test_heredoc_second_command_multiple_lines_no_expansion(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 1);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     t_cmd *cmd2 = (t_cmd*)ft_lstlast(pipe_head)->content;
     t_redir *redir_after = ft_lstlast(cmd2->redirs)->content;
@@ -461,7 +510,7 @@ static int test_heredoc_second_command_multiple_lines_with_expansion(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     t_cmd *cmd2 = (t_cmd*)ft_lstlast(pipe_head)->content;
     t_redir *redir_after = ft_lstlast(cmd2->redirs)->content;
@@ -499,7 +548,7 @@ static int test_heredoc_multiple_commands_multiple_lines_no_expansion(void)
     // segmentation fault when returning
     t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 1, "EOF", 1, "EOF", 1);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -542,7 +591,7 @@ static int test_heredoc_multiple_commands_multiple_lines_with_expansion(void)
 
     t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -583,7 +632,7 @@ static int test_last_status_expanded_to_0(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -616,7 +665,7 @@ static int test_last_status_expanded_to_127(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -649,7 +698,7 @@ static int test_last_status_expanded_to_127_second_command(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_second_command("EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd2 = (t_cmd*)pipe_head->next->content;
@@ -682,7 +731,7 @@ static int test_last_status_not_expanded_when_quoted(void)
 
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 1);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -719,7 +768,7 @@ static int test_miscellanea_6_commands(void)
 
     t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 1, "EOF", 0);
 
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
 
     // verify path vs expected for every command
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
@@ -758,7 +807,7 @@ static int test_heredoc_first_command_dollar_sign(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -790,7 +839,7 @@ static int test_heredoc_first_command_double_dollar_sign(void)
     
     t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
     
-    set_here_doc(sh, pipe_head);
+    set_here_docs(sh, pipe_head);
     
     t_cmd *cmd1 = (t_cmd*)pipe_head->content;
     t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
@@ -804,6 +853,226 @@ static int test_heredoc_first_command_double_dollar_sign(void)
     free_shell(sh);
     teardown_readline_mock();
     
+    return 0;
+}
+
+// Test 19: Here doc on first command, but opens fails with eaccess, set_here_docs returns -1
+static int test_heredoc_first_command_open_fail(void)
+{
+    printf("Test: test_heredoc_first_command_open_fail\n");
+
+    const char *user_input[] = {"line1", "EOF", NULL};
+    // const char *expected_content = "line1\n";
+
+    setup_readline_mock(user_input);
+    setup_open_fails_at_call(open_wrap_eaccess, 0);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    t_cmd *cmd1 = (t_cmd*)pipe_head->content;
+    t_redir *redir_after = ft_lstlast(cmd1->redirs)->content;
+
+    mu_assert("fd changed when setting heredoc", redir_after->fd == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+
+// Test 20: Multiple commands with heredocs pipeline but opens fails at call 1
+static int test_heredocs_multiple_commands_open_fails_at_1(void)
+{
+    printf("Test: test_heredocs_multiple_commands_open_fails_at_1\n");
+
+    const char *user_input[] = {
+        "$HOME", "EOF",
+        "$$ hello this here_doc won't even be fetched because open is failing", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_open_fails_at_call(open_wrap_eaccess, 1);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+
+// Test 21: Multiple commands with heredocs pipeline but opens fails at call 2
+static int test_heredocs_multiple_commands_open_fails_at_2(void)
+{
+    printf("Test: test_heredocs_multiple_commands_open_fails_at_2\n");
+
+    const char *user_input[] = {
+        "$HOME", "EOF",
+        "abc", "EOF",
+        "$$ hello this here_doc won't even be fetched because open is failing", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_open_fails_at_call(open_wrap_eaccess, 2);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+// Test 22: One command in pipeline with here doc with 1 line and expansion but readline fails at that first call
+static int test_heredoc_one_command_pipeline_readline_fails(void)
+{
+    printf("Test: test_heredoc_one_command_pipeline_readline_fails\n");
+
+    const char *user_input[] = {
+        "$HOME", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_readline_to_fail_at(user_input, 1);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+// Test 23: One command in pipeline with here doc with various line and expansion but readline fails at second call
+static int test_heredoc_one_command_pipeline_readline_fails_at_2(void)
+{
+    printf("Test: test_heredoc_one_command_pipeline_readline_fails_at_2\n");
+
+    const char *user_input[] = {
+        "This goes ok $HOME", "line2 will fail", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_readline_to_fail_at(user_input, 1);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+
+// Test 24: One command in pipeline with here doc with various line and expansion but readline fails at EOF
+static int test_heredoc_one_command_pipeline_readline_fails_at_eof(void)
+{
+    printf("Test: test_heredoc_one_command_pipeline_readline_fails_at_eof\n");
+
+    const char *user_input[] = {
+        "This goes ok $HOME", "line2 will fail", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_readline_to_fail_at(user_input, 2);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+// Test 25: multiple here docs (so various commands with here doc) and readline fails in the middle of second command
+static int test_heredoc_multiple_commands_pipeline_readline_fails(void)
+{
+    printf("Test: test_heredoc_multiple_commands_pipeline_readline_fails\n");
+
+    const char *user_input[] = {
+        "HD1 expands $HOME line 1", "HD1 line 2", "EOF",
+        "HD2 expands $HOME line 1", "HD2 line 2 will fail readline", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_readline_to_fail_at(user_input, 4);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_various_heredocs("EOF", 0, "EOF", 0, "EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
     return 0;
 }
 
@@ -827,6 +1096,15 @@ int main(void)
     mu_run_test(test_miscellanea_6_commands);
     mu_run_test(test_heredoc_first_command_dollar_sign);
     mu_run_test(test_heredoc_first_command_double_dollar_sign);
+
+    // injected syscalls with errors (testing memory more than errors themselves)
+    mu_run_test(test_heredoc_first_command_open_fail);
+    mu_run_test(test_heredocs_multiple_commands_open_fails_at_1);
+    mu_run_test(test_heredocs_multiple_commands_open_fails_at_2);
+    mu_run_test(test_heredoc_one_command_pipeline_readline_fails);
+    mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_2);
+    mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_eof);
+    mu_run_test(test_heredoc_multiple_commands_pipeline_readline_fails);
 
     mu_summary();
 }
