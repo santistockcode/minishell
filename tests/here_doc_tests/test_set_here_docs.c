@@ -1076,6 +1076,69 @@ static int test_heredoc_multiple_commands_pipeline_readline_fails(void)
     return 0;
 }
 
+//Test 26: On open fail, errno doesn't change on top level (from test itself)
+static int test_heredoc_open_fail_errno_unchanged(void)
+{
+    printf("Test: test_heredoc_open_fail_errno_unchanged\n");
+
+    const char *user_input[] = {
+        "This goes ok $HOME", "line2 will fail", "EOF",
+        NULL
+    };
+
+    setup_readline_mock(user_input);
+    setup_open_fails_at_call(open_wrap_eaccess, 0);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+
+    mu_assert("errno changed on open fail", errno == EACCES);
+    mu_assert("last_error_op changed on open fail", strcmp(sh->last_err_op, "open") == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+    syswrap_set_open(NULL);
+
+    return 0;
+}
+
+// Test 27: On readline fail, errno hasn't change on top level (this test)
+static int test_heredoc_readline_fail_errno_unchanged(void)
+{
+    printf("Test: test_heredoc_readline_fail_errno_unchanged\n");
+
+    const char *user_input[] = {
+        "This goes ok $HOME", "line2 will fail", "EOF",
+        NULL
+    };
+
+    setup_readline_to_fail_at(user_input, 1);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+    mu_assert("errno changed on readline fail", errno == ENOMEM);
+    mu_assert("last_error_op changed on readline fail", strcmp(sh->last_err_op, "readline") == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    teardown_readline_mock();
+
+    return 0;
+}
+
 int main(void)
 {
     mu_run_test(test_various_cmds_no_here_doc_unchanges_returns_0);
@@ -1105,6 +1168,10 @@ int main(void)
     mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_2);
     mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_eof);
     mu_run_test(test_heredoc_multiple_commands_pipeline_readline_fails);
+
+    // custom tests to implement error handling file
+    mu_run_test(test_heredoc_open_fail_errno_unchanged);
+    mu_run_test(test_heredoc_readline_fail_errno_unchanged);
 
     mu_summary();
 }

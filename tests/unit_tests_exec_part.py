@@ -31,7 +31,7 @@ class TestRunner:
         self.keep_binaries = keep_binaries
         # project_root = repo root (parent of tests/)
         self.project_root = Path(__file__).parent.parent
-        self.unit_tests_dir = self.project_root / "tests" / "cmds_tests"
+        self.unit_tests_dir = self.project_root / "tests" / "here_doc_tests"
         self.src_dir = self.project_root / "src"
         self.include_dir = self.project_root / "include"
         self.libft_dir = self.project_root / "Libft"

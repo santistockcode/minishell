@@ -6,12 +6,18 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:11:45 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 15:35:29 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/09 18:09:45 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 #include "../include/exec.h"
+
+int					get_env_from_key(char *key, t_list *env, char **res_value);
+int					add_char_to_list(char c, t_list **chars_list);
+int					add_string_to_list(char *str, t_list **chars_list);
+void				free_aux_list(t_list **lst);
+char				*list_to_alloc_string(t_list *chars_list);
 
 /*
 Expands a variable if exists in env and adds it to the chars_list.

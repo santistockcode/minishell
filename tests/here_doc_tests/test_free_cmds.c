@@ -7,6 +7,8 @@
 #include "../common/test_helpers.h"
 
 
+void				free_cmd_struct(void *input);
+
 static int test_free_cmds_basic(void)
 {
     printf("Test: test_free_cmds_basic\n");

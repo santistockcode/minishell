@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 15:39:38 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/09 18:04:51 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	{
 		line = readline_wrap("> ");
 		if (!line)
-			return (READLINE_OP_ERR, -1);
+			return (msh_set_error(sh, READLINE_OP), -1);
 		if (ft_strncmp(line, delim, ft_strlen(delim)) == 0)
 		{
 			free(line);
@@ -61,7 +61,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 		{
 			expanded_line = expand_hd((const char *) line, sh);
 			if (!expanded_line)
-				return (free(line), MALLOC_OP_ERR, -1);
+				return (free(line), msh_set_error(sh, MALLOC_OP), -1);
 			free(line);
 			line = expanded_line;
 		}
@@ -85,16 +85,16 @@ int	fetch_hd_from_user(t_shell *sh, char **delim,
 
 	tmp_sfx = ft_itoa(suffix);
 	if (!tmp_sfx)
-		return (MALLOC_OP_ERR, -1);
+		return (msh_set_error(sh, MALLOC_OP), -1);
 	here_doc_name = ft_strjoin(".here_doc_", tmp_sfx);
 	if (!here_doc_name)
-		return (free(tmp_sfx), MALLOC_OP_ERR, -1);
+		return (free(tmp_sfx), msh_set_error(sh, MALLOC_OP), -1);
 	free(tmp_sfx);
 	fd = open_wrap(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fd == -1)
 	{
 		free(here_doc_name);
-		return (OPEN_OP_ERR, -1);
+		return (msh_set_error(sh, OPEN_OP), -1);
 	}
 	rpl_result = repl_here_doc(sh, *delim, should_expand, fd);
 	free(*delim);

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 15:08:54 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/09 18:07:41 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,11 +60,10 @@ int					exec_cmds(t_shell *sh, t_list *cmd_first);
 
 /* Free an entire cmds list, including argv strings, redirs and list nodes. */
 void				free_cmds(t_list *cmd_first);
-void				free_cmd_struct(void *input);
 
 /* Execute pipeline when there are pipes*/
-int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
-						int nstages);
+// int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
+// 						int nstages);
 
 /*
 ** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
@@ -85,11 +84,11 @@ typedef struct s_stage_io
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
-int					msh_exec_stage(t_shell *sh, t_cmd *cmd,
-						const t_stage_io *io, t_list *env);
+// int					msh_exec_stage(t_shell *sh, t_cmd *cmd,
+// 						const t_stage_io *io, t_list *env);
 
 /*Execute simple command (no pipelines involved)*/
-int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
+// int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
 /*
 Previous function makes use of:
 int	msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
@@ -109,13 +108,6 @@ int					set_here_docs(t_shell *sh, t_list *cmd_first);
 ** Returns a heap string with expansions applied using env; caller frees. */
 char				*expand_hd(const char *content, t_shell *sh);
 
-// Expand variables in heredoc utils
-int					get_env_from_key(char *key, t_list *env, char **res_value);
-int					add_char_to_list(char c, t_list **chars_list);
-int					add_string_to_list(char *str, t_list **chars_list);
-void				free_aux_list(t_list **lst);
-char				*list_to_alloc_string(t_list *chars_list);
-
 // Unlink all temporary files used for here_docs
 void				unlink_hds(t_list *cmds);
 
@@ -123,68 +115,65 @@ void				unlink_hds(t_list *cmds);
 void				msh_set_error(t_shell *sh, const char *op);
 void				msh_print_last_error(t_shell *sh);
 
-// FIXME: norminette error handling macros
-# define MALLOC_OP_ERR msh_set_error(sh, "malloc")
-# define READLINE_OP_ERR msh_set_error(sh, "readline")
-# define OPEN_OP_ERR msh_set_error(sh, "open")
-# define CLOSE_OP_ERR msh_set_error(sh, "close")
-# define UNLINK_OP_ERR msh_set_error(sh, "unlink")
+# define MALLOC_OP "malloc"
+# define READLINE_OP "readline"
+# define OPEN_OP "open"
 
 // TODO: errors in execution part
 
 /* Error and status mapping (execution) */
 /* Conventional shell status codes */
-# define STATUS_CMD_NOT_EXEC 126 /* permission denied or not executable */
-# define STATUS_CMD_NOT_FOUND 127 /* command not found */
+// # define STATUS_CMD_NOT_EXEC 126 /* permission denied or not executable */
+// # define STATUS_CMD_NOT_FOUND 127 /* command not found */
 
-/* Map execve errno to a shell exit status (e.g., 126 for EACCES,
-	127 for ENOENT). */
-int					msh_status_from_execve_error(int err);
+// /* Map execve errno to a shell exit status (e.g., 126 for EACCES,
+// 	127 for ENOENT). */
+// int					msh_status_from_execve_error(int err);
 
-/* Map open errno to handling status. is_outfile=1 for output file scenarios. */
-int					msh_status_from_open_error(int err, int is_outfile);
+// /* Map open errno to hanlde stat. is_outfile=1 for output file scenarios. */
+// int					msh_status_from_open_error(int err, int is_outfile);
 
-/* Map fork errno to non-zero status for pipeline abort decisions. */
-int					msh_status_from_fork_error(int err);
+// /* Map fork errno to non-zero status for pipeline abort decisions. */
+// int					msh_status_from_fork_error(int err);
 
-/* Emit a concise error message for a command (to stderr). */
-void				msh_emit_error_cmd(const char *cmd, const char *msg);
+// /* Emit a concise error message for a command (to stderr). */
+// void				msh_emit_error_cmd(const char *cmd, const char *msg);
 
-/* Emit an errno-based error for an operation on a path (uses strerror/perror)*/
-void				msh_emit_errno_path(const char *op, const char *path);
+// /* Emit an errno-based error for an operation on a path (uses strerror)*/
+// void				msh_emit_errno_path(const char *op, const char *path);
 
-/* Exec helpers */
-/* Return 1 if name is a builtin, 0 otherwise. */
-int					msh_is_builtin(const char *name);
+// /* Exec helpers */
+// /* Return 1 if name is a builtin, 0 otherwise. */
+// int					msh_is_builtin(const char *name);
 
-/* Dispatch a builtin by name and argv. Returns the builtin's exit status. */
-int					msh_run_builtin(t_shell *sh, const char *name, char **argv,
-						t_list *env);
+// /* Dispatch a builtin by name and argv. Returns the builtin's exit status. */
+// int			msh_run_builtin(t_shell *sh, const char *name, char **argv,
+// 						t_list *env);
 
-/* Resolve an external command name using PATH from env.
-** Returns a heap-allocated absolute path or NULL if not found. */
-char				*msh_resolve_path(const char *name, t_list *env);
+// /* Resolve an external command name using PATH from env.
+// ** Returns a heap-allocated absolute path or NULL if not found. */
+// char				*msh_resolve_path(const char *name, t_list *env);
 
-/* Execute an external command (fork/exec).
-** Returns child exit status or appropriate error code. */
-int					msh_exec_external(t_shell *sh, char **argv, t_list *env);
+// /* Execute an external command (fork/exec).
+// ** Returns child exit status or appropriate error code. */
+// int			msh_exec_external(t_shell *sh, char **argv, t_list *env);
 
-/* Builtins */
-/* supports -n */
-int					builtin_echo(t_shell *sh, char **argv);
+// /* Builtins */
+// /* supports -n */
+// int					builtin_echo(t_shell *sh, char **argv);
 
-/* reative / absolute */
-int					builtin_cd(t_shell *sh, char **argv, t_list *env);
+// /* reative / absolute */
+// int					builtin_cd(t_shell *sh, char **argv, t_list *env);
 
-int					builtin_pwd(t_shell *sh);
+// int					builtin_pwd(t_shell *sh);
 
-/* no options */
-int					builtin_export(t_shell *sh, char **argv, t_list *env);
+// /* no options */
+// int					builtin_export(t_shell *sh, char **argv, t_list *env);
 
-/* no options */
-int					builtin_unset(t_shell *sh, char **argv, t_list *env);
+// /* no options */
+// int					builtin_unset(t_shell *sh, char **argv, t_list *env);
 
-/* no args */
-int					builtin_env(t_shell *sh, t_list *env);
+// /* no args */
+// int					builtin_env(t_shell *sh, t_list *env);
 
 #endif
