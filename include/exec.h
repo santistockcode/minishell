@@ -106,6 +106,12 @@ void 				free_aux_list(t_list **lst);
 char 				*list_to_alloc_string(t_list *chars_list);
 void 				unlink_hds(t_list *cmds);
 
+/*
+Basic here_doc part (prior to execution) error handling
+*/
+void msh_set_error(t_shell *sh, const char *op);
+void msh_print_last_error(t_shell *sh);
+
 /* Error and status mapping (execution) */
 /* Conventional shell status codes */
 # define STATUS_CMD_NOT_EXEC 126 /* permission denied or not executable */

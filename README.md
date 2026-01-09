@@ -125,11 +125,19 @@ gdb ./binary-to-run
 
 Any syscall error prior to multiprocessing should interrupt pipeline altogether, That means top level exec_cmds must print something like: 
 "minishell: malloc: <strerror(errno)>", set status code and return (-1)
-so that caller knows what to clean.
+so that caller knows what to clean. Update:
+0 is okay
+anything other than 0 is information for top level : 
+# define MALLOC_ERROR -1
+# define INPUT_ERROR -2
+# define FILE_ERROR -3
+maybe a READLINE_ERROR
+
+
 
 ### Libft calls (string management)
 - Is protected? ✅
-- Are errors descriptive to users?
+- Are errors descriptive to users? Yes, in case it sets errno user will see strerror(errno) string.
 - Is exit code set correctly?
 
 ### Malloc and free
@@ -214,6 +222,8 @@ void msh_print_last_error(t_shell *sh)
 ```
 
 ## TODO: Error handling on execution (after here_doc management)
+We use exec_status to get proper status_code. 
+If something went wrong in child process that's what exit exists: we exit with correct status_code from the child so the parent sees it. 
 
 
 ### LOG

@@ -27,7 +27,7 @@ class Colors:
 class TestRunner:
     """Compiles and runs Criterion unit tests for minishell."""
 
-    def __init__(self, keep_binaries: bool = False, debug: bool = False):
+    def __init__(self, keep_binaries: bool = False, debug: bool = False, valgrind: bool = False):
         self.keep_binaries = keep_binaries
         # project_root = repo root (parent of tests/)
         self.project_root = Path(__file__).parent.parent
@@ -36,6 +36,7 @@ class TestRunner:
         self.include_dir = self.project_root / "include"
         self.libft_dir = self.project_root / "Libft"
         self.libft_lib = self.libft_dir / "bin" / "libft.a"
+        self.keep_binaries_valgrind = valgrind
 
         # Track compiled binaries for cleanup
         self.compiled_binaries: List[Path] = []
@@ -102,6 +103,7 @@ class TestRunner:
         deps.append(self.src_dir / "expand_hd.c")
         deps.append(self.src_dir / "expand_hd_utils.c")
         deps.append(self.src_dir / "unlink_hds.c")
+        deps.append(self.src_dir / "exec_errors.c")
 
         # common test helpers
         deps.append(self.project_root / "tests" / "common" / "test_helpers.c")
@@ -150,6 +152,10 @@ class TestRunner:
     def run_test(self, binary: Path) -> int:
         """Run a test binary - let Criterion handle everything."""
         self.log(f"\nRunning {binary.name}...", Colors.YELLOW)
+        if (self.keep_binaries_valgrind):
+            self.log(f"Running {binary.name} under Valgrind...", Colors.CYAN)
+            result = subprocess.run(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "--track-origins=yes", str(binary)])
+            return result.returncode
         result = subprocess.run([str(binary)])
         return result.returncode
     
@@ -221,6 +227,8 @@ Examples:
     python3 tests/unit_cmds.py --debug
     # Clean binaries
     python3 tests/unit_cmds.py --clean
+    # Keep binaries and run under Valgrind
+    python3 tests/unit_cmds.py --keep-binaries-valgrind
         """
     )
 
@@ -235,13 +243,19 @@ Examples:
     parser.add_argument(
         '--keep-binaries',
         action='store_true',
-        help='Keep compiled test binaries (for manual testing)'
+        help='Keep compiled test binaries (for manual testing and debugging)'
     )
 
     parser.add_argument(
         '--clean',
         action='store_true',
         help='Clean up compiled test binaries'
+    )
+
+    parser.add_argument(
+        '--keep-binaries-valgrind',
+        action='store_true',
+        help='Keep compiled test binaries and run them under Valgrind'
     )
 
     args = parser.parse_args()
@@ -253,7 +267,7 @@ Examples:
         args.keep_binaries = False
         args.debug = False
 
-    runner = TestRunner(keep_binaries=args.keep_binaries, debug=args.debug)
+    runner = TestRunner(keep_binaries=args.keep_binaries, debug=args.debug, valgrind=args.keep_binaries_valgrind)
 
     success = True
 

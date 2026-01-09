@@ -77,6 +77,8 @@ void free_shell(t_shell *sh)
 {
     if (!sh) return;
     ft_lstclear(&sh->env, free_env_struct);
+    if (sh->last_err_op)
+        free(sh->last_err_op);
     free(sh);
 }
 
@@ -90,5 +92,6 @@ t_shell *create_test_shell(const char **test_env, int last_status)
     sh->last_status = last_status;
     sh->should_exit = 0;
     sh->env = deep_copy_env(test_env);
+    sh->last_err_op = NULL;
     return sh;
 }

@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+How can I manage errors from set_here_doc?
+set a mapped status and abort if needed.
+*/
+
 int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {
 	int	nstages;
@@ -18,6 +23,8 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	if (set_here_doc(sh, cmd_first) == (-1))
 	{
 		MSH_LOG("Failed to set here_doc");
+		sh->last_status = 1;
+		msh_print_last_error(sh);
 		return (-1);
 	}
 	if (nstages > 1)
