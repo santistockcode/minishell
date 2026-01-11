@@ -39,7 +39,7 @@ int init_minishell(t_shell **minishell,char **envp);
 
 
 //SEÑALES
-void septup_signal();
+void setup_signal();
 void	ft_ctrl_mini(int signal);
 void	ft_ctrl_quit(int signal);
 void	ft_ctrl_heredoc(int signal);

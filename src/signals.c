@@ -6,7 +6,7 @@
 /*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/12 14:15:00 by mario             #+#    #+#             */
-/*   Updated: 2026/01/11 13:22:17 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/11 18:58:01 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 extern volatile sig_atomic_t	exit_status;
 
-void septup_signal(void)
+void setup_signal(void)
 {
 	struct sigaction	sa;
 	
