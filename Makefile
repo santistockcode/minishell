@@ -4,6 +4,7 @@ NAME = minishell
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3
+LDFLAGS = -lreadline -lncurses
 RM = rm
 RMFLAGS = -rf
 MKDIR = mkdir -p
@@ -30,8 +31,10 @@ syswrap \
 expand_hd \
 expand_hd_utils \
 unlink_hds \
-exec_errors
-
+exec_errors \
+crtl\
+signals\
+minishell_init
 
 # Files add
 
@@ -51,11 +54,10 @@ fsanitize: CFLAGS += -fsanitize=address
 fsanitize: $(NAME)
 
 # Comp bin
-READLINE_LIBS = -lreadline
 
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(READLINE_LIBS) -o $@
+  $(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c

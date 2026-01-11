@@ -195,6 +195,9 @@ void msh_print_last_error(t_shell *sh)
 We use exec_status to get proper status_code. 
 If something went wrong in child process that's what exit exists: we exit with correct status_code from the child so the parent sees it. 
 
+### References: 
+https://03-jon-perez.gitbook.io/coding-library/c/procesos-e-hilos/estructura-sigaction
+https://jesustorres.es/introduccion-a-las-senales-posix
 
 ### LOG
 - 12/10/2025 init team and project in 42 servers
