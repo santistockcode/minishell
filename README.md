@@ -108,5 +108,9 @@ gdb ./binary-to-run
 (and so on)
 ```
 
+### References: 
+https://03-jon-perez.gitbook.io/coding-library/c/procesos-e-hilos/estructura-sigaction
+https://jesustorres.es/introduccion-a-las-senales-posix
+
 ### LOG
 - 12/10/2025 init team and project in 42 servers
