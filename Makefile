@@ -4,6 +4,7 @@ NAME = minishell
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3
+LDFLAGS = -lreadline -lncurses
 RM = rm
 RMFLAGS = -rf
 MKDIR = mkdir -p
@@ -21,7 +22,10 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main
+FILES = main\
+crtl\
+signals\
+minishell_init
 
 
 # Files add
@@ -40,7 +44,7 @@ debug: $(NAME)
 # Comp bin
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c

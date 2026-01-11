@@ -24,8 +24,8 @@ typedef struct s_cmd {
 
 
 // "backend"
-int    exec_pipeline(t_shell *sh, t_list *cmd_first);
-void   free_pipeline(t_list *cmd_first);
+//int    exec_pipeline(t_shell *sh, t_list *cmd_first);
+//void   free_pipeline(t_list *cmd_first);
 
 
 

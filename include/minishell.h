@@ -12,9 +12,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <readline/readline.h>
 
 #include "../Libft/include/libft.h"
 #include "log.h"
+#include "exec.h"
 
 // can you deep copy envp?
 // typedef struct s_env
@@ -22,7 +24,7 @@
 //     char            *key;
 //     char            *value;
 // }   t_env;
-extern int exit_status;
+extern volatile sig_atomic_t exit_status;
 
 
 typedef struct s_shell
@@ -32,10 +34,15 @@ typedef struct s_shell
     // int      last_status; // last $? value
     // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
-void septup_signal();
 
+int init_minishell(t_shell **minishell,char **envp);
+
+
+//SEÑALES
+void septup_signal();
 void	ft_ctrl_mini(int signal);
 void	ft_ctrl_quit(int signal);
+void	ft_ctrl_heredoc(int signal);
 
 
 
