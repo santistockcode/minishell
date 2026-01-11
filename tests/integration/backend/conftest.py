@@ -31,8 +31,8 @@ class TestCmdSpec(ctypes.Structure):
 @pytest.fixture(scope="session")
 def test_api_lib():
     """Load the compiled test API shared library."""
-    project_root = Path(__file__).parent.parent.parent
-    lib_path = project_root / "tests" / "integration_test_apis" / "libtest_api_set_here_docs.so"
+    project_root = Path(__file__).parent.parent.parent.parent
+    lib_path = project_root / "tests" / "integration" / "apis" / "libtest_api_set_here_docs.so"
     
     if not lib_path.exists():
         pytest.fail(f"Test API library not found: {lib_path}")

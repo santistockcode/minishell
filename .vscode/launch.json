@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Current Test Binary",
+            "name": "Unit-test set here docs",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/tests/cmds_tests/test_set_here_docs",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_set_here_docs",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -19,28 +19,7 @@
                     "ignoreFailures": true
                 }
             ],
-            // "preLaunchTask": "compile-test",
             "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "Debug Test (Input Binary Name)",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/tests/cmds_tests/${input:testBinaryName}",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb"
-        }
-    ],
-    "inputs": [
-        {
-            "id": "testBinaryName",
-            "type": "promptString",
-            "description": "Test binary name",
-            "default": "test_exec_cmds"
         }
     ]
 }

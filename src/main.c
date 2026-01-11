@@ -11,13 +11,7 @@ int main(int argc, char** argv,char **envp)
 		return(0);
 	if (!init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
-	minishell->i = 10;
-	MSH_LOG("Minishell initialized with i = %d", minishell->i);
-	setup_signal();
-	while(1)
-	{
-
-	}
+	MSH_LOG("t_shell structure initialized by Mario");
 	free(minishell);
 	return (0);
 }

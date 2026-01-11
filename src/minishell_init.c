@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell_init.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/01/11 19:17:34 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/11 19:46:05 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,6 @@ int init_minishell(t_shell **minishell,char **envp)
 	if(!minishell)
 		return (MALLOC_ERROR);
 	cpy = envp;
-	printf("%s",cpy[1]);
+	// printf("%s",cpy[1]);
 	return(1);
 }

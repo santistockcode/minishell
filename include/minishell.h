@@ -28,7 +28,6 @@ typedef struct s_env
 
 typedef struct s_shell
 {
-	int		i;
 	t_list	*env;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up

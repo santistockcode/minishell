@@ -21,7 +21,6 @@ static int test_empty_pipeline_returns_zero(void)
     printf("Test: test_empty_pipeline_returns_zero\n");
     t_shell *sh = (t_shell*)malloc(sizeof(t_shell));
     mu_assert("malloc shell failed", sh != NULL);
-    sh->i = 0;
     sh->last_status = 0;
     sh->should_exit = 0;
 
