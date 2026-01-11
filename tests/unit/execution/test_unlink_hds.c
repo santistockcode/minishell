@@ -1,10 +1,11 @@
 #include <stdlib.h>
-#include "minunit.h"
+#include "../../support/third_party/minunit.h"
+#include "../../support/c_helpers/test_helpers.h"
 
-#include "../../include/exec.h"
-#include "../../include/minishell.h"
-#include "../../Libft/include/libft.h"
-#include "../common/test_helpers.h"
+#include "../../../include/exec.h"
+#include "../../../include/minishell.h"
+#include "../../../include/syswrap.h"
+#include "../../../Libft/include/libft.h"
 
 
 static int test_assert_here_docs_unlinked(void)

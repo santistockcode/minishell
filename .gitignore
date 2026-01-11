@@ -57,5 +57,17 @@ dkms.conf
 # Docs private
 docs-private/
 
-# python venv
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.tox/
+.pytest_cache/
+.coverage
+htmlcov/
 .env/

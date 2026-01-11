@@ -15,18 +15,32 @@ Effort by test type:
 60% Integration  
 10% E2E
 
-### Tox - test orchestration
+### Minunit - Unit tests
+
+Execute every `unit_*.py` file undert `/tests`.
+
+```bash
+python3 tests/support/scripts/compile_unit_tests.py --run
+
+tox -e unit
+tox -e unit-keep
+tox -e unit-keep-debug
+tox -e unit-valgrind
+```
+
+### Tox - integration tests orchestration
 
 All code to be submitted + debug goes by Makefile + c. All other tests/tools go by tox + python. 
 A tox.ini file at root level allows us to maintain code by module on ongoing changes. Expected recipes for e2e, integration and unit. 
 
-### Criterion - Unit tests
+```bash
+pip install -r requirements.txt
+tox // run all tests
+tox -e integration-backend // run execution integration tests
+tox -e integration-frontend // run parsing integration tests
+```
 
-Unit tests framework. Criterion runs each test in a separate forked process by default. Very useful for testing functions individually.
 
-### Python script - Integration tests
-
-Candidates for integration tests are those that involve sysemcalls (we can mock system calls and use ctypes in python) and those that involve more than one module. That means we can tests full pipeline execution, error scenarios, edge cases, system call interactions... and so on. 
 
 ### Python script + manual tests + external tools - E2e tests
 
@@ -125,47 +139,9 @@ gdb ./binary-to-run
 
 Any syscall error prior to multiprocessing should interrupt pipeline altogether, That means top level exec_cmds must print something like: 
 "minishell: malloc: <strerror(errno)>", set status code and return (-1)
-so that caller knows what to clean. 
+so that caller knows what to clean.
 
-
-
-### Libft calls (string management)
-- Is protected? ✅
-- Are errors descriptive to users? Yes, in case it sets errno user will see strerror(errno) string.
-- Is exit code set correctly?
-
-### Malloc and free
-- Is protected? ✅
-- Are errors descriptive to users?
-- Is exit code set correctly?
-
-### Readline
-- Is protected?
-- Are errors descriptive to users?
-- Is exit code set correctly?
-- Are multiple error options included in tests?
-- Does those test pass valgrind?
-
-### Open
-- Is protected?
-- Are errors descriptive to users?
-- Is exit code set correctly?
-- Are multiple error options included in tests?
-- Does those test pass valgrind?
-
-### Close
-- Is protected?
-- Are errors descriptive to users?
-- Is exit code set correctly?
-- Are multiple error options included in tests?
-- Does those test pass valgrind?
-
-### Unlink
-- Is protected?
-- Are errors descriptive to users?
-- Is exit code set correctly?
-- Are multiple error options included in tests?
-- Does those test pass valgrind?
+// FIXME: status_code needs to be calculated from errno
 
 
 #### Proposed pattern

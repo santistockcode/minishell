@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include "minunit.h"
+#include "../../support/third_party/minunit.h"
+#include "../../support/c_helpers/test_helpers.h"
 
-#include "../../include/exec.h"
-#include "../../include/minishell.h"
-#include "../common/test_helpers.h"
+#include "../../../include/exec.h"
+#include "../../../include/minishell.h"
 
 static int test_set_error_sets_last_err_op(void)
 {

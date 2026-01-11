@@ -2,13 +2,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "minunit.h"
-#include "../common/test_helpers.h"
+#include "../../support/third_party/minunit.h"
+#include "../../support/c_helpers/test_helpers.h"
 
-#include "../../include/exec.h"
-#include "../../include/minishell.h"
-#include "../../include/syswrap.h"
-#include "../../Libft/include/libft.h"
+#include "../../../include/exec.h"
+#include "../../../include/minishell.h"
+#include "../../../include/syswrap.h"
+#include "../../../Libft/include/libft.h"
 
 // TESTS
 

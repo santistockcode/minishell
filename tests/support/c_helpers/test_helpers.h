@@ -1,8 +1,8 @@
 #ifndef TEST_HELPERS_H
 #define TEST_HELPERS_H
 
-#include "../../include/exec.h"
-#include "../../include/minishell.h"
+#include "../../../include/exec.h"
+#include "../../../include/minishell.h"
 
 char **dup_argv(const char *const *argv_in, size_t argc);
 t_cmd  *new_cmd_from_args(const char *const *argv_in, size_t argc);

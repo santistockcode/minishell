@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
-#include "minunit.h"
 
+#include "../../support/third_party/minunit.h"
+#include "../../support/c_helpers/test_helpers.h"
 
-#include "../../include/exec.h"
-#include "../../include/minishell.h"
-#include "../../Libft/include/libft.h"
+#include "../../../include/exec.h"
+#include "../../../include/minishell.h"
+#include "../../../include/syswrap.h"
+#include "../../../Libft/include/libft.h"
 
 
 /*

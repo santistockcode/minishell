@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 17:48:40 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/11 18:42:04 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 /*
 TODO: exec_cmds returns status code, but is already set in sh. 
 Discuss with parser part where to set error status.
+// FIXME: bad smell exec_cmds and set_here_docs admiten los mismos parámetros
 */
 int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {

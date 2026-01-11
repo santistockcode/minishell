@@ -8,8 +8,8 @@
 /* ************************************************************************** */
 
 #include "test_api_set_here_docs.h"
-#include "../include/minishell.h"
-#include "../include/exec.h"
+#include "../../include/minishell.h"
+#include "../../include/exec.h"
 #include <stdlib.h>
 #include <string.h>
 
