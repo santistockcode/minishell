@@ -1,8 +1,5 @@
 #include "../include/minishell.h"
 
-
-volatile sig_atomic_t exit_status = 0;
-
 int main(int argc, char** argv,char **envp)
 {
 	t_shell	*minishell;

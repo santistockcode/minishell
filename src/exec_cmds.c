@@ -6,15 +6,17 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/11 19:29:27 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/12 18:13:01 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/exec.h"
 #include "../include/log.h"
 #include "../Libft/include/libft.h"
+#include "../include/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
+
 
 /*
 TODO: exec_cmds returns status code, but is already set in sh. 
@@ -25,6 +27,7 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {
 	int	nstages;
 
+	setup_signal();
 	nstages = ft_lstsize(cmd_first);
 	if (nstages < 1)
 	{
@@ -34,7 +37,10 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	if (set_here_docs(sh, cmd_first) == (-1))
 	{
 		MSH_LOG("Failed to set here_docs");
-		sh->last_status = 1;
+		if (exit_status == 130) // FIXME: check https://github.com/luna7111/shrapnel repo
+			sh->last_status = exit_status;
+		else
+			sh->last_status = 1; // FIXME: calculate en base a errno
 		msh_print_last_error(sh);
 		unlink_hds(cmd_first);
 		return (1);

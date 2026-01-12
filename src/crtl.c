@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   crtl.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 22:08:46 by mario             #+#    #+#             */
-/*   Updated: 2026/01/11 13:24:00 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/12 12:41:34 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-
-extern volatile sig_atomic_t exit_status;
 
 void	setup_signals_child(void)
 {

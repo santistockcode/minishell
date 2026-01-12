@@ -40,16 +40,19 @@ def ensure_libft_built(libft_dir: Path) -> bool:
     return True
 
 
-def compile_shared_library(project_root: Path) -> bool:
+def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
     """Compile test API into shared library."""
     log("Compiling test API shared library...", Colors.BOLD_BLUE)
     
     test_api_dir = project_root / "tests" / "integration" / "apis"
+
     src_dir = project_root / "src"
     include_dir = project_root / "include"
     libft_dir = project_root / "Libft"
     libft_lib = libft_dir / "bin" / "libft.a"
     
+    runner_c = test_api_dir / "test_runner_heredoc.c"
+    runner_bin = test_api_dir / "test_runner_heredoc"
     test_api_c = test_api_dir / "test_api_set_here_docs.c"
     output_so = test_api_dir / "libtest_api_set_here_docs.so"
     
@@ -61,9 +64,26 @@ def compile_shared_library(project_root: Path) -> bool:
         src_dir / "expand_hd_utils.c",
         src_dir / "unlink_hds.c",
         src_dir / "exec_errors.c",
+        src_dir / "crtl.c",
+        src_dir / "signals.c",
     ]
-    
+
     cmd = [
+        "cc",
+        "-Wall", "-Wextra", "-Werror", "-g", "-fPIC",
+        f"-I{include_dir}",
+        f"-I{libft_dir}/include",
+        f"-I{test_api_dir}",
+        str(runner_c),
+        str(test_api_c),
+        *[str(d) for d in dependencies],
+        str(libft_lib),
+        "-L", str(test_api_dir),
+        f"-Wl,-rpath,{test_api_dir}",
+        "-lreadline",
+        "-o", str(runner_bin)
+    ]
+    cmd_compile_shared_library = [
         "cc",
         "-Wall", "-Wextra", "-Werror", "-g", "-fPIC",
         "-shared",
@@ -76,12 +96,19 @@ def compile_shared_library(project_root: Path) -> bool:
         "-lm",
         "-o", str(output_so)
     ]
-    
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        log(Colors.error(f"Compilation failed:\n{result.stderr}"))
-        return False
-    
+
+    if (runner):
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            log(Colors.error(f"Compilation failed for intermediate tty test runner (here_docs):\n{result.stderr}"))
+            return False
+
+    if cmd_compile_shared_library:
+        result = subprocess.run(cmd_compile_shared_library, capture_output=True, text=True)
+        if result.returncode != 0:
+            log(Colors.error(f"Compilation for shared library ffi failed:\n{result.stderr}"))
+            return False
+
     log(Colors.success(f"Compiled: {output_so}"))
     return True
 
@@ -91,8 +118,13 @@ def cleanup(project_root: Path):
     log("Cleaning up compiled artifacts...", Colors.BOLD_YELLOW)
     test_api_dir = project_root / "tests" / "integration" / "apis"
     so_file = test_api_dir / "libtest_api_set_here_docs.so"
+    runner_path = test_api_dir / "test_runner_heredoc"
+
     if so_file.exists():
         so_file.unlink()
+        log(Colors.success("Cleaned up"))
+    if runner_path.exists():
+        runner_path.unlink()
         log(Colors.success("Cleaned up"))
     else:
         log(Colors.info("Nothing to clean"))
@@ -101,6 +133,7 @@ def cleanup(project_root: Path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--clean', action='store_true', help='Clean compiled artifacts')
+    parser.add_argument('--tty-runner-hds', action='store_true', help='Build the test runner middle tty for here docs testing')
     args = parser.parse_args()
     
     project_root = Path(__file__).parent.parent.parent.parent
@@ -112,8 +145,8 @@ def main():
     libft_dir = project_root / "Libft"
     if not ensure_libft_built(libft_dir):
         return 1
-    
-    if not compile_shared_library(project_root):
+
+    if not compile_shared_library(project_root, args.tty_runner_hds):
         return 1
     
     return 0

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 18:07:41 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/12 17:26:13 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ void				msh_print_last_error(t_shell *sh);
 # define MALLOC_OP "malloc"
 # define READLINE_OP "readline"
 # define OPEN_OP "open"
+# define READ_OP "read"
 
 // TODO: errors in execution part
 

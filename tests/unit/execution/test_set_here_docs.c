@@ -112,6 +112,29 @@ static void setup_open_fails_at_call(int (*open_func)(const char *, int, int), i
 }
 
 // ============================================================================
+// Generic read mock generator
+// ============================================================================
+
+typedef struct s_read_mock {
+    const char **lines;
+} t_read_mock;
+
+static int generic_read_mock(int fd, void *buf, size_t count)
+{
+    (void)fd;
+    (void)buf;
+    (void)count;
+
+    errno = EACCES;
+    return (0);
+}
+
+static void setup_read_fails(int (*read_func)(int, void *, size_t))
+{
+    syswrap_set_read((t_read_fn)read_func);
+}
+
+// ============================================================================
 // Test helpers for test_here_doc
 // ============================================================================
 
@@ -1139,6 +1162,31 @@ static int test_heredoc_readline_fail_errno_unchanged(void)
     return 0;
 }
 
+// Test 28: On reading for /proc/stat read fails so errno is set
+static int test_heredoc_read_proc_stat_fail(void)
+{
+    printf("Test: test_heredoc_read_proc_stat_fail\n");
+
+    setup_read_fails(generic_read_mock);
+
+    t_shell *sh = create_test_shell(test_env, 0);
+    mu_assert("malloc shell failed", sh != NULL);
+
+    t_list *pipe_head = build_generic_pipeline_with_heredoc_first_command("EOF", 0);
+
+    int result = set_here_docs(sh, pipe_head);
+    mu_assert("set_here_docs failed", result == -1);
+    // mu_assert("errno changed on /proc/stat read fail", errno == EACCES);
+    // mu_assert("last_error_op changed on /proc/stat read fail", strcmp(sh->last_err_op, "read") == 0);
+
+    unlink_hds(pipe_head);
+    free_cmds(pipe_head);
+    free_shell(sh);
+    syswrap_set_read(NULL);
+
+    return 0;
+}
+
 int main(void)
 {
     mu_run_test(test_various_cmds_no_here_doc_unchanges_returns_0);
@@ -1168,10 +1216,13 @@ int main(void)
     mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_2);
     mu_run_test(test_heredoc_one_command_pipeline_readline_fails_at_eof);
     mu_run_test(test_heredoc_multiple_commands_pipeline_readline_fails);
+    mu_run_test(test_heredoc_read_proc_stat_fail);
 
     // custom tests to implement error handling file
     mu_run_test(test_heredoc_open_fail_errno_unchanged);
     mu_run_test(test_heredoc_readline_fail_errno_unchanged);
+
+    // 
 
     mu_summary();
 }

@@ -20,6 +20,15 @@
                 }
             ],
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Integration tests (Python) for here docs",
+            "type": "python",
+            "module": "pytest",
+            "request": "launch",
+            "args": ["${workspaceFolder}/tests/integration/backend/test_here_docs.py", "--tty-runner-hds"],
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

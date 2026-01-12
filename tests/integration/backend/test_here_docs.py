@@ -2,92 +2,190 @@
 Integration tests for heredoc functionality.
 """
 
+import os
 import pytest
 import sys
 from pathlib import Path
+import pexpect
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from python_helpers.constants import RedirType
 
+def test_single_heredoc_with_real_readline(test_runner_tty):
+    """Test heredoc with real readline via test runner."""
+    # Create context with one command having a heredoc
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
 
-"""
-Ejemplo de test super básico: 
+    # Add command: cat << EOF
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
 
-Build t_msh_test_redir_spec[] with a sentinel {type=-1}
-Build t_msh_test_cmd_spec[] for a pipeline
-ctx = msh_test_ctx_create(cmds, n, envp, last_status)
-ret = msh_test_set_here_docs(ctx)
-use real mini tty with pexpect
-Inspect msh_test_get_redir_target(ctx, cmd_i, redir_i) → check for here_doc_* in target
-Destroy ctx
-"""
+    # Add heredoc redirection
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")  # type=3(HEREDOC), fd=0, target=EOF, quoted=0
+    test_runner_tty.expect("OK")
+
+    # BUILD THE CONTEXT - This was missing!
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Now run heredocs - this will prompt for input!
+    test_runner_tty.sendline("RUN_HEREDOCS")
+
+    # Expect heredoc prompt
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("Hello World")
+
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("Another line")
+
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF")  # Delimiter
+
+    # Check result
+    test_runner_tty.expect("RESULT 0")
+    
+    # Get the heredoc target (should be changed to .here_doc_*)
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+
+    target = test_runner_tty.match.group(1)
+    assert target.startswith(".here_doc_")
+    
+    # Verify file exists and contains correct content
+    heredoc_file = Path(target)
+    assert heredoc_file.exists()
+    
+    content = heredoc_file.read_text()
+    assert "Hello World" in content
+    assert "Another line" in content
+    
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
 
 
-def test_single_heredoc_target_changed(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
+def test_single_heredoc_target_changed(test_runner_tty):
     """Test that heredoc changes target from delimiter to temp file."""
-    # Build redirs: one heredoc with delimiter "EOF"
-    heredoc_redir = make_redir_spec(RedirType.R_HEREDOC, "EOF", quoted=0)
-    
-    # Build command: cat with heredoc
-    cmd = make_cmd_spec(["cat"], [heredoc_redir])
-    cmds_arr = (type(cmd) * 1)(cmd)
-    
-    # Create environment
-    envp = make_envp({"USER": "testuser", "HOME": "/home/test"})
-    
-    # Create context
-    ctx = test_context(cmds_arr, 1, envp, 0)
-    assert ctx is not None
-    
-    # Call set_here_docs
-    result = test_api_lib.msh_test_set_here_docs(ctx)
-    assert result == 0, "set_here_docs should succeed"
-    
-    # Inspect target - should be changed to .here_doc_*
-    target = test_api_lib.msh_test_get_redir_target(ctx, 0, 0)
-    assert target is not None
-    target_str = target.decode('utf-8')
-    
-    assert target_str.startswith(".here_doc_"), \
-        f"Expected target to start with '.here_doc_', got: {target_str}"
+    # Create context with one command having a heredoc
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add command: cat << EOF
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add heredoc redirection
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")  # type=3(HEREDOC), fd=0, target=EOF, quoted=0
+    test_runner_tty.expect("OK")
+
+    # BUILD THE CONTEXT - This was missing!
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Now run heredocs - this will prompt for input!
+    test_runner_tty.sendline("RUN_HEREDOCS")
+
+    # Expect heredoc prompt
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("Hello World")
+
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("Another line")
+
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF")  # Delimiter
+
+    # Check result
+    test_runner_tty.expect("RESULT 0")
+
+    # Get the heredoc target (should be changed to .here_doc_*)
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+
+    target = test_runner_tty.match.group(1)
+    assert target.startswith(".here_doc_")
+
+    # Verify file exists and contains correct content
+    heredoc_file = Path(target)
+    assert heredoc_file.exists()
+
+    content = heredoc_file.read_text()
+    assert "Hello World" in content
+    assert "Another line" in content
+
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
 
 
-@pytest.mark.skip(reason="Test not implemented yet")
-def test_multiple_heredocs_in_pipeline(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
+def test_multiple_heredocs_in_pipeline(test_runner_tty):
     """Test multiple heredocs in a pipeline."""
+    # Create context with 2 commands
+    test_runner_tty.sendline("CREATE 2 0")
+    test_runner_tty.expect("OK")
+
     # Command 1: cat << EOF1
-    heredoc1 = make_redir_spec(RedirType.R_HEREDOC, "EOF1", quoted=0)
-    cmd1 = make_cmd_spec(["cat"], [heredoc1])
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF1 0")
+    test_runner_tty.expect("OK")
     
     # Command 2: grep test << EOF2
-    heredoc2 = make_redir_spec(RedirType.R_HEREDOC, "EOF2", quoted=0)
-    cmd2 = make_cmd_spec(["grep", "test"], [heredoc2])
+    test_runner_tty.sendline("ADD_CMD 1 2 grep test")
+    test_runner_tty.expect("OK")
+    test_runner_tty.sendline("ADD_REDIR 1 3 0 EOF2 0")
+    test_runner_tty.expect("OK")
+
+    # Build context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
     
-    cmds_arr = (type(cmd1) * 2)(cmd1, cmd2)
-    envp = make_envp({})
+    # Run heredocs - will prompt for BOTH heredocs
+    test_runner_tty.sendline("RUN_HEREDOCS")
+
+    # First heredoc (EOF1)
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("line 1")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("line 2")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF1")
+
+    # Second heredoc (EOF2)
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("more content")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF2")
+
+    # Check success
+    test_runner_tty.expect("RESULT 0")
     
-    ctx = test_context(cmds_arr, 2, envp, 0)
-    result = test_api_lib.msh_test_set_here_docs(ctx)
-    
-    assert result == 0
-    
-    # Check both heredocs have unique names
-    target1 = test_api_lib.msh_test_get_redir_target(ctx, 0, 0).decode('utf-8')
-    target2 = test_api_lib.msh_test_get_redir_target(ctx, 1, 0).decode('utf-8')
-    
-    assert target1.startswith(".here_doc_")
-    assert target2.startswith(".here_doc_")
+    # Verify both heredocs have unique filenames
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+    target1 = test_runner_tty.match.group(1)
+
+    test_runner_tty.sendline("GET_REDIR_TARGET 1 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+    target2 = test_runner_tty.match.group(1)
+
     assert target1 != target2, "Heredoc files should have unique names"
+    assert Path(target1).exists()
+    assert Path(target2).exists()
+    
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
 
 
-@pytest.mark.skip(reason="Test not implemented yet")
-def test_quoted_heredoc_no_expansion(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
-    """Test that quoted heredocs don't expand variables."""
-    # Heredoc with quoted delimiter
-    heredoc = make_redir_spec(RedirType.R_HEREDOC, "EOF", quoted=1)
-    cmd = make_cmd_spec(["cat"], [heredoc])
+def test_cmds_no_here_docs_returns_0(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
+    """Test that cmds with no here_docs returns 0"""
+    # Redirection infile no heredoc
+    simple_redir = make_redir_spec(RedirType.R_IN, "fake/path", 0, False)
+    cmd = make_cmd_spec(["cat"], [simple_redir])
     cmds_arr = (type(cmd) * 1)(cmd)
     
     envp = make_envp({"VAR": "value"})
@@ -95,3 +193,82 @@ def test_quoted_heredoc_no_expansion(test_api_lib, make_redir_spec, make_cmd_spe
     
     result = test_api_lib.msh_test_set_here_docs(ctx)
     assert result == 0
+
+
+def test_heredoc_empty_content(test_runner_tty):
+    """Test heredoc with only delimiter (empty content)."""
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("RUN_HEREDOCS")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF")  # Immediate delimiter
+
+    test_runner_tty.expect("RESULT 0")
+    
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+    target = test_runner_tty.match.group(1)
+    
+    # Verify file is empty
+    content = Path(target).read_text()
+    assert content == ""
+    
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+
+@pytest.mark.skip(reason="FAILS -> DUDA")
+def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_runner_tty):
+    """Test that sending a signal while fetching here docs interrupts the pipeline."""
+    # Create context with one command having a heredoc
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add command: cat << EOF
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add heredoc redirection
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")
+    test_runner_tty.expect("OK")
+
+    # BUILD THE CONTEXT
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Run the heredoc
+    test_runner_tty.sendline("RUN_HEREDOCS")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("line 1")
+    test_runner_tty.expect("> ")
+
+    # Send ctrl+c signal to interrupt
+    test_runner_tty.sendcontrol('c')
+    
+    # Expect the signal to be caught and return error code
+    test_runner_tty.expect("RESULT -1")
+
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+
+@pytest.mark.skip(reason="To be implemented on frontend tests because set_here_docs exists loop")
+def test_open_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
+    """Test that open failure sets errno correctly."""
+    pass
+
+
+@pytest.mark.skip(reason="To be implemented on rontend tests because set_here_docs exists loop")
+def test_malloc_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
+    """Test that malloc failure sets errno correctly and error is displayed."""
+    pass

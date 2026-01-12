@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 18:04:51 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/12 18:13:30 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,60 @@ void	safe_close(int fd)
 }
 
 /*
+FIXME: doesn't pass norminette
+This function returns a unique process ID for the current shell.
+*/
+int	get_unique_pid_of_process(t_shell *sh)
+{
+	int 	fd;
+	char 	buffer[256];
+	ssize_t bytes_read; 
+
+	fd = open_wrap("/proc/self/stat", O_RDONLY);
+    if (fd == -1) {
+        msh_set_error(sh, OPEN_OP);
+        return -1;
+    }
+	bytes_read = read_wrap(fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read <= 0) {
+        msh_set_error(sh, READ_OP);
+        close(fd);
+        return -1;
+    }
+    buffer[bytes_read] = '\0';
+    safe_close(fd);
+	return (ft_atoi(buffer));
+}
+
+/*
+FIXME: doesn't pass norminette
+This function processes the suffix with the current shell's unique process ID.
+*/
+char *process_suffix_with_pid(int suffix, t_shell *sh)
+{
+	int		pid;
+	char 	*sfx_cmd;
+	char	*pid_sfx;
+	char	*result;
+
+	pid = get_unique_pid_of_process(sh);
+	if (pid == -1)
+		return (NULL);
+	sfx_cmd = ft_itoa(suffix);
+	if (!sfx_cmd)
+		return (msh_set_error(sh, MALLOC_OP), NULL);
+	pid_sfx = ft_itoa(pid);
+	if (!pid_sfx)
+		return (free(sfx_cmd), msh_set_error(sh, MALLOC_OP), NULL);
+	result = ft_strjoin(sfx_cmd, pid_sfx);
+	if (!result)
+		return (msh_set_error(sh, MALLOC_OP), free(sfx_cmd), free(pid_sfx), NULL);
+	free(sfx_cmd);
+	free(pid_sfx);
+	return result;
+}
+
+/*
 Uses readline to fetch user input for the heredoc, and expands it
 with expand_hd. Then writes expanded line on fd.
 Returns -1 and frees line on error
@@ -47,7 +101,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	char	*line;
 	char	*expanded_line;
 
-	while (1)
+	while (1) // FIXME: check for 130 on exit_status on every loop
 	{
 		line = readline_wrap("> ");
 		if (!line)
@@ -80,16 +134,16 @@ int	fetch_hd_from_user(t_shell *sh, char **delim,
 {
 	int		fd;
 	char	*here_doc_name;
-	char	*tmp_sfx;
+	char	*unique_sfx;
 	int		rpl_result;
 
-	tmp_sfx = ft_itoa(suffix);
-	if (!tmp_sfx)
-		return (msh_set_error(sh, MALLOC_OP), -1);
-	here_doc_name = ft_strjoin(".here_doc_", tmp_sfx);
+	unique_sfx = process_suffix_with_pid(suffix, sh);
+	if (!unique_sfx)
+		return (-1);
+	here_doc_name = ft_strjoin(".here_doc_", unique_sfx);
 	if (!here_doc_name)
-		return (free(tmp_sfx), msh_set_error(sh, MALLOC_OP), -1);
-	free(tmp_sfx);
+		return (free(unique_sfx), msh_set_error(sh, MALLOC_OP), -1);
+	free(unique_sfx);
 	fd = open_wrap(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fd == -1)
 	{
@@ -137,6 +191,7 @@ int	set_here_docs(t_shell *sh, t_list *cmd_first)
 
 	cmd_list = cmd_first;
 	suffix = 0;
+	setup_signals_heredoc(); // FIXME: when do we go back to normal signal management
 	while (cmd_list)
 	{
 		redir_list = ((t_cmd *)(cmd_list->content))->redirs;

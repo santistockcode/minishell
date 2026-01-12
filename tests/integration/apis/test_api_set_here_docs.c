@@ -527,6 +527,9 @@ void	msh_test_ctx_destroy(void *ctx_void)
 	if (!ctx)
 		return;
 
+	/* unlink heredocs */
+	unlink_hds(ctx->cmd_first);
+
 	/* cmd list + its content */
 	free_cmds(ctx->cmd_first);
 

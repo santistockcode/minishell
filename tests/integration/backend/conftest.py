@@ -7,6 +7,7 @@ import pytest
 import sys
 from pathlib import Path
 from typing import List
+import pexpect
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "support"))
 
@@ -138,3 +139,23 @@ def test_context(test_api_lib):
     for ctx in contexts:
         if ctx:
             test_api_lib.msh_test_ctx_destroy(ctx)
+
+
+@pytest.fixture
+def test_runner_tty():
+    """Spawn the test runner executable."""
+    runner_path = Path(__file__).parent.parent / "apis" / "test_runner_heredoc"
+    
+    if not runner_path.exists():
+        pytest.fail(f"Test runner not found: {runner_path}")
+    
+    proc = pexpect.spawn(str(runner_path), encoding='utf-8', timeout=5)
+    yield proc
+    
+    # Cleanup
+    try:
+        proc.sendline("EXIT")
+        proc.expect(pexpect.EOF, timeout=1)
+    except:
+        pass
+    proc.close()
