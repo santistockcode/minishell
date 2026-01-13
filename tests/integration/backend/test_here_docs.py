@@ -225,8 +225,7 @@ def test_heredoc_empty_content(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-
-@pytest.mark.skip(reason="FAILS -> DUDA")
+@pytest.mark.skip(reason="Signal exits here_doc loop so set_here_docs ends and there's no way to recover the error status")
 def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_runner_tty):
     """Test that sending a signal while fetching here docs interrupts the pipeline."""
     # Create context with one command having a heredoc
@@ -261,12 +260,10 @@ def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_run
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-
 @pytest.mark.skip(reason="To be implemented on frontend tests because set_here_docs exists loop")
 def test_open_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
     """Test that open failure sets errno correctly."""
     pass
-
 
 @pytest.mark.skip(reason="To be implemented on rontend tests because set_here_docs exists loop")
 def test_malloc_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):

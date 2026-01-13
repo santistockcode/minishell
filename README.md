@@ -141,8 +141,6 @@ Any syscall error prior to multiprocessing should interrupt pipeline altogether,
 "minishell: malloc: <strerror(errno)>", set status code and return (-1)
 so that caller knows what to clean.
 
-// FIXME: status_code needs to be calculated from errno
-
 
 #### Proposed pattern
 ```c

@@ -66,6 +66,7 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         src_dir / "exec_errors.c",
         src_dir / "crtl.c",
         src_dir / "signals.c",
+        src_dir / "exec_utils.c"
     ]
 
     cmd = [

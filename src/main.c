@@ -4,6 +4,7 @@ int main(int argc, char** argv,char **envp)
 {
 	t_shell	*minishell;
 
+	setup_signal(); // prior to entering main loop
 	if(argc != 0 && argv[1] != NULL)
 		return(0);
 	if (!init_minishell(&minishell, envp))

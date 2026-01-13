@@ -32,6 +32,7 @@ expand_hd \
 expand_hd_utils \
 unlink_hds \
 exec_errors \
+exec_utils \
 crtl\
 signals\
 minishell_init

@@ -49,12 +49,12 @@ class UnitTestRunner:
             "test_set_here_docs.c": [
                 "set_here_docs.c", "expand_hd.c", "expand_hd_utils.c",
                 "free_cmds.c", "syswrap.c", "unlink_hds.c", "exec_errors.c",
-                "signals.c", "crtl.c"
+                "signals.c", "crtl.c", "exec_utils.c"
             ],
             "test_exec_cmds.c": [
                 "exec_cmds.c", "exec_single_cmd.c", "free_cmds.c",
                 "syswrap.c", "exec_errors.c", "set_here_docs.c", "unlink_hds.c",
-                "expand_hd.c", "expand_hd_utils.c", "signals.c", "crtl.c"
+                "expand_hd.c", "expand_hd_utils.c", "signals.c", "crtl.c", "exec_utils.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c"

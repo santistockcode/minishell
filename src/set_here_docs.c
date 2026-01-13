@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/12 18:13:30 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/13 12:33:49 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,48 +29,12 @@ All malloc calls and calls to libft that makes use of malloc are protected
 */
 
 /*
-Protects against closing invalid file descriptors
-*/
-void	safe_close(int fd)
-{
-	if (fd > 0)
-		close(fd);
-}
-
-/*
-FIXME: doesn't pass norminette
-This function returns a unique process ID for the current shell.
-*/
-int	get_unique_pid_of_process(t_shell *sh)
-{
-	int 	fd;
-	char 	buffer[256];
-	ssize_t bytes_read; 
-
-	fd = open_wrap("/proc/self/stat", O_RDONLY);
-    if (fd == -1) {
-        msh_set_error(sh, OPEN_OP);
-        return -1;
-    }
-	bytes_read = read_wrap(fd, buffer, sizeof(buffer) - 1);
-    if (bytes_read <= 0) {
-        msh_set_error(sh, READ_OP);
-        close(fd);
-        return -1;
-    }
-    buffer[bytes_read] = '\0';
-    safe_close(fd);
-	return (ft_atoi(buffer));
-}
-
-/*
-FIXME: doesn't pass norminette
 This function processes the suffix with the current shell's unique process ID.
 */
-char *process_suffix_with_pid(int suffix, t_shell *sh)
+char	*process_suffix_with_pid(int suffix, t_shell *sh)
 {
 	int		pid;
-	char 	*sfx_cmd;
+	char	*sfx_cmd;
 	char	*pid_sfx;
 	char	*result;
 
@@ -85,10 +49,11 @@ char *process_suffix_with_pid(int suffix, t_shell *sh)
 		return (free(sfx_cmd), msh_set_error(sh, MALLOC_OP), NULL);
 	result = ft_strjoin(sfx_cmd, pid_sfx);
 	if (!result)
-		return (msh_set_error(sh, MALLOC_OP), free(sfx_cmd), free(pid_sfx), NULL);
+		return (msh_set_error(sh, MALLOC_OP),
+			free(sfx_cmd), free(pid_sfx), NULL);
 	free(sfx_cmd);
 	free(pid_sfx);
-	return result;
+	return (result);
 }
 
 /*
@@ -101,7 +66,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	char	*line;
 	char	*expanded_line;
 
-	while (1) // FIXME: check for 130 on exit_status on every loop
+	while (1 && exit_status != 130)
 	{
 		line = readline_wrap("> ");
 		if (!line)
@@ -167,6 +132,7 @@ int	process_here_doc(t_shell *sh, t_redir *redir, int suffix)
 {
 	int	result;
 
+	setup_signals_heredoc();
 	result = fetch_hd_from_user(sh, &(redir->target),
 			!(redir->quoted), suffix);
 	if (result != 0)
@@ -191,7 +157,6 @@ int	set_here_docs(t_shell *sh, t_list *cmd_first)
 
 	cmd_list = cmd_first;
 	suffix = 0;
-	setup_signals_heredoc(); // FIXME: when do we go back to normal signal management
 	while (cmd_list)
 	{
 		redir_list = ((t_cmd *)(cmd_list->content))->redirs;

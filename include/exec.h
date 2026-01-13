@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/12 17:26:13 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/13 12:26:22 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,12 @@ int					set_here_docs(t_shell *sh, t_list *cmd_first);
 /* Expand variables in heredoc content when needed (quoted==0).
 ** Returns a heap string with expansions applied using env; caller frees. */
 char				*expand_hd(const char *content, t_shell *sh);
+
+// exec utils
+void				safe_close(int fd);
+int					get_unique_pid_of_process(t_shell *sh);
+int					calculate_status_from_errno(int exit_status);
+
 
 // Unlink all temporary files used for here_docs
 void				unlink_hds(t_list *cmds);
