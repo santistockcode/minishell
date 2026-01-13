@@ -3,70 +3,103 @@
 /*                                                        :::      ::::::::   */
 /*   envp_init.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:34:26 by mario             #+#    #+#             */
-/*   Updated: 2026/01/13 18:25:31 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/13 21:25:09 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+int free_list(t_list *env, t_env *aux)
+{
+	free_aux(aux);
+	if(env != NULL)
+		ft_lstclear(&env,free);
+	return(NULL);
+}
+int free_aux(t_env *aux)
+{
+	if (!aux)
+		return;
+	free(aux->key);
+	free(aux->value);
+	free(aux);
+}
 t_env *new_value_env(char *str_key, char*str_value)
 {
-	t_env *token;
+	t_env *env;
 
-	token = malloc(sizeof(t_env));
-	if(!token)
-		return(NULL);//mirar posible fallo en cascada y reconduc
-	token->key = ft_strdup(str_key);
-	if(!token->key)
-		return(NULL);
-	token->value = ft_strdup(str_value);
-	if(!token->value)
-		return(NULL);
-	return(token);
+	env = malloc(sizeof(*env));
+	if (!env)
+		return NULL;
+
+	env->key = ft_strdup(str_key);
+	if (!env->key)
+		return (free(env), NULL);
+
+	env->value = ft_strdup(str_value);
+	if (!env->value)
+		return (free(env->key), free(env), NULL);
+
+	return (env);
 }
 
-void update_shlvl(char *value)
+void	update_shlvl(t_env *env)
 {
-	int lvl;
+	int	lvl;
+	char *new;
 
-	lvl = 0;
-	lvl = ft_atoi(value);
-	free(value);
-	value = ft_itoa(lvl + 1);
-	if(value)
-		return;/// funcion de limpieza
+	lvl = ft_atoi(env->value);
+	new = ft_itoa(lvl + 1);
+	free(env->value);
+	env->value = new;
+}
+t_env *init_node(char *envp)
+{
+	t_env	*env;
+	char	*eq;
+
+	eq = ft_strchr(envp, '=');
+	if (!eq)
+		return NULL;
+
+	env = malloc(sizeof(*env));
+	if (!env)
+		return NULL;
+
+	env->key = ft_substr(envp, 0, eq - envp);
+	if (!env->key)
+		return (free(env), NULL);
+
+	env->value = ft_strdup(eq + 1);
+	if (!env->value)
+		return (free(env->key), free(env), NULL);
+
+	return env;
 }
 
 t_list *init_envp(char **envp)
 {
 	t_list *env;
+	t_env *aux;
 	int i;
-	char * aux;
-	char * aux_key;
-	char * aux_value;
 	
 	i = 0;
 	env = NULL;
-	while(envp[i])
+	aux = malloc(sizeof(*aux));
+	while(envp[i++])
 	{
-		aux = ft_strchr(envp[i], '=');
-		aux_key = ft_substr(envp[i], 0, aux - envp[i]);
-		if(!aux_key)
-			return(NULL);// mirar free
-		aux_value = ft_strdup(aux + 1);
-		if(!aux_value)
-			return(NULL);// mirar free
-		if(ft_strncmp(aux_key,"SHLVL",5) == 0)
-			update_shlvl(aux_value);
-		ft_lstadd_back(&env,ft_lstnew((void *)new_value_env(aux_key,aux_value)));
+		aux = init_node(envp[i]);
+		if(!aux)
+			free_aux(aux);
+		if(ft_strncmp(aux->key,"SHLVL",5) == 0)
+			update_shlvl(aux->value);
+		ft_lstadd_back(&env,ft_lstnew((void *)new_value_env(aux->key,aux->value)));
 		if(!env)
-			ft_lstclear(env,free);// esto no es del todo correcto no se libera aux keu aux value and etc
-		free(aux_key);
-		free(aux_value); // modificar en otra funcion
-		i++;
+			free_list(env, aux);// esto no es del todo correcto no se libera aux keu aux value and etc
+		free_aux(aux);// modificar en otra funcion
 	}
 	return(env);
 }
