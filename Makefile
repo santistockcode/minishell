@@ -25,7 +25,9 @@ INCLUDE_DIR = include/
 FILES = main\
 crtl\
 signals\
-minishell_init
+minishell_init\
+envp_init\
+print_env
 
 
 # Files add

@@ -1,36 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell_init.c                                   :+:      :+:    :+:   */
+/*   print_env.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/01/13 17:39:28 by mario            ###   ########.fr       */
+/*   Created: 2026/01/13 17:35:53 by mario             #+#    #+#             */
+/*   Updated: 2026/01/13 17:36:51 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-
-/* void	print_env(char **envp)
+void	print_env_list(t_list *env)
 {
-	int	i = 0;
+	t_env	*var;
 
-	while (envp[i])
+	while (env)
 	{
-		printf("\033[0;36m%s\033[0m\n", envp[i]);
-		i++;
+		var = (t_env *)env->content;
+		if (var->value)
+			printf("%s=%s\n", var->key, var->value);
+		else
+			printf("%s=\n", var->key);
+		env = env->next;
 	}
-}*/
-
-int init_minishell(t_shell **minishell,char **envp)
-{
-	*minishell = ft_calloc(sizeof(t_shell),1);
-	if(!minishell)
-		return (MALLOC_ERROR);
-	(*minishell)->env = init_envp(envp);
-	//print_env(envp);
-	print_env_list((*minishell)->env);
-	return(1);
-}
+} 
