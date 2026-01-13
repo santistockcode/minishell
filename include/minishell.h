@@ -19,18 +19,19 @@
 #include "exec.h"
 
 // can you deep copy envp?
-// typedef struct s_env
-// {
-//     char            *key;
-//     char            *value;
-// }   t_env;
 extern volatile sig_atomic_t exit_status;
+
+typedef struct s_env
+{
+     char            *key;
+     char            *value;
+}   t_env;
 
 
 typedef struct s_shell
 {
 	int i;
-	// t_list   *env;
+	t_list   *env;
     // int      last_status; // last $? value
     // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
