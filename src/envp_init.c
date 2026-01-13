@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:34:26 by mario             #+#    #+#             */
-/*   Updated: 2026/01/13 21:25:09 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/13 21:26:18 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,21 +59,21 @@ void	update_shlvl(t_env *env)
 t_env *init_node(char *envp)
 {
 	t_env	*env;
-	char	*eq;
+	char	*aux;
 
-	eq = ft_strchr(envp, '=');
-	if (!eq)
+	aux = ft_strchr(envp, '=');
+	if (!aux)
 		return NULL;
 
 	env = malloc(sizeof(*env));
 	if (!env)
 		return NULL;
 
-	env->key = ft_substr(envp, 0, eq - envp);
+	env->key = ft_substr(envp, 0, aux - envp);
 	if (!env->key)
 		return (free(env), NULL);
 
-	env->value = ft_strdup(eq + 1);
+	env->value = ft_strdup(aux + 1);
 	if (!env->value)
 		return (free(env->key), free(env), NULL);
 
