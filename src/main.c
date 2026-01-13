@@ -1,4 +1,5 @@
 #include "../include/minishell.h"
+#include "../include/log.h"
 
 int main(int argc, char** argv,char **envp)
 {
@@ -9,7 +10,7 @@ int main(int argc, char** argv,char **envp)
 		return(0);
 	if (!init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
-	MSH_LOG("t_shell structure initialized by Mario");
+	logger("main", "t_shell structure initialized by Mario");
 	free(minishell);
 	return (0);
 }

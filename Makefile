@@ -24,6 +24,7 @@ INCLUDE_DIR = include/
 
 FILES = \
 main \
+logger \
 exec_cmds \
 set_here_docs \
 free_cmds \

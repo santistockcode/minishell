@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 12:33:49 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/13 16:27:13 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ int	process_here_doc(t_shell *sh, t_redir *redir, int suffix)
 			!(redir->quoted), suffix);
 	if (result != 0)
 	{
-		MSH_LOG("Failed to fetch heredoc content for cmd number %d", suffix);
+		logger("process_here_doc", "Failed to fetch heredoc content for cmd number");
 		return (result);
 	}
 	return (0);
@@ -157,6 +157,7 @@ int	set_here_docs(t_shell *sh, t_list *cmd_first)
 
 	cmd_list = cmd_first;
 	suffix = 0;
+	logger_ctx(sh, cmd_first, "set_here_docs", "Starting to process here docs");
 	while (cmd_list)
 	{
 		redir_list = ((t_cmd *)(cmd_list->content))->redirs;

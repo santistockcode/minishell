@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 		return(0);
 	minishell = malloc(sizeof(t_shell));
 	minishell->i = 10;
-	MSH_LOG("Minishell initialized with i = %d", minishell->i);
+	logger("main", "Minishell initialized");
 	free(minishell);
 	return (0);
 }

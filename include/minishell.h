@@ -2,7 +2,6 @@
 # define MINISHELL_H
 
 # include "../Libft/include/libft.h"
-# include "log.h"
 
 #define _POSIX_C_SOURCE 200809L
 

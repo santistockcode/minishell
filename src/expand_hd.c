@@ -6,12 +6,13 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:11:45 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 18:09:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/13 16:29:02 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 #include "../include/exec.h"
+#include "../include/log.h"
 
 int					get_env_from_key(char *key, t_list *env, char **res_value);
 int					add_char_to_list(char c, t_list **chars_list);
@@ -140,7 +141,7 @@ char	*expand_hd(const char *content, t_shell *sh)
 
 	if (!content || *content == '\0')
 	{
-		MSH_LOG("content is empty");
+		logger("expand_hd", "content is empty");
 		chars_list = ft_lstnew(NULL);
 		if (!chars_list)
 			return (NULL);

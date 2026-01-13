@@ -12,7 +12,7 @@ void	unlink_hds(t_list *cmds)
 	t_list	*redir_node;
 	t_redir	*redir;
 
-	MSH_LOG("Unlinking here_docs associated with commands");
+	logger("unlink_hds", "Unlinking here_docs associated with commands");
 	cmd_node = cmds;
 	while (cmd_node)
 	{
@@ -23,7 +23,7 @@ void	unlink_hds(t_list *cmds)
 			redir = (t_redir *)redir_node->content;
 			if (redir && redir->type == R_HEREDOC)
 			{
-				MSH_LOG("Unlinking here_doc file: %s", redir->target);
+				logger("unlink_hds", "Unlinking here_doc file");
 				if (redir->target)
 					unlink_wrap(redir->target);
 			}
