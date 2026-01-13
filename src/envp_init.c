@@ -6,7 +6,7 @@
 /*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:34:26 by mario             #+#    #+#             */
-/*   Updated: 2026/01/13 17:39:41 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/13 18:25:31 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,12 @@ t_env *new_value_env(char *str_key, char*str_value)
 	token = malloc(sizeof(t_env));
 	if(!token)
 		return(NULL);//mirar posible fallo en cascada y reconduc
-	token->key = ft_calloc(ft_strlen(str_key) + 1, sizeof(char));
 	token->key = ft_strdup(str_key);
+	if(!token->key)
+		return(NULL);
 	token->value = ft_strdup(str_value);
-	
+	if(!token->value)
+		return(NULL);
 	return(token);
 }
 
@@ -34,6 +36,8 @@ void update_shlvl(char *value)
 	lvl = ft_atoi(value);
 	free(value);
 	value = ft_itoa(lvl + 1);
+	if(value)
+		return;/// funcion de limpieza
 }
 
 t_list *init_envp(char **envp)
@@ -50,12 +54,18 @@ t_list *init_envp(char **envp)
 	{
 		aux = ft_strchr(envp[i], '=');
 		aux_key = ft_substr(envp[i], 0, aux - envp[i]);
+		if(!aux_key)
+			return(NULL);// mirar free
 		aux_value = ft_strdup(aux + 1);
+		if(!aux_value)
+			return(NULL);// mirar free
 		if(ft_strncmp(aux_key,"SHLVL",5) == 0)
 			update_shlvl(aux_value);
 		ft_lstadd_back(&env,ft_lstnew((void *)new_value_env(aux_key,aux_value)));
+		if(!env)
+			ft_lstclear(env,free);// esto no es del todo correcto no se libera aux keu aux value and etc
 		free(aux_key);
-		free(aux_value);
+		free(aux_value); // modificar en otra funcion
 		i++;
 	}
 	return(env);
