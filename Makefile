@@ -26,8 +26,9 @@ FILES = main\
 crtl\
 signals\
 minishell_init\
-envp_init\
-print_env
+envp/envp_init\
+envp/print_envp\
+envp/print_envp
 
 
 # Files add
