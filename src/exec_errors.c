@@ -24,7 +24,16 @@ void	msh_set_error(t_shell *sh, const char *op)
 		sh->last_err_op = NULL;
 	else
 		sh->last_err_op = tmp_op;
+    sh->last_errno = errno;
 }
+
+/*
+In child what to do after execve fails:
+int e = errno;
+int st = msh_status_from_execve_error(e);
+msh_set_error_with_errno(sh, "execve", e);
+msh_print_last_error(sh); _exit(st);
+*/
 
 /*
 When a syscall fails, it often sets errno. Except that we are still

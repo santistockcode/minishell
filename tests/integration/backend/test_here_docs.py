@@ -181,7 +181,7 @@ def test_multiple_heredocs_in_pipeline(test_runner_tty):
     test_runner_tty.expect("OK")
 
 
-def test_cmds_no_here_docs_returns_0(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
+def test_cmds_no_here_docs_returns_0_via_shared_lib(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
     """Test that cmds with no here_docs returns 0"""
     # Redirection infile no heredoc
     simple_redir = make_redir_spec(RedirType.R_IN, "fake/path", 0, False)
@@ -225,7 +225,7 @@ def test_heredoc_empty_content(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-@pytest.mark.skip(reason="Signal exits here_doc loop so set_here_docs ends and there's no way to recover the error status")
+@pytest.mark.skip(reason="Pending implement GET STATUS in test runner")
 def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_runner_tty):
     """Test that sending a signal while fetching here docs interrupts the pipeline."""
     # Create context with one command having a heredoc
@@ -260,7 +260,7 @@ def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_run
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-@pytest.mark.skip(reason="To be implemented on frontend tests because set_here_docs exists loop")
+@pytest.mark.skip(reason="")
 def test_open_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
     """Test that open failure sets errno correctly."""
     pass

@@ -19,6 +19,6 @@ int init_minishell(t_shell **minishell,char **envp)
 	if(!minishell)
 		return (MALLOC_ERROR);
 	cpy = envp;
-	// printf("%s",cpy[1]);
+	printf("%s",cpy[1]);
 	return(1);
 }

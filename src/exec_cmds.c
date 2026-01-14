@@ -20,7 +20,7 @@
 /*
 TODO: exec_cmds returns status code, but is already set in sh. 
 Discuss with parser part where to set error status.
-// FIXME: bad smell exec_cmds and set_here_docs admiten los mismos parámetros
+// FIXME: bad smell exec_cmds and set_here_docs admiten los mismos parámetros, mover a main, aquí exclusivamente parte de ejecución
 */
 int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {
@@ -29,7 +29,7 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	nstages = ft_lstsize(cmd_first);
 	if (nstages < 1)
 	{
-		logger("exec_cmds", "No commands to execute, you sure parser is working ok?");
+		logger("exec_cmds", "No commands to execute... new phone who this");
 		return (0);
 	}
 	if (set_here_docs(sh, cmd_first) == (-1))

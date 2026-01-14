@@ -33,7 +33,7 @@ class TestCmdSpec(ctypes.Structure):
 def test_api_lib():
     """Load the compiled test API shared library."""
     project_root = Path(__file__).parent.parent.parent.parent
-    lib_path = project_root / "tests" / "integration" / "apis" / "libtest_api_set_here_docs.so"
+    lib_path = project_root / "tests" / "integration" / "apis" / "libtest_api_exec.so"
     
     if not lib_path.exists():
         pytest.fail(f"Test API library not found: {lib_path}")
@@ -122,7 +122,7 @@ def make_envp():
         return envp
     return _make
 
-
+# TODO: pytest fixture that builds temp directory for the test to be cleaned after, moves neccesary executables scripts there.
 @pytest.fixture
 def test_context(test_api_lib):
     """Factory fixture for creating and cleaning up test contexts."""
@@ -159,3 +159,5 @@ def test_runner_tty():
     except:
         pass
     proc.close()
+
+

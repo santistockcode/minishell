@@ -1,4 +1,4 @@
-#include <stdlib.h>
+ #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -119,7 +119,7 @@ typedef struct s_read_mock {
     const char **lines;
 } t_read_mock;
 
-static int generic_read_mock(int fd, void *buf, size_t count)
+static size_t generic_read_mock(int fd, void *buf, size_t count)
 {
     (void)fd;
     (void)buf;
@@ -129,7 +129,7 @@ static int generic_read_mock(int fd, void *buf, size_t count)
     return (0);
 }
 
-static void setup_read_fails(int (*read_func)(int, void *, size_t))
+static void setup_read_fails(size_t (*read_func)(int, void *, size_t))
 {
     syswrap_set_read((t_read_fn)read_func);
 }

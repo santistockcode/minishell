@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_api_set_here_doc.h                            :+:      :+:    :+:   */
+/*   test_api_exec.h.                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef TEST_API_HEREDOC_H
-# define TEST_API_HEREDOC_H
+#ifndef TEST_API_EXEC_H
+# define TEST_API_EXEC_H
 
 # include <stddef.h>
 

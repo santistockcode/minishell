@@ -53,8 +53,8 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
     
     runner_c = test_api_dir / "test_runner_heredoc.c"
     runner_bin = test_api_dir / "test_runner_heredoc"
-    test_api_c = test_api_dir / "test_api_set_here_docs.c"
-    output_so = test_api_dir / "libtest_api_set_here_docs.so"
+    test_api_c = test_api_dir / "test_api_exec.c"
+    output_so = test_api_dir / "libtest_api_exec.so"
     
     dependencies = [
         src_dir / "set_here_docs.c",
@@ -66,7 +66,8 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         src_dir / "exec_errors.c",
         src_dir / "crtl.c",
         src_dir / "signals.c",
-        src_dir / "exec_utils.c"
+        src_dir / "exec_utils.c",
+        src_dir / "logger.c"
     ]
 
     cmd = [
@@ -82,6 +83,7 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         "-L", str(test_api_dir),
         f"-Wl,-rpath,{test_api_dir}",
         "-lreadline",
+        "-DDEBUG",
         "-o", str(runner_bin)
     ]
     cmd_compile_shared_library = [
@@ -118,7 +120,7 @@ def cleanup(project_root: Path):
     """Clean up compiled artifacts."""
     log("Cleaning up compiled artifacts...", Colors.BOLD_YELLOW)
     test_api_dir = project_root / "tests" / "integration" / "apis"
-    so_file = test_api_dir / "libtest_api_set_here_docs.so"
+    so_file = test_api_dir / "libtest_api_exec.so"
     runner_path = test_api_dir / "test_runner_heredoc"
 
     if so_file.exists():

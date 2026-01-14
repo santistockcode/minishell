@@ -31,6 +31,7 @@ typedef struct s_shell
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
 	char	*last_err_op; // last operation that caused an error
+	int		last_errno; // last errno value
 }			t_shell;
 
 

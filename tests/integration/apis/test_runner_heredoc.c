@@ -3,7 +3,7 @@
  * Provides TTY interface for pexpect while using the test API.
  */
 
-#include "test_api_set_here_docs.h"
+#include "test_api_exec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -120,6 +120,7 @@ static void handle_add_cmd(const char *args)
     g_builder.cmds[cmd_idx].argv[g_builder.cmds[cmd_idx].argc] = NULL;
     
     printf("OK\n");
+    printf("Command %d added with %d args\n", cmd_idx, g_builder.cmds[cmd_idx].argc);
     fflush(stdout);
 }
 
@@ -189,7 +190,12 @@ static void handle_build_context(void)
     for (int i = 0; i < g_builder.cmd_count; i++)
     {
         cmd_specs[i].argv = (const char **)g_builder.cmds[i].argv;
-        cmd_specs[i].redirs = g_builder.cmds[i].redirs;
+        if (g_builder.cmds[i].redir_count == 0)
+        {
+            cmd_specs[i].redirs = NULL;
+        }
+        else
+            cmd_specs[i].redirs = g_builder.cmds[i].redirs;
     }
     
     // Create context
@@ -319,6 +325,7 @@ int main(void)
         }
     }
     
+    // achtung! up to this point no context is destroyed
     if (g_ctx)
         msh_test_ctx_destroy(g_ctx);
     cleanup_builder();

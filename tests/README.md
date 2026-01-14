@@ -5,16 +5,16 @@ Makes use of minunit.h
 # Integration tests
 
 Because dividing frontend from backend is just a matter of how we divide our work, there's not really a different process for execution_part so just using a ffi to test set_here_docs won't work by using pexpect (mock tty) because we need a terminal for that. 
-Test runner heredoc aims to fullfill that layer, serves as an intermediate layer, entry point between pexpect and test_api_set_here_docs,
+Test runner heredoc aims to fullfill that layer, serves as an intermediate layer, entry point between pexpect and test_api_exec,
 
 ACHTUNG!: current integration-backend tox flag fails precisely because the entry point for "execution part" is not set_here_docs but exec_cmds. Later on I will evolve that flag. (FIXME bad smell)
 
 ¿Qué queremos probar?
     - expansion + env handling -> unit
-    - heredoc file creation in temp dir (real open/close)
+    - heredoc file creation in temp dir (real open/close/read happy path and error)
     - error paths (permission denied, etc.), errno correctamente seteado por funciones reales
-    - file descriptor management
-    - signal handling
+    - file descriptor management (lsof y pexpect)
+    - signal handling (pexpect con sendcontrol)
 
 Lo importante de usar ctypes o cffi es que las llamadas al sistema son REALES, y puedo: 
     - testear con una terminal real (usamos pexpect ya que internamente usamos readline)
