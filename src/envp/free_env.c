@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   free_envp.c                                        :+:      :+:    :+:   */
+/*   free_env.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/14 23:12:42 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/14 23:27:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/15 18:43:59 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/envp.h"
+#include "../../include/env.h"
 
-void free_envp(t_env *aux)
+void free_env(t_env *aux)
 {
 	if (!aux)
 		return;

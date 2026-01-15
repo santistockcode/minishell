@@ -15,17 +15,13 @@
 #include <readline/readline.h>
 
 #include "../Libft/include/libft.h"
+#include "env.h"
 #include "log.h"
 #include "exec.h"
 
 // can you deep copy envp?
 extern volatile sig_atomic_t exit_status;
 
-typedef struct s_env
-{
-     char            *key;
-     char            *value;
-}   t_env;
 
 
 typedef struct s_shell
@@ -36,6 +32,7 @@ typedef struct s_shell
     // int      should_exit; // 1 if shell should exit so you can clean up
 } t_shell;
 
+int init_minishell(t_shell **minishell,char **envp);
 
 
 //SEÑALES
