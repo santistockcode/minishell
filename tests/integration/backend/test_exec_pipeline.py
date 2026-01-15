@@ -1,9 +1,19 @@
-# Test integration of front part of minishell with back 
+# Test integration of exec_pipeline
 
-# Produces commands to fetch continuosly backend part (exec_pipeline)
-# Necesita de ffi to test IPC, relation to context (maybe it will be the same as integration_redirs.py)
-
-
-
-def test_mock():
+def test_on_injected_failing_syscall_via_test_api_exec():
     pass
+
+def test_signals_when_running_pipeline():
+    pass
+
+def test_with_lsof_no_dangling_fds():
+    pass
+
+def test_sleep_commands_correctly_works():
+    pass
+
+def test_against_failing_scripts():
+    pass
+
+# include here rest of pipex tests
+

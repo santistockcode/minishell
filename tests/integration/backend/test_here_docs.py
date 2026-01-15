@@ -67,7 +67,6 @@ def test_single_heredoc_with_real_readline(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-
 def test_single_heredoc_target_changed(test_runner_tty):
     """Test that heredoc changes target from delimiter to temp file."""
     # Create context with one command having a heredoc
@@ -120,7 +119,6 @@ def test_single_heredoc_target_changed(test_runner_tty):
     # Cleanup
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
-
 
 def test_multiple_heredocs_in_pipeline(test_runner_tty):
     """Test multiple heredocs in a pipeline."""
@@ -181,7 +179,6 @@ def test_multiple_heredocs_in_pipeline(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-
 def test_cmds_no_here_docs_returns_0_via_shared_lib(test_api_lib, make_redir_spec, make_cmd_spec, make_envp, test_context):
     """Test that cmds with no here_docs returns 0"""
     # Redirection infile no heredoc
@@ -194,7 +191,6 @@ def test_cmds_no_here_docs_returns_0_via_shared_lib(test_api_lib, make_redir_spe
     
     result = test_api_lib.msh_test_set_here_docs(ctx)
     assert result == 0
-
 
 def test_heredoc_empty_content(test_runner_tty):
     """Test heredoc with only delimiter (empty content)."""
@@ -225,7 +221,6 @@ def test_heredoc_empty_content(test_runner_tty):
     
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
-
 
 def test_heredoc_expanded_on_custom_envp(test_runner_tty):
     """Test heredoc with environment variable expansion."""
@@ -297,3 +292,76 @@ def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_run
     # Cleanup
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
+
+
+def test_multiple_processes_againts_same_folder_no_errors_on_mixed_heredocs(test_runner_tty):
+    """Test multiple processes against the same folder with mixed heredocs."""
+    # Create context for process 1
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add command: cat << EOF
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add heredoc redirection
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")
+    test_runner_tty.expect("OK")
+
+    # BUILD THE CONTEXT
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Run the heredoc
+    test_runner_tty.sendline("RUN_HEREDOCS")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("proc1 - line 1")
+
+    backend_folder = Path(__file__).parent
+    proc_manual = pexpect.spawn(str(backend_folder / "test-workspaces/test_multiple_processes_againts_same_folder_no_errors_on_mixed_heredocs_runner/test_runner_exec"), encoding='utf-8', timeout=5)
+
+    # Create context for process 2
+    proc_manual.sendline("CREATE 1 0")
+    proc_manual.expect("OK")
+
+    # Add command: cat << EOF
+    proc_manual.sendline("ADD_CMD 0 1 cat")
+    proc_manual.expect("OK")
+
+    # Add heredoc redirection
+    proc_manual.sendline("ADD_REDIR 0 3 0 EOF 0")
+    proc_manual.expect("OK")
+
+    # BUILD THE CONTEXT for process 2
+    proc_manual.sendline("BUILD_CONTEXT")
+    proc_manual.expect("OK")
+
+    # Run the heredoc
+    proc_manual.sendline("RUN_HEREDOCS")
+    proc_manual.expect("> ")
+    proc_manual.sendline("proc2 - line 1")
+    proc_manual.expect("> ")
+    proc_manual.sendline("EOF")
+
+    # Resume original process
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF")
+
+    # Check each target file
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+    target = test_runner_tty.match.group(1)
+    content = Path(target).read_text()
+    assert content == "proc1 - line 1\n"
+
+    proc_manual.sendline("GET_REDIR_TARGET 0 0")
+    proc_manual.expect(r"TARGET (\.here_doc_\d+)")
+    target = proc_manual.match.group(1)
+    content = Path(target).read_text()
+    assert content == "proc2 - line 1\n"
+
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+    proc_manual.sendline("DESTROY")
+    proc_manual.expect("OK")
