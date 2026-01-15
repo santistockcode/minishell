@@ -21,6 +21,7 @@
  *   DESTROY
  */
 
+#define MAX_ENVP 64
 #define MAX_CMDS 16
 #define MAX_ARGS 32
 #define MAX_REDIRS 16
@@ -36,7 +37,8 @@ typedef struct s_builder_ctx {
     t_builder_cmd cmds[MAX_CMDS];
     int cmd_count;
     int last_status;
-    char *envp[1];  // Empty environment for now
+    int env_count;
+    char *envp[MAX_ENVP];
 } t_builder_ctx;
 
 static void *g_ctx = NULL;
@@ -55,8 +57,38 @@ static void handle_create(int cmd_count, int last_status)
     memset(&g_builder, 0, sizeof(g_builder));
     g_builder.cmd_count = cmd_count;
     g_builder.last_status = last_status;
-    g_builder.envp[0] = NULL;
     
+    printf("OK\n");
+    fflush(stdout);
+}
+
+static void handle_envp_creation(const char *args)
+{
+    char args_buf[256];
+    strncpy(args_buf, args, sizeof(args_buf) - 1);
+    args_buf[sizeof(args_buf) - 1] = '\0';
+
+    // Split the input arguments by spaces
+    char *token = strtok(args_buf, " ");
+    while (token)
+    {
+        if (g_builder.env_count >= MAX_ENVP)
+        {
+            printf("ERROR: Too many environment variables (max %d)\n", MAX_ENVP);
+            fflush(stdout);
+            return;
+        }
+
+        if (strlen(token) == 0)
+        {
+            printf("ERROR: Empty environment variable\n");
+            fflush(stdout);
+            return;
+        }
+
+        g_builder.envp[g_builder.env_count++] = strdup(token);
+        token = strtok(NULL, " ");
+    }
     printf("OK\n");
     fflush(stdout);
 }
@@ -120,7 +152,7 @@ static void handle_add_cmd(const char *args)
     g_builder.cmds[cmd_idx].argv[g_builder.cmds[cmd_idx].argc] = NULL;
     
     printf("OK\n");
-    printf("Command %d added with %d args\n", cmd_idx, g_builder.cmds[cmd_idx].argc);
+    // printf("Command %d added with %d args\n", cmd_idx, g_builder.cmds[cmd_idx].argc);
     fflush(stdout);
 }
 
@@ -280,6 +312,10 @@ int main(void)
             int cmd_count, last_status;
             sscanf(line + 7, "%d %d", &cmd_count, &last_status);
             handle_create(cmd_count, last_status);
+        }
+        else if (strncmp(line, "CREATE_ENVP", 11) == 0)
+        {
+            handle_envp_creation(line + 11);
         }
         else if (strncmp(line, "ADD_CMD ", 8) == 0)
         {

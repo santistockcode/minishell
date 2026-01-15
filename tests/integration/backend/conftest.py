@@ -3,11 +3,13 @@ Shared pytest fixtures for backend integration tests.
 """
 
 import ctypes
+import shutil
 import pytest
 import sys
 from pathlib import Path
 from typing import List
 import pexpect
+import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "support"))
 
@@ -122,7 +124,43 @@ def make_envp():
         return envp
     return _make
 
-# TODO: pytest fixture that builds temp directory for the test to be cleaned after, moves neccesary executables scripts there.
+# TODO: moves neccesary executables scripts there.
+# ...existing code...
+@pytest.fixture
+def test_create_workspace(request):
+    """Create a workspace folder under tests/integration/backend/test-workspaces/<name>.
+
+    Returns a factory callable _make(name=None) that creates a workspace directory
+    and records it for cleanup. Default name uses the requesting test node name.
+    """
+    created: list[Path] = []
+
+    def _make(name: str | None = None) -> Path:
+        base_name = name if name is not None else request.node.name
+        backend_dir = Path(__file__).parent  # tests/integration/backend
+        root = backend_dir / "test-workspaces"
+        root.mkdir(parents=True, exist_ok=True)
+
+        workspace = root / base_name
+        # start fresh for deterministic debugging: remove if already exists
+        if workspace.exists():
+            shutil.rmtree(workspace)
+        workspace.mkdir(parents=True, exist_ok=False)
+
+        created.append(workspace)
+        return workspace
+
+    yield _make
+
+    # teardown: remove all created workspaces
+    for p in created:
+        try:
+            if p.exists():
+                shutil.rmtree(p)
+        except Exception:
+            pass
+
+
 @pytest.fixture
 def test_context(test_api_lib):
     """Factory fixture for creating and cleaning up test contexts."""
@@ -142,22 +180,41 @@ def test_context(test_api_lib):
 
 
 @pytest.fixture
-def test_runner_tty():
-    """Spawn the test runner executable."""
-    runner_path = Path(__file__).parent.parent / "apis" / "test_runner_heredoc"
-    
-    if not runner_path.exists():
-        pytest.fail(f"Test runner not found: {runner_path}")
-    
-    proc = pexpect.spawn(str(runner_path), encoding='utf-8', timeout=5)
+def test_runner_tty(test_create_workspace, request):
+    """Spawn the test runner executable inside a temporary workspace named for the test.
+
+    The runner binary is copied into the workspace and made executable. While the
+    runner is active the current working directory is the workspace; cwd is restored
+    on teardown.
+    """
+    workspace = test_create_workspace(f"{request.node.name}_runner")
+    runner_src = Path(__file__).parent.parent / "apis" / "test_runner_exec"
+
+    if not runner_src.exists():
+        pytest.fail(f"Test runner not found: {runner_src}")
+
+    runner_dest = workspace / "test_runner_exec"
+    shutil.copy(str(runner_src), str(runner_dest))
+    runner_dest.chmod(runner_dest.stat().st_mode | 0o111)
+
+    old_cwd = Path.cwd()
+    os.chdir(str(workspace))
+    try:
+        proc = pexpect.spawn(str(runner_dest), encoding='utf-8', timeout=5)
+    except Exception:
+        os.chdir(str(old_cwd))
+        raise
+
     yield proc
-    
-    # Cleanup
+
+    # cleanup
     try:
         proc.sendline("EXIT")
         proc.expect(pexpect.EOF, timeout=1)
-    except:
+    except Exception:
         pass
-    proc.close()
-
-
+    try:
+        proc.close()
+    except Exception:
+        pass
+    os.chdir(str(old_cwd))

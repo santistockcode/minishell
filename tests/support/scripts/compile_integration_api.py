@@ -40,7 +40,7 @@ def ensure_libft_built(libft_dir: Path) -> bool:
     return True
 
 
-def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
+def compile_shared_library(project_root: Path, runner: bool = False, debug: bool = False) -> bool:
     """Compile test API into shared library."""
     log("Compiling test API shared library...", Colors.BOLD_BLUE)
     
@@ -51,8 +51,8 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
     libft_dir = project_root / "Libft"
     libft_lib = libft_dir / "bin" / "libft.a"
     
-    runner_c = test_api_dir / "test_runner_heredoc.c"
-    runner_bin = test_api_dir / "test_runner_heredoc"
+    runner_c = test_api_dir / "test_runner_exec.c"
+    runner_bin = test_api_dir / "test_runner_exec"
     test_api_c = test_api_dir / "test_api_exec.c"
     output_so = test_api_dir / "libtest_api_exec.so"
     
@@ -70,6 +70,8 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         src_dir / "logger.c"
     ]
 
+    debug_flag = "-DDEBUG" if debug else ""
+
     cmd = [
         "cc",
         "-Wall", "-Wextra", "-Werror", "-g", "-fPIC",
@@ -83,7 +85,7 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         "-L", str(test_api_dir),
         f"-Wl,-rpath,{test_api_dir}",
         "-lreadline",
-        "-DDEBUG",
+        debug_flag,
         "-o", str(runner_bin)
     ]
     cmd_compile_shared_library = [
@@ -97,6 +99,7 @@ def compile_shared_library(project_root: Path, runner: bool = False) -> bool:
         str(libft_lib),
         "-lreadline",
         "-lm",
+        debug_flag,
         "-o", str(output_so)
     ]
 
@@ -121,7 +124,7 @@ def cleanup(project_root: Path):
     log("Cleaning up compiled artifacts...", Colors.BOLD_YELLOW)
     test_api_dir = project_root / "tests" / "integration" / "apis"
     so_file = test_api_dir / "libtest_api_exec.so"
-    runner_path = test_api_dir / "test_runner_heredoc"
+    runner_path = test_api_dir / "test_runner_exec"
 
     if so_file.exists():
         so_file.unlink()
@@ -136,7 +139,8 @@ def cleanup(project_root: Path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--clean', action='store_true', help='Clean compiled artifacts')
-    parser.add_argument('--tty-runner-hds', action='store_true', help='Build the test runner middle tty for here docs testing')
+    parser.add_argument('--runner', action='store_true', help='Build the test runner middle tty for here docs testing')
+    parser.add_argument('--logger', action='store_true', help='Enable logger (it helps for me to write integration tests)')
     args = parser.parse_args()
     
     project_root = Path(__file__).parent.parent.parent.parent
@@ -149,7 +153,7 @@ def main():
     if not ensure_libft_built(libft_dir):
         return 1
 
-    if not compile_shared_library(project_root, args.tty_runner_hds):
+    if not compile_shared_library(project_root, args.runner, args.logger):
         return 1
     
     return 0

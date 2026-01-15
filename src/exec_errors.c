@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 18:08:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 18:09:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/15 08:21:27 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ void	msh_set_error(t_shell *sh, const char *op)
 
 	if (!sh)
 		return ;
+	sh->last_errno = errno;
 	free(sh->last_err_op);
 	tmp_op = ft_strdup(op);
 	if (!tmp_op)
 		sh->last_err_op = NULL;
 	else
 		sh->last_err_op = tmp_op;
-    sh->last_errno = errno;
 }
 
 /*
@@ -47,11 +47,11 @@ void	msh_print_last_error(t_shell *sh)
 	op = NULL;
 	if (sh && sh->last_err_op)
 		op = sh->last_err_op;
-	if (op && errno)
-		fprintf(stderr, "minishell: %s: %s\n", op, strerror(errno));
+	if (op && sh && sh->last_errno)
+		fprintf(stderr, "minishell: %s: %s\n", op, strerror(sh->last_errno));
 	else if (op)
 		fprintf(stderr, "minishell: %s\n", op);
-	else if (errno)
+	else if (sh && errno)
 		fprintf(stderr, "minishell: %s\n", strerror(errno));
 	else
 		fprintf(stderr, "minishell: unknown error/internal error\n");
@@ -60,4 +60,5 @@ void	msh_print_last_error(t_shell *sh)
 		free(sh->last_err_op);
 		sh->last_err_op = NULL;
 	}
+	sh->last_errno = 0;
 }

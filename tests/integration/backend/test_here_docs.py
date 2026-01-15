@@ -9,12 +9,13 @@ from pathlib import Path
 import pexpect
 
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "support"))
 
 from python_helpers.constants import RedirType
 
 def test_single_heredoc_with_real_readline(test_runner_tty):
     """Test heredoc with real readline via test runner."""
+
     # Create context with one command having a heredoc
     test_runner_tty.sendline("CREATE 1 0")
     test_runner_tty.expect("OK")
@@ -225,7 +226,44 @@ def test_heredoc_empty_content(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-@pytest.mark.skip(reason="Pending implement GET STATUS in test runner")
+
+def test_heredoc_expanded_on_custom_envp(test_runner_tty):
+    """Test heredoc with environment variable expansion."""
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+    test_runner_tty.sendline("ADD_REDIR 0 3 0 EOF 0")
+    test_runner_tty.expect("OK")
+
+    # Add environment variable
+    test_runner_tty.sendline("CREATE_ENVP USER=mockJoe")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    test_runner_tty.sendline("RUN_HEREDOCS")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("Take a look the user name is $USER")
+    test_runner_tty.expect("> ")
+    test_runner_tty.sendline("EOF")
+
+    test_runner_tty.expect("RESULT 0")
+    
+    test_runner_tty.sendline("GET_REDIR_TARGET 0 0")
+    test_runner_tty.expect(r"TARGET (\.here_doc_\d+)")
+    target = test_runner_tty.match.group(1)
+    
+    # Verify file content with expanded environment variable
+    content = Path(target).read_text()
+    assert content == "Take a look the user name is mockJoe\n"
+    
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+@pytest.mark.skip(reason="FIXME: signals not working")
 def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_runner_tty):
     """Test that sending a signal while fetching here docs interrupts the pipeline."""
     # Create context with one command having a heredoc
@@ -259,13 +297,3 @@ def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_run
     # Cleanup
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
-
-@pytest.mark.skip(reason="")
-def test_open_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
-    """Test that open failure sets errno correctly."""
-    pass
-
-@pytest.mark.skip(reason="To be implemented on rontend tests because set_here_docs exists loop")
-def test_malloc_failure_sets_errno_correctly_and_error_displayed(test_runner_tty):
-    """Test that malloc failure sets errno correctly and error is displayed."""
-    pass

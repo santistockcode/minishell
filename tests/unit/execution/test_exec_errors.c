@@ -45,6 +45,7 @@ static int test_print_last_error_with_errno(void)
 	t_shell *sh = create_test_shell(NULL, 0);
 	mu_assert("shell alloc failed", sh != NULL);
 
+	errno = EACCES;
 	msh_set_error(sh, "open");
 
 	/* Redirect stderr to a temp file */
@@ -54,7 +55,6 @@ static int test_print_last_error_with_errno(void)
 	dup2(fd, STDERR_FILENO);
 	close(fd);
 
-	errno = EACCES;
 	msh_print_last_error(sh);
 
 	/* Read back the contents */
@@ -80,6 +80,7 @@ static int test_print_last_error_without_errno(void)
 	t_shell *sh = create_test_shell(NULL, 0);
 	mu_assert("shell alloc failed", sh != NULL);
 
+	errno = 0; /* no errno -> just op */
     msh_set_error(sh, "read");
 
 	const char *tmp_path = ".tmp_err_exec_errors_2.txt";
@@ -88,7 +89,6 @@ static int test_print_last_error_without_errno(void)
 	dup2(fd, STDERR_FILENO);
 	close(fd);
 
-	errno = 0; /* no errno -> just op */
 	msh_print_last_error(sh);
 
 	char buf[256] = {0};
@@ -113,13 +113,13 @@ static int test_print_errno_only_when_no_op(void)
 
 	/* Ensure no operation is set */
 	mu_assert("last_err_op should start NULL", sh->last_err_op == NULL);
-
+	
 	const char *tmp_path = ".tmp_err_exec_errors_3.txt";
 	int fd = open(tmp_path, O_CREAT | O_TRUNC | O_WRONLY, 0644);
 	mu_assert("failed to open temp file", fd != -1);
 	dup2(fd, STDERR_FILENO);
 	close(fd);
-
+	
 	errno = EIO; /* Input/output error */
 	msh_print_last_error(sh);
 
@@ -147,6 +147,7 @@ static int test_print_clears_last_err_op(void)
 	t_shell *sh = create_test_shell(NULL, 0);
 	mu_assert("shell alloc failed", sh != NULL);
 
+	errno = 0; 
 	msh_set_error(sh, "read");
 	mu_assert("setup failed", sh->last_err_op && strcmp(sh->last_err_op, "read") == 0);
 
@@ -156,7 +157,6 @@ static int test_print_clears_last_err_op(void)
 	dup2(fd, STDERR_FILENO);
 	close(fd);
 
-	errno = 0; /* Just the op should be printed */
 	msh_print_last_error(sh);
 
 	/* After printing, the last_err_op must be cleared */

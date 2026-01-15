@@ -22,12 +22,35 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
-            "name": "Integration tests (Python) for here docs",
-            "type": "python",
-            "module": "pytest",
+            "name": "Unit-test exec-errors",
+            "type": "cppdbg",
             "request": "launch",
-            "args": ["${workspaceFolder}/tests/integration/backend/test_here_docs.py", "--tty-runner-hds"],
-            "justMyCode": true,
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_errors",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Integration tests (Python) for here docs (debug)",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}/tests/integration/backend/test_here_docs.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
             "cwd": "${workspaceFolder}"
         }
     ]
