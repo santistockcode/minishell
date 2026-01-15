@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test_api_exec.h.                                   :+:      :+:    :+:   */
+/*   test_api_exec.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by s list in C       #+#    #+#             */
-/*   Updated: 2026/01/09 16:12:56 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/15 13:10:09 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,12 @@ void	*msh_test_ctx_create(const t_msh_test_cmd_spec *cmds,
 
 /* Calls your real function: set_here_docs(&ctx->sh, ctx->cmd_first) */
 int		msh_test_set_here_docs(void *ctx);
+
+/* Calls real function: msh_exec_pipeline(&ctx->sh, ctx->cmd_first, ctx->cmd_count) */
+int		msh_test_exec_pipeline(void *ctx);
+
+/* Calls real function: msh_exec_simple(&ctx->sh, ctx->cmd_first, ctx->env) */
+int		msh_test_exec_simple(void *ctx);
 
 /* Accessors to inspect results after set_here_docs (e.g., heredoc paths) */
 const char	*msh_test_get_last_err_op(void *ctx);

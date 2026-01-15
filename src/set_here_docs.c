@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 16:27:13 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/15 14:57:45 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,8 +120,7 @@ int	fetch_hd_from_user(t_shell *sh, char **delim,
 	*delim = here_doc_name;
 	if (rpl_result == -1)
 		return (safe_close(fd), -1);
-	safe_close(fd);
-	return (0);
+	return (safe_close(fd));
 }
 
 /*

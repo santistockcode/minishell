@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 12:26:22 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/15 20:19:19 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,8 @@ int					exec_cmds(t_shell *sh, t_list *cmd_first);
 void				free_cmds(t_list *cmd_first);
 
 /* Execute pipeline when there are pipes*/
-// int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
-// 						int nstages);
+int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
+						int nstages);
 
 /*
 ** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
@@ -84,17 +84,17 @@ typedef struct s_stage_io
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
-// int					msh_exec_stage(t_shell *sh, t_cmd *cmd,
-// 						const t_stage_io *io, t_list *env);
+int msh_exec_stage(t_shell *sh, t_cmd *cmd,
+    const t_stage_io *io, t_list *env, int *p);
 
 /*Execute simple command (no pipelines involved)*/
-// int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
-/*
-Previous function makes use of:
-int	msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
+int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
+
+
+// Previous function makes use of:
+int		msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
 						int *save_out);
-and void			msh_restore_stdio(int save_in, int save_out);
-*/
+void			msh_restore_stdio(int save_in, int save_out);
 
 /* 
 ** Heredoc (prior to exec commands) 
@@ -109,7 +109,7 @@ int					set_here_docs(t_shell *sh, t_list *cmd_first);
 char				*expand_hd(const char *content, t_shell *sh);
 
 // exec utils
-void				safe_close(int fd);
+int					safe_close(int fd);
 int					get_unique_pid_of_process(t_shell *sh);
 int					calculate_status_from_errno(int exit_status);
 
@@ -120,11 +120,21 @@ void				unlink_hds(t_list *cmds);
 // Basic here_doc part (prior to execution) error handling
 void				msh_set_error(t_shell *sh, const char *op);
 void				msh_print_last_error(t_shell *sh);
+int msh_status_from_execve_error(int err);
 
 # define MALLOC_OP "malloc"
 # define READLINE_OP "readline"
 # define OPEN_OP "open"
 # define READ_OP "read"
+# define MISSING_FDS_OP "file descriptors"
+# define PIPE_OP "pipe"
+# define FORK_OP "fork"
+# define CLOSE_OP "close"
+# define ACCESS_OP "access"
+# define EXECVE_OP "execve"
+#define STATUS_CMD_NOT_FOUND 127
+#define STATUS_CMD_NOT_EXEC 126
+# define DUP2_OP "dup2"
 
 // TODO: errors in execution part
 

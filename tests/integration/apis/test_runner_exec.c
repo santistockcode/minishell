@@ -242,7 +242,6 @@ static void handle_build_context(void)
         fflush(stdout);
         return;
     }
-    
     printf("OK\n");
     fflush(stdout);
 }
@@ -257,6 +256,34 @@ static void handle_run_heredocs(void)
     }
     
     int result = msh_test_set_here_docs(g_ctx);
+    printf("RESULT %d\n", result);
+    fflush(stdout);
+}
+
+static void handle_exec_pipeline(void)
+{
+    if (!g_ctx)
+    {
+        printf("ERROR: No context created (use BUILD_CONTEXT first)\n");
+        fflush(stdout);
+        return;
+    }
+
+    int result = msh_test_exec_pipeline(g_ctx);
+    printf("RESULT %d\n", result);
+    fflush(stdout);
+}
+
+static void handle_exec_simple(void)
+{
+    if (!g_ctx)
+    {
+        printf("ERROR: No context created (use BUILD_CONTEXT first)\n");
+        fflush(stdout);
+        return;
+    }
+
+    int result = msh_test_exec_simple(g_ctx);
     printf("RESULT %d\n", result);
     fflush(stdout);
 }
@@ -332,6 +359,14 @@ int main(void)
         else if (strcmp(line, "RUN_HEREDOCS") == 0)
         {
             handle_run_heredocs();
+        }
+        else if (strcmp(line, "EXEC_PIPELINE") == 0)
+        {
+            handle_exec_pipeline();
+        }
+        else if (strcmp(line, "EXEC_SIMPLE") == 0)
+        {
+            handle_exec_simple();
         }
         else if (strncmp(line, "GET_REDIR_TARGET ", 17) == 0)
         {

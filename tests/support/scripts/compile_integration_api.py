@@ -67,7 +67,8 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         src_dir / "crtl.c",
         src_dir / "signals.c",
         src_dir / "exec_utils.c",
-        src_dir / "logger.c"
+        src_dir / "logger.c",
+        src_dir / "tuberiex.c"
     ]
 
     debug_flag = "-DDEBUG" if debug else ""

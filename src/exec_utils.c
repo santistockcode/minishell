@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 12:19:35 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 12:33:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/15 16:44:33 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,16 @@
 #include <stdlib.h>
 
 /*
-Protects against closing invalid file descriptors
+Protects against closing invalid file descriptors.
+Dosn't interrupt flow but logs an error message.
 */
-void	safe_close(int fd)
+int	safe_close(int fd)
 {
 	if (fd > 0)
-		close(fd);
+	{
+		return (close(fd));
+	}
+	return (0);
 }
 
 /*
@@ -49,7 +53,8 @@ int	get_unique_pid_of_process(t_shell *sh)
 		return (-1);
 	}
 	buffer[bytes_read] = '\0';
-	safe_close(fd);
+	if (safe_close(fd) == -1)
+		return (msh_set_error(NULL, CLOSE_OP), -1);
 	return (ft_atoi(buffer));
 }
 

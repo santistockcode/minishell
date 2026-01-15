@@ -365,6 +365,42 @@ typedef struct s_msh_test_ctx
 	int		cmd_count;
 }	t_msh_test_ctx;
 
+// print cmd info
+// static void print_cmd_info(void *content)
+// {
+// 	int i;
+// 	t_cmd *cmd = (t_cmd *)content;
+// 	if (!cmd)
+// 		return;
+// 	printf("  Command:\n");
+// 	for (int i = 0; cmd->argv && cmd->argv[i]; i++)
+// 	{
+// 		printf("    Arg %d: %s\n", i, cmd->argv[i]);
+// 	}
+// 	t_list *redirs;
+// 	redirs = cmd->redirs;
+// 	t_redir *r;
+// 	i = 0;
+// 	if (redirs)
+// 	{
+// 		printf("  Redirections:\n");
+// 		while (redirs)
+// 		{
+// 			r = (t_redir *)redirs->content;
+// 			if (r)
+// 			{
+// 				printf("    Redir %d: %d %d %s %d\n", i,
+// 					r->type,
+// 					r->fd,
+// 					r->target,
+// 					r->quoted);
+// 			}
+// 			i++;
+// 			redirs = redirs->next;
+// 		}
+// 	}
+// }
+
 void	*msh_test_ctx_create(const t_msh_test_cmd_spec *cmds,
 			int cmd_count, char **envp, int last_status)
 {
@@ -381,6 +417,13 @@ void	*msh_test_ctx_create(const t_msh_test_cmd_spec *cmds,
 
 	ctx->cmd_first = cmds_list_from_specs(cmds, cmd_count);
 	ctx->cmd_count = msh_count_list(ctx->cmd_first);
+
+	// Print detailed ctx
+	// printf("Created test context:\n");
+	// printf("  Last status: %d\n", ctx->sh.last_status);
+	// printf("  Command count: %d\n", ctx->cmd_count);
+	// if (ctx->cmd_first)
+	// 	ft_lstiter(ctx->cmd_first, print_cmd_info);
 
 	if (cmd_count > 0 && !ctx->cmd_first)
 	{
@@ -399,6 +442,26 @@ int	msh_test_set_here_docs(void *ctx_void)
 	if (!ctx)
 		return -1;
 	return set_here_docs(&ctx->sh, ctx->cmd_first);
+}
+
+
+int msh_test_exec_pipeline(void *ctx_void)
+{
+	t_msh_test_ctx	*ctx;
+
+	ctx = (t_msh_test_ctx *)ctx_void;
+	if (!ctx)
+		return -1;
+	return msh_exec_pipeline(&ctx->sh, ctx->cmd_first, ft_lstsize(ctx->cmd_first));
+}
+
+
+int msh_test_exec_simple(void *ctx_void)
+{
+	t_msh_test_ctx	*ctx = (t_msh_test_ctx *)ctx_void;
+	if (!ctx)
+		return -1;
+	return msh_exec_simple(&ctx->sh, (t_cmd *)ctx->cmd_first->content, ctx->sh.env);
 }
 
 const char	*msh_test_get_last_err_op(void *ctx_void)

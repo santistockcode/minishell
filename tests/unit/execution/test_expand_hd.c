@@ -10,6 +10,8 @@
 #include "../../../include/syswrap.h"
 #include "../../../Libft/include/libft.h"
 
+// FIXME: It turns out that echo $USER= will print "/saalarco=" in bash and not an empty string.
+
 /*
 Helpers to build and free the env list used by expand_hd.
 */
