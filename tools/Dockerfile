@@ -9,7 +9,7 @@ RUN apt-get update && \
         build-essential clang lldb valgrind gdb gdbserver \
         git curl ca-certificates \
         meson ninja-build cmake pkg-config \
-        libssl-dev lsof    # Criterion needs this for its tests
+        libssl-dev lsof libreadline-dev  # Criterion needs this for its tests
 # ---------------------------------------------------------------------------
 
 # --- build & install Criterion ----------------------------------------------
