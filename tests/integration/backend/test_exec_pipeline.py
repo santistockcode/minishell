@@ -95,5 +95,11 @@ def test_against_failing_scripts():
 def test_that_interacts_with_child_processes():
     pass
 
+# cat < infile >> out1 > out2: if out1 has permission denied, test that out2 is not created
+@pytest.mark.skip("Not implemented yet")
+def test_cat_infile_to_outfile_with_permission_denied(test_runner_tty):
+    pass
+
+
 # include here rest of pipex tests
 
