@@ -22,11 +22,22 @@ INCLUDE_DIR = include/
 
 #Files
 
-FILES = main\
-crtl\
-signals\
-minishell_init
-
+FILES = \
+main \
+logger \
+exec_cmds \
+set_here_docs \
+free_cmds \
+syswrap \
+expand_hd \
+expand_hd_utils \
+unlink_hds \
+exec_errors \
+exec_utils \
+crtl \
+signals \
+minishell_init \
+tuberiex
 
 # Files add
 
@@ -41,7 +52,12 @@ all: $(NAME)
 debug: CFLAGS += -g3 -O0 -DDEBUG
 debug: $(NAME)
 
+# Fsanitize rule
+fsanitize: CFLAGS += -fsanitize=address
+fsanitize: $(NAME)
+
 # Comp bin
+
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
 	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
@@ -54,6 +70,7 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 # Compilar la libft
 $(LIBFT_NAME):
 	$(MAKE) -C $(LIBFT_DIR)
+
 
 # clean OBJ
 clean:

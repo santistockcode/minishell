@@ -1,6 +1,8 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# include "../Libft/include/libft.h"
+
 #define _POSIX_C_SOURCE 200809L
 
 #include <unistd.h>
@@ -14,36 +16,34 @@
 #include <errno.h>
 #include <readline/readline.h>
 
-#include "../Libft/include/libft.h"
-#include "log.h"
-#include "exec.h"
-
-// can you deep copy envp?
-// typedef struct s_env
-// {
-//     char            *key;
-//     char            *value;
-// }   t_env;
 extern volatile sig_atomic_t exit_status;
 
+// envp deep copy
+typedef struct s_env
+{
+	char	*key;
+	char	*value;
+}			t_env;
 
 typedef struct s_shell
 {
-	int i;
-	// t_list   *env;
-    // int      last_status; // last $? value
-    // int      should_exit; // 1 if shell should exit so you can clean up
-} t_shell;
+	t_list	*env;
+	int		last_status; // last $? value
+	int		should_exit; // 1 if shell should exit so you can clean up
+	char	*last_err_op; // last operation that caused an error
+	int		last_errno; // last errno value
+}			t_shell;
+
 
 int init_minishell(t_shell **minishell,char **envp);
 
 
 //SEÑALES
-void setup_signal();
+void 	setup_signal();
+void	setup_signals_heredoc();
 void	ft_ctrl_mini(int signal);
 void	ft_ctrl_quit(int signal);
 void	ft_ctrl_heredoc(int signal);
-
 
 
 # define SUCCESS 0
