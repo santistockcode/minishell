@@ -35,8 +35,9 @@ typedef struct s_shell
 }			t_shell;
 
 
+// INIT
 int init_minishell(t_shell **minishell,char **envp);
-
+t_list *init_envp(char **envp);
 
 //SEÑALES
 void 	setup_signal();
@@ -45,6 +46,8 @@ void	ft_ctrl_mini(int signal);
 void	ft_ctrl_quit(int signal);
 void	ft_ctrl_heredoc(int signal);
 
+//PRINT VALUES
+void	print_env_list(t_list *env);
 
 # define SUCCESS 0
 # define MALLOC_ERROR -1

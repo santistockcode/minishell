@@ -22,6 +22,7 @@ INCLUDE_DIR = include/
 
 #Files
 
+
 FILES = \
 main \
 logger \
@@ -37,7 +38,10 @@ exec_utils \
 crtl \
 signals \
 minishell_init \
-tuberiex
+tuberiex\
+envp_init\
+print_env
+
 
 # Files add
 
