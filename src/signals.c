@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/12 14:15:00 by mario             #+#    #+#             */
-/*   Updated: 2026/01/16 13:26:03 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/16 17:47:19 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+extern volatile sig_atomic_t exit_status;
 
 void setup_signal(void)
 {
