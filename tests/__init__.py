@@ -1,0 +1,3 @@
+"""
+Minishell test suite.
+"""

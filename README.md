@@ -15,18 +15,32 @@ Effort by test type:
 60% Integration  
 10% E2E
 
-### Tox - test orchestration
+### Minunit - Unit tests
+
+Execute every `unit_*.py` file undert `/tests`.
+
+```bash
+python3 tests/support/scripts/compile_unit_tests.py --run
+
+tox -e unit
+tox -e unit-keep
+tox -e unit-keep-debug
+tox -e unit-valgrind
+```
+
+### Tox - integration tests orchestration
 
 All code to be submitted + debug goes by Makefile + c. All other tests/tools go by tox + python. 
 A tox.ini file at root level allows us to maintain code by module on ongoing changes. Expected recipes for e2e, integration and unit. 
 
-### Criterion - Unit tests
+```bash
+pip install -r requirements.txt
+tox // run all tests
+tox -e integration-backend // run execution integration tests
+tox -e integration-frontend // run parsing integration tests
+```
 
-Unit tests framework. Criterion runs each test in a separate forked process by default. Very useful for testing functions individually.
 
-### Python script - Integration tests
-
-Candidates for integration tests are those that involve sysemcalls (we can mock system calls and use ctypes in python) and those that involve more than one module. That means we can tests full pipeline execution, error scenarios, edge cases, system call interactions... and so on. 
 
 ### Python script + manual tests + external tools - E2e tests
 
@@ -72,7 +86,7 @@ int main(int argc, char** argv)
 		return(0);
 	minishell = malloc(sizeof(t_shell));
 	minishell->i = 10;
-	MSH_LOG("Minishell initialized with i = %d", minishell->i);
+	logger("main", "Minishell initialized");
 	free(minishell);
 	return (0);
 }
@@ -107,6 +121,77 @@ gdb ./binary-to-run
 (gdb) run
 (and so on)
 ```
+
+## Spec for expanding variables on here_doc
+
+- Text plain is copied as is. Example: "abc" -> "abc".
+- '$' followed by any character except '$' until space, \0 or \n is expanded is possible. Example: "$HOME"->"/user/saalarco".
+- '$' followed by any character except '$' until space, \0 or \n is ommited if expansion is not possible. Example: "$HMOE"->"", "$HOME,"->"", "Hi my name is $USR and..."->"Hi my name is  and...".
+- '$' followed by space or '$' is kept as literal. Example: "$"->"$", but also "$$"->"$$".
+- '$' followed by '?' is expanded for last status code. Example (last status code was 0): "Last status $?"->"Last status 0".
+
+## Readline has leaks, how do I prove it?
+
+- To prove readline has leaks, just comment out setup_readline_mock and teardown_readline_mock on any test in test_set_here_doc and run executable (--keep-binaries flag on python script to keep executables) with valgrind. Compare this with running valgrind against original executable (readline injected) or just read valgrind logs to assert that leaks comes from readline function. 
+
+
+## Error handling on exec part here_doc (prior to pipeline execution)
+
+Any syscall error prior to multiprocessing should interrupt pipeline altogether, That means top level exec_cmds must print something like: 
+"minishell: malloc: <strerror(errno)>", set status code and return (-1)
+so that caller knows what to clean.
+
+
+#### Proposed pattern
+```c
+
+/*
+typedef struct s_shell
+{
+	int		i;
+	t_list	*env;
+	int		last_status;
+	int		should_exit;
+    char    *last_err_op;
+
+}			t_shell;
+*/
+
+
+// call this in the failing low-level function before returning -1
+void msh_set_error(t_shell *sh, const char *op, int saved_errno)
+{
+    char *tmp_op;
+
+    if (!sh)
+        return;
+    free(sh->last_err_op);
+    tmp_op = ft_strdup(op);
+    if (!tmp_op)
+        sh->last_err_op = NULL;
+    else
+        sh->last_err_op = tmp_op;
+}
+
+// top level printing helper
+void msh_print_last_error(t_shell *sh)
+{
+    char *op;
+
+    if (sh && sh->last_err_op)
+        op = sh->last_err_op;
+    if (op && errno)
+        fprintf(stderr, "minishell: %s: %s\n", op, strerror(errno));
+    else if (op)
+        fprintf(stderr, "minishell: %s\n", op);
+    else
+        fprintf(stderr, "minishell: unknown error\n");
+}
+```
+
+## TODO: Error handling on execution (after here_doc management)
+We use exec_status to get proper status_code. 
+If something went wrong in child process that's what exit exists: we exit with correct status_code from the child so the parent sees it. 
 
 ### References: 
 https://03-jon-perez.gitbook.io/coding-library/c/procesos-e-hilos/estructura-sigaction
