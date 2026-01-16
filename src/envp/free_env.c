@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   free_env.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/14 23:12:42 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/15 18:43:59 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/16 13:23:08 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/env.h"
+#include "../../include/minishell.h"
 
 void free_env(t_env *aux)
 {

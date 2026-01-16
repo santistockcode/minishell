@@ -3,17 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   set_here_docs.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/15 14:57:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/16 13:33:10 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Libft/include/libft.h"
-#include "../include/exec.h"
-#include "../include/syswrap.h"
-#include "../include/log.h"
+#include "../include/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
 

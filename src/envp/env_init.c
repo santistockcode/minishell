@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   env_init.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:34:26 by mario             #+#    #+#             */
-/*   Updated: 2026/01/15 18:43:33 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/16 13:22:49 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/env.h"
+#include "../../include/minishell.h"
 
 void	update_shlvl(t_env *env)
 {

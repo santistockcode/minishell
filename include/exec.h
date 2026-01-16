@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/15 20:19:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/16 13:34:52 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXEC_H
 # define EXEC_H
-# include "minishell.h"
+
+typedef struct s_shell	t_shell;
+typedef struct s_list	t_list;
 
 // TODO: Implement pipes and redirections after here_docs
 
@@ -111,7 +113,7 @@ char				*expand_hd(const char *content, t_shell *sh);
 // exec utils
 int					safe_close(int fd);
 int					get_unique_pid_of_process(t_shell *sh);
-int					calculate_status_from_errno(int exit_status);
+int					calculate_status_from_errno();
 
 
 // Unlink all temporary files used for here_docs

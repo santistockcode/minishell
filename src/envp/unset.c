@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:50:36 by mario             #+#    #+#             */
-/*   Updated: 2026/01/15 18:47:01 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/16 13:23:29 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/env.h"
+#include "../../include/minishell.h"
 
 void delete_value(t_list *aux, t_list **prev, t_list **env)
 {

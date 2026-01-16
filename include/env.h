@@ -1,13 +1,9 @@
 #ifndef ENVP_H
 # define ENVP_H
 
-#include "minishell.h"
-
-typedef struct s_env
-{
-     char            *key;
-     char            *value;
-}   t_env;
+typedef struct s_shell	t_shell;
+typedef struct s_list	t_list;
+typedef struct s_env	t_env;
 
 // INIT
 

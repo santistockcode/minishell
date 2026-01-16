@@ -2,7 +2,6 @@
 #ifndef SYSWRAP_H
 # define SYSWRAP_H
 
-# include "minishell.h"
 # include <fcntl.h>
 # include <sys/types.h>
 # include <unistd.h>
