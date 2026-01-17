@@ -3,17 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   log.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:17:49 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 16:43:04 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/16 13:18:50 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOG_H
 # define LOG_H
-# include "minishell.h"
-# include <stdio.h>
+
+typedef struct s_shell	t_shell;
+typedef struct s_list	t_list;
+
 
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[31m"

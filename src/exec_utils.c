@@ -3,19 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   exec_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 12:19:35 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/15 16:44:33 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/16 13:37:06 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Libft/include/libft.h"
-#include "../include/exec.h"
-#include "../include/syswrap.h"
-#include "../include/log.h"
+#include "../include/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+extern volatile sig_atomic_t exit_status;
 
 /*
 Protects against closing invalid file descriptors.
@@ -61,7 +60,7 @@ int	get_unique_pid_of_process(t_shell *sh)
 /*
 FIXME: evolve this function once pipex integrated
 */
-int	calculate_status_from_errno(int exit_status)
+int	calculate_status_from_errno()
 {
 	int	es_result;
 

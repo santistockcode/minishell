@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   expand_hd.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:11:45 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 16:29:02 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/16 13:21:38 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-#include "../include/exec.h"
-#include "../include/log.h"
 
 int					get_env_from_key(char *key, t_list *env, char **res_value);
 int					add_char_to_list(char c, t_list **chars_list);
