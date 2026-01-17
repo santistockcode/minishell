@@ -1,9 +1,4 @@
-#include "../Libft/include/libft.h"
-#include "../include/exec.h"
-#include "../include/log.h"
-#include "../include/syswrap.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/minishell.h"
 
 void	unlink_hds(t_list *cmds)
 {

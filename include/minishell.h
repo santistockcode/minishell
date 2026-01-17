@@ -2,9 +2,6 @@
 # define MINISHELL_H
 #define _POSIX_C_SOURCE 200809L
 
-# include "../Libft/include/libft.h"
-
-
 #include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -14,9 +11,10 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <stdarg.h>
 #include <readline/readline.h>
 
-#include "../Libft/include/libft.h"
+# include "../Libft/include/libft.h"
 #include "log.h"
 #include "env.h"
 #include "exec.h"

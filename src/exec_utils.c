@@ -11,8 +11,7 @@
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
+
 
 extern volatile sig_atomic_t exit_status;
 
@@ -57,13 +56,3 @@ int	get_unique_pid_of_process(t_shell *sh)
 	return (ft_atoi(buffer));
 }
 
-/*
-FIXME: evolve this function once pipex integrated
-*/
-int	calculate_status_from_errno()
-{
-	int	es_result;
-
-	es_result = exit_status + 128;
-	return (es_result);
-}

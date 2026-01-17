@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-#include "../include/exec.h"
 
 /*
 Frees a list of characters.

@@ -10,11 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/log.h"
-#include "../include/exec.h"
 #include "../include/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 
 // FIXME: do not present this file with time.h

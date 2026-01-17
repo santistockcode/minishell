@@ -11,8 +11,7 @@
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-
-
+extern volatile sig_atomic_t exit_status;
 
 /*
 TODO: exec_cmds returns status code, but is already set in sh. 
@@ -26,15 +25,13 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 
 	nstages = ft_lstsize(cmd_first);
 	if (nstages < 1)
-	{
-		logger("exec_cmds", "No commands to execute... new phone who this");
 		return (0);
-	}
-	if (set_here_docs(sh, cmd_first) == (-1))
+	logger_ctx(sh, cmd_first, "msh_exec_pipeline", "Entry point");
+	if (set_here_docs(sh, cmd_first) == (-1) || exit_status == 130)
 	{
 		logger("exec_cmds", "Failed to set here_docs");
 		if (exit_status == 130)
-			sh->last_status = calculate_status_from_errno();
+			sh->last_status = exit_status;
 		else
 			sh->last_status = 1;
 		msh_print_last_error(sh);
@@ -47,7 +44,8 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 		if (msh_exec_pipeline(sh, cmd_first, nstages) == -1)
 		{
 			logger("exec_cmds", "Failed to execute pipeline");
-			sh->last_status = calculate_status_from_errno();
+			// FIXME: decide proper status code
+			sh->last_status = exit_status;
 			msh_print_last_error(sh);
 			unlink_hds(cmd_first);
 			return (1);

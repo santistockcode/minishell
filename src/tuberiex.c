@@ -1,12 +1,4 @@
-#include "../include/exec.h"
-#include "../include/log.h"
-#include "../Libft/include/libft.h"
 #include "../include/minishell.h"
-#include "../include/syswrap.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 /*
     *************************************************
@@ -495,7 +487,6 @@ void detailed_logger(t_list *cmd_first)
 
 int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 {
-    logger_ctx(sh, cmd_first, "msh_exec_pipeline", "Entry point");
     detailed_logger(cmd_first);
     if (require_standard_fds(sh) == -1)
         return (-1);

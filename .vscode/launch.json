@@ -42,6 +42,26 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "Unit-test exec-cmds",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_cmds",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "Integration tests (Python) for here docs (debug)",
             "type": "python",
             "request": "launch",
