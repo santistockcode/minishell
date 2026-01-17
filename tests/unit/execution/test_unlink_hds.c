@@ -7,6 +7,8 @@
 #include "../../../include/syswrap.h"
 #include "../../../Libft/include/libft.h"
 
+volatile sig_atomic_t exit_status = 0;
+
 
 static int test_assert_here_docs_unlinked(void)
 {

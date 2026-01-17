@@ -1,12 +1,5 @@
-#include "../include/syswrap.h"
-#include "../include/exec.h"
-#include "../Libft/include/libft.h"
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "../include/minishell.h"
 #include <sys/wait.h>
-#include <readline/readline.h>
-
 /*
  * Minimal syscall wrapper indirection. Defaults call the real syscalls,
  * but can be overridden via setter functions. For command injection

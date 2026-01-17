@@ -10,10 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Libft/include/libft.h"
 #include "../include/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
+extern volatile sig_atomic_t exit_status;
 
 /*
 Note on syscalls: 
@@ -154,7 +152,6 @@ int	set_here_docs(t_shell *sh, t_list *cmd_first)
 
 	cmd_list = cmd_first;
 	suffix = 0;
-	logger_ctx(sh, cmd_first, "set_here_docs", "Starting to process here docs");
 	while (cmd_list)
 	{
 		redir_list = ((t_cmd *)(cmd_list->content))->redirs;

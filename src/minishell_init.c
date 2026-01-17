@@ -12,7 +12,6 @@
 
 #include "../include/minishell.h"
 
-
 /* void	print_env(char **envp)
 {
 	int	i = 0;

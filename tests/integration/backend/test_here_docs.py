@@ -258,7 +258,6 @@ def test_heredoc_expanded_on_custom_envp(test_runner_tty):
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-@pytest.mark.skip(reason="FIXME: signals not working")
 def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_runner_tty):
     """Test that sending a signal while fetching here docs interrupts the pipeline."""
     # Create context with one command having a heredoc
@@ -284,14 +283,18 @@ def test_signal_in_the_middle_of_fetching_here_docs_interrupts_pipeline(test_run
     test_runner_tty.expect("> ")
 
     # Send ctrl+c signal to interrupt
-    test_runner_tty.sendcontrol('c')
-    
-    # Expect the signal to be caught and return error code
-    test_runner_tty.expect("RESULT -1")
+    test_runner_tty.sendcontrol('C')
 
-    # Cleanup
-    test_runner_tty.sendline("DESTROY")
-    test_runner_tty.expect("OK")
+    # Match '^C' optionally preceded by '> ' to make this robust.
+    test_runner_tty.expect(r"(?:> )?\^C")
+
+    
+    # Expect the signal to be caught
+    test_runner_tty.expect("RESULT -1")
+    test_runner_tty.expect("EXITED_SIGNAL")
+
+    # After a SIGINT, the runner exits; expect EOF instead of DESTROY.
+    test_runner_tty.expect(pexpect.EOF)
 
 
 def test_multiple_processes_againts_same_folder_no_errors_on_mixed_heredocs(test_runner_tty):

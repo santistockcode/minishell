@@ -1,8 +1,4 @@
-#include "../Libft/include/libft.h"
-#include "../include/exec.h"
-#include "../include/log.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/minishell.h"
 
 static void	free_redir(void *redir_ptr)
 {

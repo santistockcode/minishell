@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-#include "../include/exec.h"
-#include <stdarg.h>
 
 int msh_status_from_execve_error(int err)
 {

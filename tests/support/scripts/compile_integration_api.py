@@ -51,9 +51,9 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
     libft_dir = project_root / "Libft"
     libft_lib = libft_dir / "bin" / "libft.a"
     
-    runner_c = test_api_dir / "test_runner_exec.c"
-    runner_bin = test_api_dir / "test_runner_exec"
     test_api_c = test_api_dir / "test_api_exec.c"
+
+    # shared library output
     output_so = test_api_dir / "libtest_api_exec.so"
     
     dependencies = [
@@ -73,22 +73,6 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
 
     debug_flag = "-DDEBUG" if debug else ""
 
-    cmd = [
-        "cc",
-        "-Wall", "-Wextra", "-Werror", "-g", "-fPIC",
-        f"-I{include_dir}",
-        f"-I{libft_dir}/include",
-        f"-I{test_api_dir}",
-        str(runner_c),
-        str(test_api_c),
-        *[str(d) for d in dependencies],
-        str(libft_lib),
-        "-L", str(test_api_dir),
-        f"-Wl,-rpath,{test_api_dir}",
-        "-lreadline",
-        debug_flag,
-        "-o", str(runner_bin)
-    ]
     cmd_compile_shared_library = [
         "cc",
         "-Wall", "-Wextra", "-Werror", "-g", "-fPIC",
@@ -103,22 +87,74 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         debug_flag,
         "-o", str(output_so)
     ]
-
-    if (runner):
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            log(Colors.error(f"Compilation failed for intermediate tty test runner (here_docs):\n{result.stderr}"))
-            return False
+    print("Compilation command:", ' '.join(cmd_compile_shared_library))
 
     if cmd_compile_shared_library:
         result = subprocess.run(cmd_compile_shared_library, capture_output=True, text=True)
         if result.returncode != 0:
             log(Colors.error(f"Compilation for shared library ffi failed:\n{result.stderr}"))
             return False
-
+        
     log(Colors.success(f"Compiled: {output_so}"))
     return True
 
+def compile_tty_runner(project_root: Path, debug: bool = False) -> bool:
+    """Compile the test runner for middle tty here docs testing."""
+    log("Compiling test runner for middle tty...", Colors.BOLD_BLUE)
+    
+    test_api_dir = project_root / "tests" / "integration" / "apis"
+
+    src_dir = project_root / "src"
+    include_dir = project_root / "include"
+    libft_dir = project_root / "Libft"
+    libft_lib = libft_dir / "bin" / "libft.a"
+    
+    runner_c = test_api_dir / "test_runner_exec.c"
+    runner_bin = test_api_dir / "test_runner_exec"
+
+    shared_library = test_api_dir / "libtest_api_exec.so"
+
+    dependencies = [
+        src_dir / "set_here_docs.c",
+        src_dir / "free_cmds.c",
+        src_dir / "syswrap.c",
+        src_dir / "expand_hd.c",
+        src_dir / "expand_hd_utils.c",
+        src_dir / "unlink_hds.c",
+        src_dir / "exec_errors.c",
+        src_dir / "crtl.c",
+        src_dir / "signals.c",
+        src_dir / "exec_utils.c",
+        src_dir / "logger.c",
+        src_dir / "tuberiex.c"
+    ]
+
+    debug_flag = "-DDEBUG" if debug else ""
+
+    cmd = [
+        "cc",
+        "-Wall", "-Wextra", "-Werror", "-g",
+        f"-I{include_dir}",
+        f"-I{libft_dir}/include",
+        f"-I{test_api_dir}",
+        str(runner_c),
+        *[str(d) for d in dependencies],
+        str(libft_lib),
+        str(shared_library),
+        "-lreadline",
+        debug_flag,
+        "-o", str(runner_bin)
+    ]
+
+    print("Compilation command:", ' '.join(cmd))
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        log(Colors.error(f"Compilation failed for tty test runner:\n{result.stderr}"))
+        return False
+
+    log(Colors.success(f"Compiled: {runner_bin}"))
+    return True
 
 def cleanup(project_root: Path):
     """Clean up compiled artifacts."""
@@ -135,7 +171,6 @@ def cleanup(project_root: Path):
         log(Colors.success("Cleaned up"))
     else:
         log(Colors.info("Nothing to clean"))
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -156,6 +191,11 @@ def main():
 
     if not compile_shared_library(project_root, args.runner, args.logger):
         return 1
+
+    if args.runner:
+        if not compile_tty_runner(project_root, args.logger):
+            return 1
+
     
     return 0
 

@@ -4,9 +4,12 @@
  */
 
 #include "test_api_exec.h"
+#include "../../../include/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+volatile sig_atomic_t exit_status = 0;
 
 /*
  * Protocol:
@@ -329,7 +332,7 @@ int main(void)
 {
     char line[4096];
     
-    while (fgets(line, sizeof(line), stdin))
+    while (fgets(line, sizeof(line), stdin) && exit_status != 130)
     {
         // Remove newline
         line[strcspn(line, "\n")] = 0;
@@ -395,7 +398,14 @@ int main(void)
             fflush(stdout);
         }
     }
-    
+
+    if (exit_status == 130)
+    {
+        // Interrupted by signal
+        printf("EXITED_SIGNAL\n");
+        fflush(stdout);
+    }
+
     // achtung! up to this point no context is destroyed
     if (g_ctx)
         msh_test_ctx_destroy(g_ctx);

@@ -10,6 +10,8 @@
 #include "../../../include/syswrap.h"
 #include "../../../Libft/include/libft.h"
 
+volatile sig_atomic_t exit_status = 0;
+
 // TESTS
 
 // Mock env for tests
@@ -1120,7 +1122,7 @@ static int test_heredoc_open_fail_errno_unchanged(void)
     int result = set_here_docs(sh, pipe_head);
     mu_assert("set_here_docs failed", result == -1);
 
-    mu_assert("errno changed on open fail", errno == EACCES);
+    mu_assert("errno changed on open fail", sh->last_errno == EACCES);
     mu_assert("last_error_op changed on open fail", strcmp(sh->last_err_op, "open") == 0);
 
     unlink_hds(pipe_head);
@@ -1151,7 +1153,7 @@ static int test_heredoc_readline_fail_errno_unchanged(void)
 
     int result = set_here_docs(sh, pipe_head);
     mu_assert("set_here_docs failed", result == -1);
-    mu_assert("errno changed on readline fail", errno == ENOMEM);
+    mu_assert("errno changed on readline fail", sh->last_errno == ENOMEM);
     mu_assert("last_error_op changed on readline fail", strcmp(sh->last_err_op, "readline") == 0);
 
     unlink_hds(pipe_head);
@@ -1176,7 +1178,7 @@ static int test_heredoc_read_proc_stat_fail(void)
 
     int result = set_here_docs(sh, pipe_head);
     mu_assert("set_here_docs failed", result == -1);
-    // mu_assert("errno changed on /proc/stat read fail", errno == EACCES);
+    mu_assert("errno changed on /proc/stat read fail", sh->last_errno == EACCES);
     // mu_assert("last_error_op changed on /proc/stat read fail", strcmp(sh->last_err_op, "read") == 0);
 
     unlink_hds(pipe_head);
