@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell_init.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/01/16 12:30:17 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/18 00:17:09 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,12 @@ int init_minishell(t_shell **minishell,char **envp)
 	*minishell = ft_calloc(sizeof(t_shell),1);
 	if(!minishell)
 		return (MALLOC_ERROR);
+	(*minishell)->term_token = ft_calloc(sizeof(t_term_token), 1);
+	if (!(*minishell)->term_token)
 	(*minishell)->env = init_envp(envp);
-	//print_env(envp);
-	print_env_list((*minishell)->env);
-	return(1);
+	(*minishell)->local_var = malloc(sizeof(t_vector));
+	if (!(*minishell)->local_var)
+		return (MALLOC_ERROR);
+	
+	return(SUCCESS);
 }

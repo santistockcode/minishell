@@ -19,6 +19,7 @@
 #include "env.h"
 #include "exec.h"
 #include "syswrap.h"
+#include "token_struct.h"
 
 
 extern volatile sig_atomic_t exit_status;
@@ -30,10 +31,20 @@ typedef struct s_env
      char            *value;
 }   t_env;
 
+typedef struct s_vector
+{
+	size_t	size;
+	size_t	capacity;
+	size_t	elem_size;
+	void	*data;
+}	t_vector;
+
 
 typedef struct s_shell
 {
 	t_list	*env;
+	t_vector			*local_var;
+	t_term_token		*term_token;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
 	char	*last_err_op; // last operation that caused an error
