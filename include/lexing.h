@@ -1,36 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.h                                              :+:      :+:    :+:   */
+/*   lexing.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/18 18:06:55 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:06:56 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/01/18 18:06:38 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/01/18 20:41:51 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ENVP_H
-# define ENVP_H
+#ifndef LEXING_H
+# define LEXING_H
 
-typedef struct s_shell	t_shell;
-typedef struct s_list	t_list;
-typedef struct s_env	t_env;
+#include "minishell.h";
 
-// INIT
+# define NO_QUOTE 0
+# define SINGLE_QUOTE 1
+# define DOUBLE_QUOTE 2
+# define BREAK 4
+# define INVALID_STR -1
 
-t_list *init_envp(char **envp);
-t_env *init_node(char *str);
 
-//PRINT VALUES
-void	print_env_list(t_list *env);
+int lexing(t_shell	* minishell);
 
-//FREES
-void free_env(t_env *aux);
-void free_list(t_list **env);
 
-//EXPORT
 
-//UNSET
 
 #endif

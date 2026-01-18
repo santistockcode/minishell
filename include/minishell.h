@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/01/18 18:13:06 by mnieto-m         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 #define _POSIX_C_SOURCE 200809L
@@ -20,6 +32,7 @@
 #include "exec.h"
 #include "syswrap.h"
 #include "token_struct.h"
+#include "lexing.h"
 
 
 extern volatile sig_atomic_t exit_status;

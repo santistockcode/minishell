@@ -1,36 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.h                                              :+:      :+:    :+:   */
+/*   free_lexing.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/18 18:06:55 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:06:56 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/01/18 19:28:12 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/01/18 19:39:49 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ENVP_H
-# define ENVP_H
+#include "../../include/minishell.h"
 
-typedef struct s_shell	t_shell;
-typedef struct s_list	t_list;
-typedef struct s_env	t_env;
-
-// INIT
-
-t_list *init_envp(char **envp);
-t_env *init_node(char *str);
-
-//PRINT VALUES
-void	print_env_list(t_list *env);
-
-//FREES
-void free_env(t_env *aux);
-void free_list(t_list **env);
-
-//EXPORT
-
-//UNSET
-
-#endif
+void free_tokens(t_vector *token_array)
+{
+	size_t i;
+	t_token *token;
+	
+	i = 0;
+	while(i< token_array->size)
+	{
+		token = *(t_token **)ft_vector_get(token_array,i);
+		free(token->value);
+		free(token);
+		i++;
+	}
+	ft_vector_free(token_array);
+	free(token_array);
+}

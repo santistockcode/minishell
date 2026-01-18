@@ -6,11 +6,11 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 00:00:53 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 00:01:13 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/18 17:18:29 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/minishell.h"
+#include "../../include/minishell.h"
 
 void	ft_vector_init(t_vector *vector, size_t elem_size)
 {

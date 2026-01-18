@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing.h                                          :+:      :+:    :+:   */
+/*   token_struct.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 22:43:36 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/17 22:44:09 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/18 18:17:58 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "minishell.h"
+#ifndef TOKEN_STRUCT_H
+# define TOKEN_STRUCT_H
 
 typedef enum e_token_type
 {
@@ -51,3 +52,9 @@ typedef struct s_term_token
 	t_vector		*token_array;
 }	t_term_token;
 
+void	ft_vector_init(t_vector *vector, size_t elem_size);
+void	ft_vector_free(t_vector *vector);
+int	ft_vector_push(t_vector *vector, const void *elem);
+void	*ft_vector_get(t_vector *vector, size_t index);
+
+#endif

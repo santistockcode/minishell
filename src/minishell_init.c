@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/01/18 00:17:09 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/18 17:26:28 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,5 @@ int init_minishell(t_shell **minishell,char **envp)
 	(*minishell)->local_var = malloc(sizeof(t_vector));
 	if (!(*minishell)->local_var)
 		return (MALLOC_ERROR);
-	
 	return(SUCCESS);
 }
