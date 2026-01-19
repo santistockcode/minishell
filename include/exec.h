@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:34:52 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/19 19:35:38 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,33 @@ typedef struct s_redir
 	int				quoted;
 }					t_redir;
 
+
+typedef enum e_stage_type
+{
+	FIRST = 0,
+	MIDDLE = 1,
+	LAST = 2
+}					t_stage_type;
+
+
+/*
+** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
+*/
+typedef enum e_out_mode
+{
+	OM_PIPE = 0,
+	OM_TRUNC = 1,
+	OM_APPEND = 2
+}					t_out_mode;
+
+
+typedef struct s_stage_io
+{
+	int			in_fd; // input fd (or -1 if none)
+	int			out_fd; // output fd (or -1 if none)
+	t_out_mode	out_mode; // how the output was opened
+}					t_stage_io;
+
 // one simple command in a pipeline
 /* One simple command in a pipeline
 ** - argv: NULL-terminated vector (already de-quoted by parser)
@@ -50,6 +77,7 @@ typedef struct s_cmd
 {
 	char			**argv;
 	t_list			*redirs;
+	t_stage_io		*stage_io; // do not use, never leaves exec part not NULL
 }					t_cmd;
 
 /* Backend */
@@ -67,27 +95,12 @@ void				free_cmds(t_list *cmd_first);
 int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 						int nstages);
 
-/*
-** Use an I/O descriptor to avoid 5+ arguments and keep clarity.
-*/
-typedef enum e_out_mode
-{
-	OM_PIPE = 0,
-	OM_TRUNC = 1,
-	OM_APPEND = 2
-}					t_out_mode;
 
-typedef struct s_stage_io
-{
-	int			in_fd; // input fd (or -1 if none)
-	int			out_fd; // output fd (or -1 if none)
-	t_out_mode	out_mode; // how the output was opened
-}					t_stage_io;
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
-int msh_exec_stage(t_shell *sh, t_cmd *cmd,
-    const t_stage_io *io, t_list *env, int *p);
+int msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
+
 
 /*Execute simple command (no pipelines involved)*/
 int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
@@ -137,6 +150,8 @@ int msh_status_from_execve_error(int err);
 #define STATUS_CMD_NOT_FOUND 127
 #define STATUS_CMD_NOT_EXEC 126
 # define DUP2_OP "dup2"
+
+
 
 // TODO: errors in execution part
 

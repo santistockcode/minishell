@@ -54,7 +54,7 @@ class UnitTestRunner:
             "test_exec_cmds.c": [
                 "exec_cmds.c", "exec_single_cmd.c", "free_cmds.c",
                 "syswrap.c", "exec_errors.c", "set_here_docs.c", "unlink_hds.c",
-                "expand_hd.c", "expand_hd_utils.c", "signals.c", "crtl.c", "exec_utils.c", "logger.c", "tuberiex.c"
+                "expand_hd.c", "expand_hd_utils.c", "signals.c", "crtl.c", "exec_utils.c", "logger.c", "tuberiex.c", "exec_stage.c", "exec_stage_utils.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c", "logger.c"
@@ -64,7 +64,7 @@ class UnitTestRunner:
             ],
             "test_unlink_hds.c": [
                 "unlink_hds.c", "syswrap.c", "free_cmds.c", "logger.c",
-                "tuberiex.c", "exec_utils.c", "exec_errors.c"
+                "tuberiex.c", "exec_utils.c", "exec_errors.c", "exec_stage.c", "exec_stage_utils.c"
             ],
             "test_exec_errors.c": [
                 "exec_errors.c", "syswrap.c", "logger.c"
