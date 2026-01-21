@@ -42,8 +42,13 @@ envp/env_init \
 envp/print_env \
 envp/free_env \
 envp/export \
-envp/unset
-
+envp/unset\
+lexing/lexing\
+lexing/ft_vector\
+lexing/init_lexing\
+lexing/free_lexing\
+lexing/automa_lexing\
+lexing/assing_lexing
 
 
 # Files add
