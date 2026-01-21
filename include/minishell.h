@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:13:06 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/21 01:47:44 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 # include "../Libft/include/libft.h"
 #include "log.h"

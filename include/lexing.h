@@ -6,14 +6,14 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:38 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 20:41:51 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/20 22:54:34 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXING_H
 # define LEXING_H
 
-#include "minishell.h";
+#include "minishell.h"
 
 # define NO_QUOTE 0
 # define SINGLE_QUOTE 1

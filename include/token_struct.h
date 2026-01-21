@@ -6,12 +6,16 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 22:43:36 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:17:58 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/20 22:54:23 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TOKEN_STRUCT_H
 # define TOKEN_STRUCT_H
+
+typedef struct s_shell	t_shell;
+typedef struct s_list	t_list;
+typedef struct s_vector	t_vector;
 
 typedef enum e_token_type
 {
