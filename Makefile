@@ -38,6 +38,8 @@ crtl \
 signals \
 minishell_init \
 tuberiex \
+exec_stage \
+exec_stage_utils \
 envp/env_init \
 envp/print_env \
 envp/free_env \

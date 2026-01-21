@@ -1,5 +1,6 @@
 #include "test_helpers.h"
 #include "../../Libft/include/libft.h"
+#include "../../include/minishell.h"
 #include <stdlib.h>
 #include <string.h>
 
