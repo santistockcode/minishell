@@ -6,11 +6,34 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:05:36 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/21 08:09:07 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/22 08:39:43 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
+
+char	*ft_strjoin_prot(char const *str1, char const *str2)
+{
+	char	*r_join;
+	int		i;
+
+	i = 0;
+	if (str1 == NULL && str2 == NULL)
+		return (NULL);
+	r_join = (char *)malloc((ft_strlen(str1)
+				+ ft_strlen(str2) + 1) * sizeof(char));
+	if (r_join == NULL)
+		return (NULL);
+	if (str1)
+	{
+		while (*str1)
+			r_join[i++] = *str1++;
+	}
+	while (*str2)
+		r_join[i++] = *str2++;
+	r_join[i] = '\0';
+	return (r_join);
+}
 
 void	safe_close_p(int *p)
 {
@@ -33,7 +56,8 @@ void	ft_split_free(char **paths)
 		free(*tmp);
 		tmp++;
 	}
-	free(paths);
+	if (paths)
+		free(paths);
 }
 
 const char	*get_path_envp(t_list *env)

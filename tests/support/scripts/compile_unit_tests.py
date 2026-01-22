@@ -69,6 +69,10 @@ class UnitTestRunner:
             "test_exec_errors.c": [
                 "exec_errors.c", "syswrap.c", "logger.c"
             ],
+            "test_exec_stage.c": [
+                "exec_stage.c", "exec_stage_utils.c", "syswrap.c", "logger.c", 
+                "exec_errors.c", "exec_utils.c"
+            ]
         }
         
         deps = deps_map.get(test_file.name, [])
@@ -96,7 +100,7 @@ class UnitTestRunner:
         ]
         
         if self.debug:
-            cmd.extend(["-g3", "-DDEBUG"])
+            cmd.extend(["-g3", "-DDEBUG", "-fsanitize=address,undefined"])
         
         cmd.extend([
             f"-I{include_dir}",
