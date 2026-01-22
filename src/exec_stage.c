@@ -149,6 +149,10 @@ char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh, int *acc_ret)
 }
 
 // returns path on found or NULL on not found and errors (sh->errno already set)
+/*
+This function resolves the path of a command by checking if it's directly accessible
+ or by searching in the PATH environment variable.
+*/
 char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 {
 	char	*path;
@@ -158,12 +162,13 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	return (NULL);
 	acc_ret = access_wrap(args[0], 0);
 	if (acc_ret == 0)
-		path = ft_strdup(args[0]);
-	else if (acc_ret == -1 && errno != ENOENT)
 	{
-		msh_set_error(sh, ACCESS_OP);
-		return (NULL);
+		path = ft_strdup(args[0]);
+		if (!path)
+			return (msh_set_error(sh, MALLOC_OP), NULL);
 	}
+	else if (acc_ret == -1 && errno != ENOENT)
+		return (msh_set_error(sh, ACCESS_OP), NULL);
 	else
 	{
 		acc_ret = 0;
@@ -171,7 +176,6 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	}
 	if (!path && acc_ret <= 0)
 		return (NULL);
-	dprintf(STDERR_FILENO, "[msh_resolve_path]Path=: %s\n", path);
 	return (path);
 }
 
@@ -212,3 +216,4 @@ int	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	free(path);
 	exit(EXIT_FAILURE); // TODO: pending testing, when does code reaches here?
 }
+

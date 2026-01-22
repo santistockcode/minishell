@@ -64,7 +64,6 @@ const char	*get_path_envp(t_list *env)
 {
 	t_env	*env_var;
 
-	dprintf(STDERR_FILENO, "[get_path_envp]: Searching for PATH\n");
 	while (env)
 	{
 		env_var = (t_env *)env->content;

@@ -71,7 +71,7 @@ class UnitTestRunner:
             ],
             "test_exec_stage.c": [
                 "exec_stage.c", "exec_stage_utils.c", "syswrap.c", "logger.c", 
-                "exec_errors.c", "exec_utils.c"
+                "exec_errors.c", "exec_utils.c", "free_cmds.c"
             ]
         }
         
