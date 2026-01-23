@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/22 08:38:39 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/23 08:34:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,8 @@ int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
-int msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
+void msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
+void    safe_close_redirs(t_list *redirs);
 
 
 /*Execute simple command (no pipelines involved)*/

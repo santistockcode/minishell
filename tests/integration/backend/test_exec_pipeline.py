@@ -35,8 +35,8 @@ def test_echo_something_and_pipe_to_wc_happy_path(test_runner_tty):
     test_runner_tty.sendline("ADD_CMD 1 1 wc")
     test_runner_tty.expect("OK")
 
-    # Add redirection: output of wc to file test_output5
-    test_runner_tty.sendline("ADD_REDIR 1 1 0 test_output5 0")
+    # Add redirection: output of wc to file test_output42
+    test_runner_tty.sendline("ADD_REDIR 1 1 0 test_output42 0")
     test_runner_tty.expect("OK")
 
     # Set environment variables
@@ -53,13 +53,14 @@ def test_echo_something_and_pipe_to_wc_happy_path(test_runner_tty):
     test_runner_tty.sendline("EXEC_PIPELINE")
     test_runner_tty.expect("RESULT 0")
 
-
     # # Cleanup
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-    # output_file = Path("test_output5")
+    # output_file = Path("test_output42")
     # output_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
 
 
 # cmd > output1 > output2 creates both files

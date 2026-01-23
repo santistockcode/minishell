@@ -312,20 +312,20 @@ int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd)
 	int status;
 	int *p;
 
-	pid = fork_wrap();
+	pid = fork_wrap(); // from here, better to just exit
 	p = NULL;
 	if (pid < 0)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
+		fprintf(stderr, "[do_last_command]: Fork created for last command\n");
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs) == -1)
-			return (safe_close_redirs(redirs), -1);
+			return (safe_close_redirs(redirs), -1); // fixme: should exit here
 		cmd->stage_io = prepare_stage_io(LAST, redirs, last_fd, p);
 		if (!cmd->stage_io)
-			return (safe_close_redirs(redirs), -1);
-		if (msh_exec_stage(sh, cmd, sh->env, p) == (-1))
-			return (safe_close_redirs(redirs), free(cmd->stage_io), cmd->stage_io = 0, (-1));
+			return (safe_close_redirs(redirs), -1); // fixme: should exit here
+		msh_exec_stage(sh, cmd, sh->env, p);
 	}
 	safe_close(last_fd);
 	waitpid(pid, &status, 0);
@@ -346,16 +346,15 @@ int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 	pid = fork_wrap();
 	if (pid < 0)
 		return (msh_set_error(sh, FORK_OP), -1);
-	logger("do_middle_commands", "Fork created for middle command");
 	if (pid == 0)
 	{
+		fprintf(stderr, "[do_middle_commands]: Fork created for middle command\n");
 		redirs = cmd->redirs;
 		rdr_spec = prepare_stage_io(MIDDLE, redirs, in_fd, p);
 		if (!rdr_spec)
-			return (safe_close_redirs(redirs), -1);
+			return (safe_close_redirs(redirs), -1); // fixme: should exit here
 		cmd->stage_io = rdr_spec;
-		if (msh_exec_stage(sh, cmd, sh->env, p) == (-1))
-			return (safe_close_redirs(redirs), free(rdr_spec), -1);
+		msh_exec_stage(sh, cmd, sh->env, p);
 	}
 	safe_close(in_fd);
 	safe_close(p[1]);
@@ -373,17 +372,15 @@ int do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		logger("do_first_command", "Fork created for first command, I'm in child");
+		fprintf(stderr, "[do_first_command]: Fork created for first command\n");
 		redirs = cmd->redirs;
-		logger("do_first_command", "Preparing redirections");
 		if (prepare_redirs(redirs) == -1)
-			return (safe_close_redirs(redirs), -1);
+			return (safe_close_redirs(redirs), -1); // fixme: should exit here
 		rdr_spec = prepare_stage_io(FIRST, redirs, -1, p);
 		if (!rdr_spec)
-			return (safe_close_redirs(redirs), -1);
+			return (safe_close_redirs(redirs), -1); // fixme: should exit here
 		cmd->stage_io = rdr_spec;
-		if (msh_exec_stage(sh, cmd, sh->env, p) == (-1))
-			return (safe_close_redirs(redirs), -1);
+		msh_exec_stage(sh, cmd, sh->env, p);
 	}
 	safe_close(p[1]);
 	return (0);
@@ -489,6 +486,7 @@ void detailed_logger(t_list *cmd_first)
 		current = current->next;
 	}
 }
+
 
 int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 {

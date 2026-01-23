@@ -9,7 +9,7 @@ volatile sig_atomic_t exit_status = 0;
 void	safe_close_p(int *p);
 char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh, int *acc_ret);
 char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh);
-int	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
+void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
 
 // ============================================================================
 // Generic access mock generator
@@ -66,6 +66,89 @@ static void teardown_access_mock(void)
     g_access_mock.call_count = 0;
     g_access_mock.fail_at = 0;
     syswrap_set_access(NULL);
+}
+
+
+// ============================================================================
+// Generic dup2 mock generator
+// ============================================================================
+
+typedef struct s_dup2_mock {
+    int call_count;
+    int fail_at;
+} t_dup2_mock;
+
+static t_dup2_mock g_dup2_mock = {0, 0};
+
+static int dup2_mock(int oldfd, int newfd)
+{
+    (void)oldfd;
+    (void)newfd;
+    g_dup2_mock.call_count++;
+    if (g_dup2_mock.call_count == g_dup2_mock.fail_at)
+    {
+        errno = EBADF; // Bad file descriptor
+        return -1;
+    }
+    return dup2(oldfd, newfd);
+}
+
+static void setup_dup2_mock(int fail_at)
+{
+    g_dup2_mock.call_count = 0;
+    g_dup2_mock.fail_at = fail_at;
+    syswrap_set_dup2((t_dup2_fn)dup2_mock);
+}
+
+static void teardown_dup2_mock(void)
+{
+    g_dup2_mock.call_count = 0;
+    g_dup2_mock.fail_at = 0;
+    syswrap_set_dup2(NULL);
+}
+
+// ============================================================================
+// Generic execve mock generator
+// ============================================================================
+
+typedef struct s_execve_mock {
+    int call_count;
+    int fail_at;
+    int failure_type;
+} t_execve_mock;
+
+static t_execve_mock g_execve_mock = {0, 0};
+
+static int execve_mock(const char *pathname, char *const argv[], char *const envp[])
+{
+    (void)pathname;
+    (void)argv;
+    (void)envp;
+    g_execve_mock.call_count++;
+    if (g_execve_mock.call_count == g_execve_mock.fail_at)
+    {
+        if (g_execve_mock.failure_type == 126)
+            errno = EACCES;
+        else if (g_execve_mock.failure_type == 127)
+            errno = ENOENT;
+        return -1;
+    }
+    return 0;
+}
+
+static void setup_execve_mock(int fail_at, int failure_type)
+{
+    g_execve_mock.call_count = 0;
+    g_execve_mock.fail_at = fail_at;
+    g_execve_mock.failure_type = failure_type;
+    syswrap_set_execve((t_execve_fn)execve_mock);
+}
+
+static void teardown_execve_mock(void)
+{
+    g_execve_mock.call_count = 0;
+    g_execve_mock.fail_at = 0;
+    syswrap_set_execve(NULL);
 }
 
 static int test_msh_path_from_cmd_name_returns_0_on_not_found_command(void)
@@ -401,6 +484,22 @@ int main(void)
     mu_run_test(test_msh_resolve_path_access_succeeds_at_direct_call);
     mu_run_test(test_msh_resolve_path_happy_path_found_in_path);
     mu_run_test(test_msh_resolve_path_happy_path_found_in_args0);
+
+    // NEXT: 
+    // FIXME: should exec_pipeline return status from last commnad? does it?
+
+    // TODO: decide correct example for direct access failure in exec_stage
+    // what happens if command is ./my-custom-command.sh but have no access? should iterate over path?
+
+    // TODO: norminette exec_stage
+
+    // msh_exec_stage
+    // exits on dup2 failure first call
+    // exits on dup2 failure second call
+    // exits on execve failure 126
+    // exits on execve failure 127
+
+    // test child process leaks
 
     mu_summary();
     return 0;

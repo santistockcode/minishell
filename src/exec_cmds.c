@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_cmds.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:38:06 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/23 07:31:25 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,11 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	}
 	if (nstages > 1)
 	{
+		sh->last_errno = 0;
 		logger("exec_cmds", "Executing pipeline with more than 1 stage");
 		if (msh_exec_pipeline(sh, cmd_first, nstages) == -1)
 		{
 			logger("exec_cmds", "Failed to execute pipeline");
-			// FIXME: decide proper status code
-			sh->last_status = exit_status;
 			msh_print_last_error(sh);
 			unlink_hds(cmd_first);
 			return (1);

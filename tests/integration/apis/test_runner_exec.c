@@ -394,7 +394,7 @@ int main(void)
         }
         else
         {
-            printf("ERROR: Unknown command: %s\n", line);
+            printf("ERROR: Unknown command test runner: %s\n", line);
             fflush(stdout);
         }
     }
