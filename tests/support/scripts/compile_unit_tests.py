@@ -107,7 +107,7 @@ class UnitTestRunner:
         ]
         
         if self.debug:
-            cmd.extend(["-g3", "-DDEBUG", "-fsanitize=address,undefined"])
+            cmd.extend(["-g3", "-DDEBUG"])
         
         cmd.extend([
             f"-I{include_dir}",

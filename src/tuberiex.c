@@ -277,6 +277,43 @@ int prepare_redirs(t_list *redirs)
     return (0);
 }
 
+int msh_save_fds(int *save_in, int *save_out, int *save_err)
+{
+    *save_in = dup(STDIN_FILENO);
+    *save_out = dup(STDOUT_FILENO);
+    *save_err = dup(STDERR_FILENO);
+    if (*save_in == -1 || *save_out == -1 || *save_err == -1)
+    {
+        if (*save_in != -1) close(*save_in);
+        if (*save_out != -1) close(*save_out);
+        if (*save_err != -1) close(*save_err);
+        return (-1);
+    }
+    return (0);
+}
+
+void msh_restore_fds(int save_in, int save_out, int save_err)
+{
+    if (save_in != -1)
+    {
+        dup2(save_in, STDIN_FILENO);
+        close(save_in);
+    }
+    if (save_out != -1)
+    {
+        dup2(save_out, STDOUT_FILENO);
+        close(save_out);
+    }
+    if (save_err != -1)
+    {
+        dup2(save_err, STDERR_FILENO);
+        close(save_err);
+    }
+}
+
+// FIXME: what should happen in echo "example test" > outfile | sleep 3
+// The output redirection should be set up correctly for the pipeline
+
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p)
 {
 	t_stage_io *rdr_spec;
@@ -319,10 +356,10 @@ int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		//fprintf(stderr, "[do_last_command]: Fork created for last command\n");
+		//FIXME: need to save og fds?
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs) == -1)
-			return (safe_close_redirs(redirs), -1); // fixme: should exit here
+			return (safe_close_redirs(redirs), -1); // fixme: should NOT exit here
 		cmd->stage_io = prepare_stage_io(LAST, redirs, last_fd, p);
 		if (!cmd->stage_io)
 			return (safe_close_redirs(redirs), -1); // fixme: should exit here
@@ -351,7 +388,7 @@ int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		//fprintf(stderr, "[do_middle_commands]: Fork created for middle command\n");
+		//FIXME: need to save og fds?
 		redirs = cmd->redirs;
 		rdr_spec = prepare_stage_io(MIDDLE, redirs, in_fd, p);
 		if (!rdr_spec)
@@ -375,7 +412,7 @@ int do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0) // child process, should exit
 	{
-		//fprintf(stderr, "[do_first_command]: Fork created for first command\n");
+		msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs) == -1)
 			return (safe_close_redirs(redirs), -1); // fixme: should exit here

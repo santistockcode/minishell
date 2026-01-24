@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/24 13:15:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/24 16:33:38 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,8 @@ int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 void msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
 
 void    safe_close_redirs(t_list *redirs); // pending review
+int msh_save_fds(int *save_in, int *save_out, int *save_err); // pending review
+void msh_restore_fds(int save_in, int save_out, int save_err); // pending review
 
 // pending review
 int		is_builtin(char *cmd);

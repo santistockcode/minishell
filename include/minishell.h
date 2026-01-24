@@ -38,6 +38,9 @@ typedef struct s_shell
 	int		should_exit; // 1 if shell should exit so you can clean up
 	char	*last_err_op; // last operation that caused an error
 	int		last_errno; // last errno value
+	int		save_in; // only to be used by exec part
+	int		save_out; // only to be used by exec part
+	int		save_err; // only to be used by exec part
 }			t_shell;
 
 

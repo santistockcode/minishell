@@ -13,9 +13,4 @@ void    free_env_struct(void *env);
 void    free_shell(t_shell *sh);
 t_shell *create_test_shell(const char **test_env, int last_status);
 
-
-int		msh_apply_redirs(int *save_in, int *save_out, int *save_err);
-
-void			msh_restore_stdio(int save_in, int save_out, int save_err);
-
 #endif
