@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/23 08:38:01 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/24 13:14:58 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,10 @@ void		ft_split_free(char **paths);
 const char	*get_path_envp(t_list *env);
 char	*ft_strjoin_prot(char const *str1, char const *str2);
 void    safe_close_redirs(t_list *redirs);
-
+int		is_builtin(char *cmd);
+int		exec_builtin(t_cmd *cmd, t_shell *sh);
+void	free_cmd_struct(void *input);
+void free_shell_child(t_shell *sh);
 
 char *const	*envp_from_env_list(t_list *env)
 {
@@ -180,6 +183,36 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	return (path);
 }
 
+void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
+{
+	safe_close_p(p);
+	safe_close_redirs(cmd->redirs);
+	free((t_stage_io *) cmd->stage_io);
+	msh_print_last_error(sh);
+	free_shell_child(sh);
+	free_cmd_struct(cmd);
+	exit(exit_code);
+}
+
+
+void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
+{
+	const t_stage_io	*rdr_spec;
+
+	rdr_spec = cmd->stage_io;
+	if (rdr_spec->in_fd != -1)
+		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
+			{
+				msh_set_error(sh, DUP2_OP);
+				stage_exit(sh, cmd, p, EXIT_FAILURE);
+			}
+	if (rdr_spec->out_fd != -1)
+		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
+		{
+			msh_set_error(sh, DUP2_OP);
+			stage_exit(sh, cmd, p, EXIT_FAILURE);
+		}
+}
 
 // Entry point for execution
 /*
@@ -199,65 +232,39 @@ Before exiting:
 */
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
-	const t_stage_io	*rdr_spec;
 	char				*path;
 	int					st;
 
-	rdr_spec = cmd->stage_io;
-	if (rdr_spec->in_fd != -1)
-		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
-			{
-				safe_close_p(p);
-				safe_close_redirs(cmd->redirs);
-				free((void *) rdr_spec);
-				msh_set_error(sh, DUP2_OP);
-				msh_print_last_error(sh);
-				exit(EXIT_FAILURE);
-			}
-	if (rdr_spec->out_fd != -1)
-		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
-		{
-			safe_close_p(p);
-			safe_close_redirs(cmd->redirs);
-			free((void *) rdr_spec);
-			msh_set_error(sh, DUP2_OP);
-			msh_print_last_error(sh);
-			exit(EXIT_FAILURE);
-		}
+	dup2_stage_io(sh, cmd, p);
 	path = msh_resolve_path(cmd->argv, env, sh);
 	if (!path)
 	{
-		safe_close_p(p);
-		safe_close_redirs(cmd->redirs);
-		free((void *) rdr_spec);
 		if (ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
 		{
 			dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' memory allocation failed\n", cmd->argv[0]);
-			msh_print_last_error(sh);
-			exit(EXIT_FAILURE);
+			stage_exit(sh, cmd, p, EXIT_FAILURE);
 		}
 		if (sh->last_errno == EACCES)
 		{
 			dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' permission denied\n", cmd->argv[0]);
-			msh_print_last_error(sh);
-			exit(126);
+			stage_exit(sh, cmd, p, 126);
 		}
 		dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' command not found\n", cmd->argv[0]);
 		msh_set_error(sh, cmd->argv[0]);
-		msh_print_last_error(sh);
-		exit(127);
+		stage_exit(sh, cmd, p, 127);
 	}
-	if (execve_wrap(path, cmd->argv, envp_from_env_list(env)) == -1)
+	if (is_builtin(cmd->argv[0]))
 	{
-		safe_close_p(p);
-		safe_close_redirs(cmd->redirs);
-		free((void *) rdr_spec);
+    	st = exec_builtin(cmd, sh);
+    	exit(st & 0xff);
+	}
+	else if (execve_wrap(path, cmd->argv, envp_from_env_list(env)) == -1)
+	{
 		dprintf(STDERR_FILENO, "[msh_exec_stage]: execve failed\n");
+		free(path);
 		st = msh_status_from_execve_error(errno);
 		msh_set_error(sh, EXECVE_OP);
-		msh_print_last_error(sh);
-		free(path);
-		exit(st);
+		stage_exit(sh, cmd, p, st);
 	}
 	free(path);
 	exit(EXIT_FAILURE);

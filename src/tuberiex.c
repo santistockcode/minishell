@@ -311,6 +311,7 @@ int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd)
 	t_list *redirs;
 	int status;
 	int *p;
+	int wtpd_resp;
 
 	pid = fork_wrap(); // from here, better to just exit
 	p = NULL;
@@ -318,7 +319,7 @@ int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		fprintf(stderr, "[do_last_command]: Fork created for last command\n");
+		//fprintf(stderr, "[do_last_command]: Fork created for last command\n");
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs) == -1)
 			return (safe_close_redirs(redirs), -1); // fixme: should exit here
@@ -328,10 +329,12 @@ int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd)
 		msh_exec_stage(sh, cmd, sh->env, p);
 	}
 	safe_close(last_fd);
-	waitpid(pid, &status, 0);
+	wtpd_resp = waitpid(pid, &status, 0);
+	if (wtpd_resp == -1)
+		return (msh_set_error(sh, WAITPID_OP), -1);
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
-	return (1);
+	return (-1); // unknown error
 }
 
 // FIXME: turns out you can have a > redir in the middle of a pipeline (fuck)
@@ -348,7 +351,7 @@ int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 		return (msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		fprintf(stderr, "[do_middle_commands]: Fork created for middle command\n");
+		//fprintf(stderr, "[do_middle_commands]: Fork created for middle command\n");
 		redirs = cmd->redirs;
 		rdr_spec = prepare_stage_io(MIDDLE, redirs, in_fd, p);
 		if (!rdr_spec)
@@ -370,9 +373,9 @@ int do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 	pid = fork_wrap();
 	if (pid < 0)
 		return (msh_set_error(sh, FORK_OP), -1);
-	if (pid == 0)
+	if (pid == 0) // child process, should exit
 	{
-		fprintf(stderr, "[do_first_command]: Fork created for first command\n");
+		//fprintf(stderr, "[do_first_command]: Fork created for first command\n");
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs) == -1)
 			return (safe_close_redirs(redirs), -1); // fixme: should exit here
@@ -385,26 +388,6 @@ int do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 	safe_close(p[1]);
 	return (0);
 }
-
-// int		msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
-// 						int *save_out)
-// {
-//     if (!cmd || !save_in || !save_out)
-//         return (-1);
-//     *save_in = dup2(STDIN_FILENO, *save_in);
-//     *save_out = dup2(STDOUT_FILENO, *save_out);
-//     if (*save_in == -1 || *save_out == -1)
-//         return (msh_set_error(NULL, DUP2_OP), -1);
-//     return (0);
-// }
-
-// void			msh_restore_stdio(int save_in, int save_out)
-// {
-//     if (save_in != -1)
-//         dup2(save_in, STDIN_FILENO);
-//     if (save_out != -1)
-//         dup2(save_out, STDOUT_FILENO);
-// }
 
 
 /*

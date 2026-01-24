@@ -39,7 +39,8 @@ signals \
 minishell_init \
 tuberiex \
 exec_stage \
-exec_stage_utils \
+exec_stage_utils1 \
+exec_stage_utils2 \
 envp/env_init \
 envp/print_env \
 envp/free_env \

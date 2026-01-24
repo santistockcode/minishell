@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/23 08:34:40 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/24 13:15:17 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,17 +100,21 @@ int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
 void msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
-void    safe_close_redirs(t_list *redirs);
 
+void    safe_close_redirs(t_list *redirs); // pending review
+
+// pending review
+int		is_builtin(char *cmd);
+int		exec_builtin(t_cmd *cmd, t_shell *sh);
 
 /*Execute simple command (no pipelines involved)*/
 int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
 
 
 // Previous function makes use of:
-int		msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
-						int *save_out);
-void			msh_restore_stdio(int save_in, int save_out);
+// int				msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
+// 						int *save_out);
+// void			msh_restore_stdio(int save_in, int save_out);
 
 /* 
 ** Heredoc (prior to exec commands) 
@@ -136,7 +140,7 @@ void				unlink_hds(t_list *cmds);
 // Basic here_doc part (prior to execution) error handling
 void				msh_set_error(t_shell *sh, const char *op);
 void				msh_print_last_error(t_shell *sh);
-int msh_status_from_execve_error(int err);
+int 				msh_status_from_execve_error(int err);
 
 # define MALLOC_OP "malloc"
 # define READLINE_OP "readline"
@@ -151,6 +155,7 @@ int msh_status_from_execve_error(int err);
 #define STATUS_CMD_NOT_FOUND 127
 #define STATUS_CMD_NOT_EXEC 126
 # define DUP2_OP "dup2"
+# define WAITPID_OP "waitpid"
 
 
 

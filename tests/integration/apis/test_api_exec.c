@@ -583,6 +583,25 @@ int	msh_test_get_redir_quoted(void *ctx_void, int cmd_index, int redir_index)
 	return r->quoted;
 }
 
+const char *msh_test_get_env_value(void *ctx_void, const char *key)
+{
+	t_msh_test_ctx	*ctx = (t_msh_test_ctx *)ctx_void;
+	t_list			*env_iter;
+	t_env			*e;
+
+	if (!ctx || !key)
+		return NULL;
+	env_iter = ctx->sh.env;
+	while (env_iter)
+	{
+		e = (t_env *)env_iter->content;
+		if (e && e->key && strcmp(e->key, key) == 0)
+			return e->value;
+		env_iter = env_iter->next;
+	}
+	return NULL;
+}
+
 void	msh_test_ctx_destroy(void *ctx_void)
 {
 	t_msh_test_ctx	*ctx;

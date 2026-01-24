@@ -36,6 +36,7 @@ t_cmd *new_cmd_from_args(const char *const *argv_in, size_t argc)
     if (!cmd) return NULL;
     cmd->argv = (char **) dup_argv(argv_in, argc);
     cmd->redirs = NULL;
+    cmd->stage_io = NULL;
     return cmd;
 }
 
@@ -95,4 +96,24 @@ t_shell *create_test_shell(const char **test_env, int last_status)
     sh->env = deep_copy_env(test_env);
     sh->last_err_op = NULL;
     return sh;
+}
+
+int		msh_apply_redirs(int *save_in, int *save_out, int *save_err)
+{
+    *save_in = dup2(STDIN_FILENO, *save_in);
+    *save_out = dup2(STDOUT_FILENO, *save_out);
+    *save_err = dup2(STDERR_FILENO, *save_err);
+    if (*save_in == -1 || *save_out == -1 || *save_err == -1)
+        return (-1);
+    return (0);
+}
+
+void			msh_restore_stdio(int save_in, int save_out, int save_err)
+{
+    if (save_in != -1)
+        dup2(save_in, STDIN_FILENO);
+    if (save_out != -1)
+        dup2(save_out, STDOUT_FILENO);
+    if (save_err != -1)
+        dup2(save_err, STDERR_FILENO);
 }

@@ -308,6 +308,25 @@ static void handle_get_redir_target(int cmd_idx, int redir_idx)
     fflush(stdout);
 }
 
+static void handle_get_env_value(const char *args)
+{
+    char key[256];
+    sscanf(args, "%255s", key);
+    if (!g_ctx)
+    {
+        printf("ERROR: No context\n");
+        fflush(stdout);
+        return;
+    }
+
+    const char *value = msh_test_get_env_value(g_ctx, (const char *) key);
+    if (value)
+        printf("VALUE %s\n", value);
+    else
+        printf("VALUE_NULL\n");
+    fflush(stdout);
+}
+
 static void cleanup_builder(void)
 {
     for (int i = 0; i < g_builder.cmd_count; i++)
@@ -376,6 +395,10 @@ int main(void)
             int cmd_idx, redir_idx;
             sscanf(line + 17, "%d %d", &cmd_idx, &redir_idx);
             handle_get_redir_target(cmd_idx, redir_idx);
+        }
+        else if (strncmp(line, "GET_ENV ", 8) == 0)
+        {
+            handle_get_env_value(line + 8);
         }
         else if (strcmp(line, "DESTROY") == 0)
         {
