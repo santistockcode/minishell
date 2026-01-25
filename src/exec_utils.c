@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 12:19:35 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 16:15:51 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 18:13:24 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
 void	exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p)
 {
-	if (ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
+	if (sh->last_err_op && ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 	if (sh->last_errno == EACCES)
 		stage_exit_print(sh, cmd, p, 126);

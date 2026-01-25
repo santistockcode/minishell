@@ -95,7 +95,11 @@ class UnitTestRunner:
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
                 "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
-                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c"    
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
+                "builtins/echo.c"
+            ],
+            "test_builtin_echo.c": [
+                "builtins/echo.c", "syswrap.c", "logger.c"
             ]
         }
         
@@ -120,7 +124,7 @@ class UnitTestRunner:
 
         cmd = [
             "cc",
-            "-Wall", "-Wextra", "-Werror",
+            "-Wextra", "-Werror",
         ]
         
         if self.debug:

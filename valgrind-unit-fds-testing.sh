@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Define the target directory
-directory="./tests/unit/execution/bin"
+directory="tests/unit/execution/bin"
 
 # Check if the target is not a directory
 if [ ! -d "$directory" ]; then
   exit 1
 fi
+
 
 # Loop through files in the target directory
 for file in "$directory"/*; do

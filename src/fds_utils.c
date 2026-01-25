@@ -8,13 +8,13 @@ void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 	const t_stage_io	*rdr_spec;
 
 	rdr_spec = cmd->stage_io;
-	if (rdr_spec->in_fd != -1)
+	if (rdr_spec && rdr_spec->in_fd != -1)
 		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
 			{
 				msh_set_error(sh, DUP2_OP);
 				stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 			}
-	if (rdr_spec->out_fd != -1)
+	if (rdr_spec && rdr_spec->out_fd != -1)
 		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
 		{
 			msh_set_error(sh, DUP2_OP);

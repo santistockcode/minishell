@@ -7,7 +7,8 @@ int         prepare_redirs(t_list *redirs);
 void        safe_close_rd_fds(t_list *redirs);
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p);
 void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
-
+void	safe_close_stage_io(t_stage_io *stage_io);
+void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
 
 int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 {
@@ -22,8 +23,18 @@ int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 		msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 		return (safe_close_rd_fds(redirs), -1);
 	}
+    cmd->stage_io = prepare_stage_io(LAST, redirs, -1, NULL);
+    if (cmd->stage_io == NULL)
+    {
+        msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+        safe_close_rd_fds(redirs);
+        return (msh_set_error(sh, MALLOC_OP), -1);
+    }
+    dup2_stage_io(sh, cmd, NULL);
 	status = exec_builtin(cmd, sh);
-	safe_close_rd_fds(redirs);
+	safe_close_rd_fds(redirs); // TODO: IS THIS CORRECT?
+    safe_close_stage_io(cmd->stage_io); // TODO: IS THIS CORRECT?
+    free(cmd->stage_io);
 	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	return (status);
 }

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 16:16:36 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 20:03:42 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,9 @@ void		stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
 // free cmds
 void		free_envp(const char **envp);
+
+// builtins_orq
+void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
 /*
 Returns: 
@@ -156,9 +159,7 @@ void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 	int		st;
 
 	st = exec_builtin(cmd, sh);
-	// FIXME: If no error should clean and exit without printing
-	stage_exit_print(sh, cmd, p, st);
-	exit(st & 0xff);
+	builtin_stage_exit(sh, cmd, p, st);
 }
 
 // Entry point for execution

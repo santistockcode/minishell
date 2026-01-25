@@ -41,11 +41,31 @@
             ],
             "miDebuggerPath": "/usr/bin/gdb"
         },
-                {
+        {
             "name": "Unit-test exec SIMPLE",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_simple",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Unit-test BUILTIN echo",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_builtin_echo",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -86,6 +106,36 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_stage",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Follow child process on fork",
+                    "text": "set follow-fork-mode child",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Detach parent on fork (optional)",
+                    "text": "set detach-on-fork on",
+                    "ignoreFailures": false
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+                {
+            "name": "Unit-test exec SIMPLE (follow child)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_simple",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 14:52:40 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 18:34:55 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,10 +112,10 @@ void msh_restore_fds(int save_in, int save_out, int save_err);
 // builtins orquestrator
 int		is_builtin(char *cmd);
 int		exec_builtin(t_cmd *cmd, t_shell *sh);
-// Previous function makes use of:
-// int				msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
-// 						int *save_out);
-// void			msh_restore_stdio(int save_in, int save_out);
+
+// FINALLY THE BUILTINS
+void	echo(char **argv, int out_fd);
+
 
 /* 
 ** Heredoc (prior to exec commands) 

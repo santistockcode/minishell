@@ -73,6 +73,7 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         src_dir / "exit_utils.c",
         src_dir / "builtins/export.c",
         src_dir / "builtins/unset.c",
+        src_dir / "builtins/echo.c",
         src_dir / "envp/env_init.c",
         src_dir / "envp/free_env.c",
         src_dir / "builtins_orq.c",

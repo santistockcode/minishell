@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:50:36 by mario             #+#    #+#             */
-/*   Updated: 2026/01/25 16:23:32 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 18:08:56 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void delete_value(t_list *aux, t_list **prev, t_list **env)
 	free(aux);
 }
 
+// FIXME: "unset", "VAR1", "VAR3" should unset BOTH variables
 void	env_unset(t_list **env, char *key)
 {
 	t_list *aux;
