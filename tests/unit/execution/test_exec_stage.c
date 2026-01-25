@@ -3,7 +3,7 @@
 #include "../../support/third_party/minunit.h"
 #include "../../support/c_helpers/test_helpers.h"
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t g_exit_status = 0;
 
 
 void	safe_close_p(int *p);
@@ -14,6 +14,7 @@ t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *
 int prepare_redirs(t_list *redirs);
 int create_mock_pipe_with_data(const char *data);
 void safe_close_stage_io(t_stage_io *stage_io);
+void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p);
 
 
 // ============================================================================
@@ -1753,9 +1754,50 @@ static int test_last_msh_exec_stage_execve_failure_127_with_here_doc(void)
     return (0);
 }
 
-// cmd MIDDLE PLACE
-
-// cmd LAST PLACE
+// msh_exec_builtin_child tests
+static int test_msh_exec_builtin_child_export_success(void)
+{
+    printf("Test: test_msh_exec_builtin_child_export_success\n");
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    int in_fd;
+    t_list *redirs;
+    int p[2];
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    pipe(p);
+    errno = 0;
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"export", "TEST_VAR=test_value", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        redirs = cmd->redirs;
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        prepare_redirs(redirs);
+        t_stage_io *stage_io = prepare_stage_io(FIRST, redirs, -1, p);
+        cmd->stage_io = stage_io;
+        msh_exec_builtin_child(sh, cmd, p);
+        exit(99); // Should never reach here
+    }
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 0", WEXITSTATUS(status), 0);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    return (0);
+}
 
 int main(void)
 {
@@ -1803,6 +1845,9 @@ int main(void)
     mu_run_test(test_last_msh_exec_stage_execve_failure_127_no_redir);
     mu_run_test(test_last_msh_exec_stage_execve_failure_126_with_redirs);
     mu_run_test(test_last_msh_exec_stage_execve_failure_127_with_here_doc);
+    
+    // // msh_exec_builtin_child export happy path
+    mu_run_test(test_msh_exec_builtin_child_export_success);
 
     // test child process leaks using valgrind
     /*

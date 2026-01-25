@@ -1,15 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec_stage_utils1.c                                :+:      :+:    :+:   */
+/*   path_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:05:36 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 08:37:54 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 13:46:48 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+// better name: build path helpers
 #include "../include/minishell.h"
 
 char	*ft_strjoin_prot(char const *str1, char const *str2)
@@ -35,16 +36,28 @@ char	*ft_strjoin_prot(char const *str1, char const *str2)
 	return (r_join);
 }
 
-void	safe_close_p(int *p)
+char	*build_path(const char *dir, const char *file)
 {
-	if (p)
+	char	*path;
+	char	*tmp;
+
+	if (!dir || !file)
+		return (NULL);
+	tmp = ft_strjoin_prot(dir, "/");
+	if (!tmp)
+		return (NULL);
+	path = ft_strjoin_prot(tmp, file);
+	if (!path)
 	{
-		safe_close(p[0]);
-		safe_close(p[1]);
+		free(tmp);
+		return (NULL);
 	}
+	free(tmp);
+	return (path);
 }
 
-void	ft_split_free(char **paths)
+// SPLIT FREEE (but norminette complains so I shortened the name)
+void	ft_spfr(char **paths)
 {
 	char	**tmp;
 

@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t   g_exit_status = 0;
 
 /*
  * Protocol:
@@ -351,7 +351,7 @@ int main(void)
 {
     char line[4096];
     
-    while (fgets(line, sizeof(line), stdin) && exit_status != 130)
+    while (fgets(line, sizeof(line), stdin) && g_exit_status != 130)
     {
         // Remove newline
         line[strcspn(line, "\n")] = 0;
@@ -422,7 +422,7 @@ int main(void)
         }
     }
 
-    if (exit_status == 130)
+    if (g_exit_status == 130)
     {
         // Interrupted by signal
         printf("EXITED_SIGNAL\n");

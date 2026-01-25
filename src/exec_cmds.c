@@ -6,12 +6,12 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/23 15:59:18 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 15:25:09 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-extern volatile sig_atomic_t exit_status;
+extern volatile sig_atomic_t	g_exit_status;
 
 /*
 Returns the exit status of the last command executed in the pipeline.
@@ -27,11 +27,11 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	if (nstages < 1)
 		return (0);
 	logger_ctx(sh, cmd_first, "msh_exec_pipeline", "Entry point");
-	if (set_here_docs(sh, cmd_first) == (-1) || exit_status == 130) // error
+	if (set_here_docs(sh, cmd_first) == (-1) || g_exit_status == 130) // error
 	{
 		logger("exec_cmds", "Failed to set here_docs");
-		if (exit_status == 130)
-			sh->last_status = exit_status;
+		if (g_exit_status == 130)
+			sh->last_status = g_exit_status;
 		else
 			sh->last_status = 1;
 		msh_print_last_error(sh);
@@ -56,6 +56,14 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	}
 	logger("exec_cmds", "Executing simple command");
 	last_pipeline_st = msh_exec_simple(sh, (t_cmd*)cmd_first->content, sh->env);
+	if (last_pipeline_st == -1)
+	{
+		logger("exec_cmds", "Failed to execute simple command (not by a builtin failure)");
+		sh->last_status = 1; // for now I have only use malloc syscalls so 1 is ok
+		msh_print_last_error(sh);
+		unlink_hds(cmd_first);
+		return (1);
+	}
 	unlink_hds(cmd_first);
 	return (last_pipeline_st);
 }

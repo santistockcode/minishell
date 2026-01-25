@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   set_here_docs.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:33:10 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/25 12:31:45 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-extern volatile sig_atomic_t exit_status;
+extern volatile sig_atomic_t g_exit_status;
 
 /*
 Note on syscalls: 
@@ -62,7 +62,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 	char	*line;
 	char	*expanded_line;
 
-	while (1 && exit_status != 130)
+	while (1 && g_exit_status != 130)
 	{
 		line = readline_wrap("> ");
 		if (!line)

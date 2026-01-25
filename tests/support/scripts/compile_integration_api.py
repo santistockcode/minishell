@@ -68,15 +68,23 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         src_dir / "signals.c",
         src_dir / "exec_utils.c",
         src_dir / "logger.c",
-        src_dir / "tuberiex.c",
         src_dir / "exec_stage.c",
-        src_dir / "exec_stage_utils1.c",
-        src_dir / "exec_stage_utils2.c",
-        src_dir / "envp/export.c",
+        src_dir / "path_utils.c",
+        src_dir / "exit_utils.c",
+        src_dir / "builtins/export.c",
+        src_dir / "builtins/unset.c",
         src_dir / "envp/env_init.c",
         src_dir / "envp/free_env.c",
         src_dir / "builtins_orq.c",
-        src_dir / "fds_utils.c"
+        src_dir / "fds_utils.c",
+        src_dir / "exec_pipeline.c",
+        src_dir / "exec_simple.c",
+        src_dir / "do_first_cmd.c",
+        src_dir / "do_middle_cmds.c",
+        src_dir / "do_last_cmd.c",
+        src_dir / "prepare_redirs.c",
+        src_dir / "prepare_stage_io.c",
+        src_dir / "prepare_stage_io_utils.c"
     ]
 
     debug_flag = "-DDEBUG" if debug else ""
@@ -134,7 +142,14 @@ def compile_tty_runner(project_root: Path, debug: bool = False) -> bool:
         src_dir / "signals.c",
         src_dir / "exec_utils.c",
         src_dir / "logger.c",
-        src_dir / "tuberiex.c"
+        src_dir / "exec_pipeline.c",
+        src_dir / "exec_simple.c",
+        src_dir / "do_first_cmd.c",
+        src_dir / "do_middle_cmds.c",
+        src_dir / "do_last_cmd.c",
+        src_dir / "prepare_redirs.c",
+        src_dir / "prepare_stage_io.c",
+        src_dir / "prepare_stage_io_utils.c"
     ]
 
     debug_flag = "-DDEBUG" if debug else ""

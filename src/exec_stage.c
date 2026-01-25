@@ -6,40 +6,41 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 12:06:28 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 16:16:36 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+// exec_utils
+void		exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p);
 
-// stage utils 1
-void		safe_close_p(int *p);
-void		ft_split_free(char **paths);
+// path utils
+void		ft_spfr(char **paths);
 const char	*get_path_envp(t_list *env);
 char		*ft_strjoin_prot(char const *str1, char const *str2);
 char *const	*envp_from_env_list(t_list *env);
+char		*build_path(const char *dir, const char *file);
 
-// stage utils 2
+// fds utils
+void		safe_close_rd_fds(t_list *redirs);
+void		dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
+int			msh_save_fds(int *save_in, int *save_out, int *save_err);
+void		msh_restore_fds(int save_in, int save_out, int save_err);
+
+// exit utils
 void		free_shell_child(t_shell *sh);
 void		free_cmd_struct(void *input);
-char *build_path(const char *dir, const char *file);
-void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
+void		stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
-// exec and file descriptors utils fds_utils.c
-void	safe_close_rd_fds(t_list *redirs);
-void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
-int		msh_save_fds(int *save_in, int *save_out, int *save_err);
-void	msh_restore_fds(int save_in, int save_out, int save_err);
-
-// fre cmds
-void free_envp(const char **envp);
-
+// free cmds
+void		free_envp(const char **envp);
 
 /*
 Returns: 
 - path is the path allocated if found, NULL if not found
-- acc_ret is set to 0 on access didn't fail, -1 on syscall error (access failed ENOENT excluded)
+- acc_ret is set to 0 on access didn't fail, -1 on syscall error 
+(access failed ENOENT excluded)
 - returns -1 if couldn't access, 1 if access succeeded
 - ñapa: if malloc fails on libft call: path is NULL, acc_ret is -2, returns -1
 
@@ -61,9 +62,8 @@ NULL -2 pos -> not possible
 NULL 0 neg -> not possible
 NULL 0 pos -> not possible
 */
-int try_access(char **pre_paths, char **path, char *file, int *acc_ret)
+int	try_access(char **pre_paths, char **path, char *file, int *acc_ret)
 {
-
 	if (!pre_paths || !*pre_paths || !file || !path || !acc_ret)
 		return (*acc_ret = 0, (-1));
 	*path = build_path(*pre_paths, file);
@@ -87,9 +87,11 @@ int try_access(char **pre_paths, char **path, char *file, int *acc_ret)
 /*
 Syscall access needs to be controled. 
 Should return path on found, NULL on not found.
-acc_ret should be set to 0 on success or malloc fail, -1 on error syscall if not ENOENT.
+acc_ret should be set to 0 on success or malloc fail,
+-1 on error syscall if not ENOENT.
 */
-char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh, int *acc_ret)
+char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh,
+	int *acc_ret)
 {
 	char		**all_paths;
 	char		*path;
@@ -107,19 +109,20 @@ char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh, int *acc_ret)
 	while (all_paths && *all_paths)
 	{
 		if (try_access(all_paths, &path, arg, acc_ret) >= 0)
-			return (ft_split_free(paths_start), path);
+			return (ft_spfr(paths_start), path);
 		else if (*acc_ret == (-2))
-			return (msh_set_error(sh, MALLOC_OP), ft_split_free(paths_start), (NULL));
-		else if (*acc_ret == (-1))			
-			return (msh_set_error(sh, ACCESS_OP), ft_split_free(paths_start), (NULL));
+			return (msh_set_error(sh, MALLOC_OP), ft_spfr(paths_start), (NULL));
+		else if (*acc_ret == (-1))
+			return (msh_set_error(sh, ACCESS_OP), ft_spfr(paths_start), (NULL));
 		all_paths++;
 	}
-	return (ft_split_free(paths_start), *acc_ret = 0, (NULL)); // TODO: is correct free here when access fails?
+	return (ft_spfr(paths_start), *acc_ret = 0, (NULL));
 }
 
 // returns path on found or NULL on not found and errors (sh->errno already set)
 /*
-This function resolves the path of a command by checking if it's directly accessible
+This function resolves the path of a command by checking
+if it's directly accessible
  or by searching in the PATH environment variable.
 */
 char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
@@ -128,7 +131,7 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	int		acc_ret;
 
 	if (!args || !args[0] || args[0][0] == '\0')
-	return (NULL);
+		return (NULL);
 	acc_ret = access_wrap(args[0], 0);
 	if (acc_ret == 0)
 	{
@@ -148,34 +151,14 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	return (path);
 }
 
-void msh_exec_not_builtin(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
+void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 {
-	(void)sh;
-	(void)cmd;
-	(void)env;
-	(void)p;
-}
-
-// TODO: use builtins_orq to manage builtin execution
-void	msh_exec_builtin(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
-{
-	int	st;
-	(void)env;
-	(void)p;
+	int		st;
 
 	st = exec_builtin(cmd, sh);
-	// FIXME: handle errors, free memory... and so on
+	// FIXME: If no error should clean and exit without printing
+	stage_exit_print(sh, cmd, p, st);
 	exit(st & 0xff);
-}
-
-void exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p)
-{
-	if (ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
-		stage_exit(sh, cmd, p, EXIT_FAILURE);
-	if (sh->last_errno == EACCES)
-		stage_exit(sh, cmd, p, 126);
-	msh_set_error(sh, cmd->argv[0]);
-	stage_exit(sh, cmd, p, 127);
 }
 
 // Entry point for execution
@@ -201,16 +184,16 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	char *const			*envp;
 
 	dup2_stage_io(sh, cmd, p);
-    path = msh_resolve_path(cmd->argv, env, sh);
+	path = msh_resolve_path(cmd->argv, env, sh);
 	if (!path)
 		exit_from_no_path(sh, cmd, p);
 	if (is_builtin(cmd->argv[0]))
-		msh_exec_builtin(sh, cmd, env, p);
+		msh_exec_builtin_child(sh, cmd, p);
 	envp = envp_from_env_list(env);
 	if (!envp)
 	{
 		free(path);
-		stage_exit(sh, cmd, p, EXIT_FAILURE);
+		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 	}
 	else if (execve_wrap(path, cmd->argv, envp) == -1)
 	{
@@ -218,9 +201,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		free_envp((const char **) envp);
 		st = msh_status_from_execve_error(errno);
 		msh_set_error(sh, EXECVE_OP);
-		stage_exit(sh, cmd, p, st);
+		stage_exit_print(sh, cmd, p, st);
 	}
-	free(path);
 	exit(EXIT_FAILURE);
 }
-	

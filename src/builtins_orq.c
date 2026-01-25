@@ -1,6 +1,7 @@
 #include "../include/minishell.h"
 
-void	env_set(t_list **env, char *var);
+int	env_set(t_list **env, char *var);
+void	env_unset(t_list **env, char *key);
 
 int		is_builtin(char *cmd)
 {
@@ -14,11 +15,13 @@ int		is_builtin(char *cmd)
 	// 	return (1);
 	if (ft_strncmp(cmd, "export", 6) == 0)
 		return (1);
-	// if (ft_strcmp(cmd, "unset") == 0)
-	// 	return (1);
+	if (ft_strncmp(cmd, "unset", 5) == 0)
+		return (1);
 	return (0);
 }
 
+// TODO: better to treat each builtin as independant programm
+// every error has been set, every error has been printed
 int		exec_builtin(t_cmd *cmd, t_shell *sh)
 {
 	int		result;
@@ -33,8 +36,9 @@ int		exec_builtin(t_cmd *cmd, t_shell *sh)
 	// if (ft_strcmp(args[0], "env") == 0)
 	// 	ft_env(mini->env);
 	if (ft_strncmp(cmd->argv[0], "export", 6) == 0)
-		env_set(&sh->env, cmd->argv[1]);
-	// if (ft_strcmp(cmd->argv[0], "unset") == 0)
-	// 	ft_unset(cmd->argv, sh);
+		result = env_set(&sh->env, cmd->argv[1]);
+	if (ft_strncmp(cmd->argv[0], "unset", 5) == 0)
+		env_unset(&sh->env, cmd->argv[1]);
+	// FIXME: on error, set op, errno, last_status, print error
 	return (result);
 }

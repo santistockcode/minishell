@@ -21,7 +21,7 @@
 #include "syswrap.h"
 
 
-extern volatile sig_atomic_t exit_status;
+extern volatile sig_atomic_t g_exit_status;
 
 
 typedef struct s_env

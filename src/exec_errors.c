@@ -6,19 +6,19 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 18:08:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/15 17:26:51 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 12:54:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-int msh_status_from_execve_error(int err)
+int	msh_status_from_execve_error(int err)
 {
-    if (err == ENOENT)
-        return STATUS_CMD_NOT_FOUND; /* 127 */
-    if (err == EACCES || err == EPERM || err == EISDIR || err == ENOEXEC)
-        return STATUS_CMD_NOT_EXEC;  /* 126 */
-    return 1; /* generic error */
+	if (err == ENOENT)
+		return (STATUS_CMD_NOT_FOUND);
+	if (err == EACCES || err == EPERM || err == EISDIR || err == ENOEXEC)
+		return (STATUS_CMD_NOT_EXEC);
+	return (1);
 }
 
 void	msh_set_error(t_shell *sh, const char *op)
@@ -38,10 +38,10 @@ void	msh_set_error(t_shell *sh, const char *op)
 
 void	putstr_fd_err(int n, ...)
 {
-	va_list args;
-	va_start(args, n);
-	int i;
+	va_list	args;
+	int		i;
 
+	va_start(args, n);
 	i = 0;
 	while (i < n)
 	{
@@ -79,7 +79,6 @@ void	msh_print_last_error(t_shell *sh)
 	}
 	sh->last_errno = 0;
 }
-
 
 /*
 In child what to do after execve fails:

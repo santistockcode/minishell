@@ -9,7 +9,7 @@
 #include "../../../include/syswrap.h"
 #include "../../../Libft/include/libft.h"
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t g_exit_status = 0;
 
 /*
 Actions of exec cmds: 
@@ -57,7 +57,7 @@ static int test_on_signal_c_last_status_set_to_130_when_set_here_docs(void)
     ft_lstadd_back(&pipe_head, ft_lstnew(cmd2));
 
     // Simulate Ctrl-C signal during here_doc setup
-    exit_status = 130; // Simulate signal interrupt
+    g_exit_status = 130; // Simulate signal interrupt
 
     exec_cmds(sh, pipe_head);
     unlink_hds(pipe_head);

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 08:20:38 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 14:52:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,32 +87,31 @@ typedef struct s_cmd
 ** command (0 on success), and updates sh->last_status accordingly. 
 */
 int					exec_cmds(t_shell *sh, t_list *cmd_first);
-
 /* Free an entire cmds list, including argv strings, redirs and list nodes. */
 void				free_cmds(t_list *cmd_first);
 
 /* Execute pipeline when there are pipes*/
 int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 						int nstages);
+/*Execute simple command (no pipelines involved)*/
+int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
 
-
+/* Jobs in the pipeline */
+int do_first_command(t_shell *sh, t_cmd *cmd, int *p);
+int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd);
+int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd);
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */
 void msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
 
-// pending review, most likely something like pipeline_utils
+// fds utils
 int msh_save_fds(int *save_in, int *save_out, int *save_err);
 void msh_restore_fds(int save_in, int save_out, int save_err);
 
 // builtins orquestrator
 int		is_builtin(char *cmd);
 int		exec_builtin(t_cmd *cmd, t_shell *sh);
-
-/*Execute simple command (no pipelines involved)*/
-int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
-
-
 // Previous function makes use of:
 // int				msh_apply_redirs_parent(t_cmd *cmd, int *save_in,
 // 						int *save_out);
@@ -157,6 +156,7 @@ int 				msh_status_from_execve_error(int err);
 #define STATUS_CMD_NOT_FOUND 127
 #define STATUS_CMD_NOT_EXEC 126
 # define DUP2_OP "dup2"
+# define DUP_OP "dup"
 # define WAITPID_OP "waitpid"
 
 

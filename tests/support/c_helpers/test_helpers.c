@@ -95,6 +95,7 @@ t_shell *create_test_shell(const char **test_env, int last_status)
     sh->should_exit = 0;
     sh->env = deep_copy_env(test_env);
     sh->last_err_op = NULL;
+    sh->last_errno = 0;
     sh->save_in = -1;
     sh->save_out = -1;
     sh->save_err = -1;

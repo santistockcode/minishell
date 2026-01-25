@@ -12,7 +12,7 @@
 #include "../../include/exec.h"
 #include <stdlib.h>
 #include <string.h>
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t	g_exit_status = 0;
 
 /* You told me you already have this: */
 void	free_cmds(t_list *cmd_first);

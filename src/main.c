@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/01/16 13:28:52 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/25 12:31:28 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t	g_exit_status = 0;
 
 int main(int argc, char** argv,char **envp)
 {

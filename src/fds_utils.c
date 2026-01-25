@@ -1,8 +1,7 @@
 #include "../include/minishell.h"
 
 // exec stage utils 2
-void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
-
+void stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
 void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 {
@@ -13,13 +12,13 @@ void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
 			{
 				msh_set_error(sh, DUP2_OP);
-				stage_exit(sh, cmd, p, EXIT_FAILURE);
+				stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 			}
 	if (rdr_spec->out_fd != -1)
 		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
 		{
 			msh_set_error(sh, DUP2_OP);
-			stage_exit(sh, cmd, p, EXIT_FAILURE);
+			stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 		}
 }
 

@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   crtl.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 22:08:46 by mario             #+#    #+#             */
-/*   Updated: 2026/01/16 17:47:29 by mario            ###   ########.fr       */
+/*   Updated: 2026/01/25 12:30:56 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-extern volatile sig_atomic_t exit_status;
+extern volatile sig_atomic_t g_exit_status;
 
 void	setup_signals_child(void)
 {
@@ -32,7 +32,7 @@ void	ft_ctrl_mini(sig_atomic_t signal)
 	rl_replace_line("", 0);
 	rl_on_new_line();
 	rl_redisplay();
-	exit_status = 130;
+	g_exit_status = 130;
 }
 
 void	ft_ctrl_heredoc(sig_atomic_t signal)
@@ -42,7 +42,7 @@ void	ft_ctrl_heredoc(sig_atomic_t signal)
 	rl_replace_line("", 0);
 	rl_on_new_line();
 	close(STDIN_FILENO);
-	exit_status = 130;
+	g_exit_status = 130;
 }
 
 void	ft_ctrl_quit(sig_atomic_t signal)

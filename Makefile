@@ -37,18 +37,24 @@ exec_utils \
 crtl \
 signals \
 minishell_init \
-tuberiex \
 exec_stage \
-exec_stage_utils1 \
-exec_stage_utils2 \
+path_utils \
+exit_utils \
 envp/env_init \
 envp/print_env \
 envp/free_env \
-envp/export \
-envp/unset \
+builtins/export \
+builtins/unset \
 builtins_orq \
-fds_utils
-
+fds_utils \
+exec_pipeline \
+exec_simple \
+do_first_cmd \
+do_middle_cmds \
+do_last_cmd \
+prepare_redirs \
+prepare_stage_io \
+prepare_stage_io_utils
 
 
 # Files add
