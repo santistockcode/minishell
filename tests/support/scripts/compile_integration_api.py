@@ -74,7 +74,9 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         src_dir / "exec_stage_utils2.c",
         src_dir / "envp/export.c",
         src_dir / "envp/env_init.c",
-        src_dir / "envp/free_env.c"
+        src_dir / "envp/free_env.c",
+        src_dir / "builtins_orq.c",
+        src_dir / "fds_utils.c"
     ]
 
     debug_flag = "-DDEBUG" if debug else ""

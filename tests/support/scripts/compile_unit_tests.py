@@ -57,7 +57,7 @@ class UnitTestRunner:
                 "expand_hd.c", "expand_hd_utils.c", "signals.c", "crtl.c",
                 "exec_utils.c", "logger.c", "tuberiex.c", "exec_stage.c",
                 "exec_stage_utils1.c", "exec_stage_utils2.c", "envp/export.c",
-                "envp/env_init.c", "envp/free_env.c"
+                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c", "logger.c"
@@ -69,7 +69,7 @@ class UnitTestRunner:
                 "unlink_hds.c", "syswrap.c", "free_cmds.c", "logger.c",
                 "tuberiex.c", "exec_utils.c", "exec_errors.c", "exec_stage.c",
                 "envp/export.c", "exec_stage_utils1.c", "exec_stage_utils2.c",
-                "envp/env_init.c", "envp/free_env.c"
+                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c"
             ],
             "test_exec_errors.c": [
                 "exec_errors.c", "syswrap.c", "logger.c"
@@ -78,7 +78,8 @@ class UnitTestRunner:
                 "exec_stage.c", "syswrap.c", "logger.c", 
                 "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
                 "envp/export.c", "exec_stage_utils1.c", "exec_stage_utils2.c",
-                "envp/env_init.c", "envp/free_env.c"
+                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
+                "fds_utils.c"
             ]
         }
         

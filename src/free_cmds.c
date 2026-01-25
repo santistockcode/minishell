@@ -1,5 +1,21 @@
 #include "../include/minishell.h"
 
+// free cmds
+void free_envp(const char **envp)
+{
+	const char **original;
+
+	if (!envp)
+		return;
+	original = envp;
+	while (*envp)
+	{
+		free((char *)*envp);
+		envp++;
+	}
+	free((char **)original);
+}
+
 static void	free_redir(void *redir_ptr)
 {
 	t_redir	*redir;

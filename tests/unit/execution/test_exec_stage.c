@@ -12,6 +12,8 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh);
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p);
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p);
 int prepare_redirs(t_list *redirs);
+int create_mock_pipe_with_data(const char *data);
+void safe_close_stage_io(t_stage_io *stage_io);
 
 
 // ============================================================================
@@ -114,45 +116,45 @@ static void teardown_dup2_mock(void)
 // Generic execve mock generator
 // ============================================================================
 
-// typedef struct s_execve_mock {
-//     int call_count;
-//     int fail_at;
-//     int failure_type;
-// } t_execve_mock;
+typedef struct s_execve_mock {
+    int call_count;
+    int fail_at;
+    int failure_type;
+} t_execve_mock;
 
-// static t_execve_mock g_execve_mock = {0, 0, 0};
+static t_execve_mock g_execve_mock = {0, 0, 0};
 
-// static int execve_mock(const char *pathname, char *const argv[], char *const envp[])
-// {
-//     (void)pathname;
-//     (void)argv;
-//     (void)envp;
-//     g_execve_mock.call_count++;
-//     if (g_execve_mock.call_count == g_execve_mock.fail_at)
-//     {
-//         if (g_execve_mock.failure_type == 126)
-//             errno = EACCES;
-//         else if (g_execve_mock.failure_type == 127)
-//             errno = ENOENT;
-//         return -1;
-//     }
-//     return 0;
-// }
+static int execve_mock(const char *pathname, char *const argv[], char *const envp[])
+{
+    (void)pathname;
+    (void)argv;
+    (void)envp;
+    g_execve_mock.call_count++;
+    if (g_execve_mock.call_count == g_execve_mock.fail_at)
+    {
+        if (g_execve_mock.failure_type == 126)
+            errno = EACCES;
+        else if (g_execve_mock.failure_type == 127)
+            errno = ENOENT;
+        return -1;
+    }
+    return 0;
+}
 
-// static void setup_execve_mock(int fail_at, int failure_type)
-// {
-//     g_execve_mock.call_count = 0;
-//     g_execve_mock.fail_at = fail_at;
-//     g_execve_mock.failure_type = failure_type;
-//     syswrap_set_execve((t_execve_fn)execve_mock);
-// }
+static void setup_execve_mock(int fail_at, int failure_type)
+{
+    g_execve_mock.call_count = 0;
+    g_execve_mock.fail_at = fail_at;
+    g_execve_mock.failure_type = failure_type;
+    syswrap_set_execve((t_execve_fn)execve_mock);
+}
 
-// static void teardown_execve_mock(void)
-// {
-//     g_execve_mock.call_count = 0;
-//     g_execve_mock.fail_at = 0;
-//     syswrap_set_execve(NULL);
-// }
+static void teardown_execve_mock(void)
+{
+    g_execve_mock.call_count = 0;
+    g_execve_mock.fail_at = 0;
+    syswrap_set_execve(NULL);
+}
 
 static int test_msh_path_from_cmd_name_returns_0_on_not_found_command(void)
 {
@@ -468,11 +470,10 @@ static int test_msh_resolve_path_happy_path_found_in_args0(void)
 
 // tests msh_exec_stage
 
-// CMD FIRST PLACE
-// cmd exits on dup2 failure first call
+// dup2 fails
+// cmd FIRST exits on dup2 failure
 static int test_first_msh_exec_stage_dup2_failure_first_call(void)
 {
-    return (0);
     printf("Test: test_msh_exec_stage_dup2_failure_first_call\n");
 	int p[2];
     pid_t pid;
@@ -517,7 +518,6 @@ static int test_first_msh_exec_stage_dup2_failure_first_call(void)
 
 static int test_first_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
 {
-    return (0);
     printf("Test: test_first_msh_exec_stage_dup2_failure_first_call_with_redir_in\n");
     // ls -l < infile
     int p[2];
@@ -567,10 +567,8 @@ static int test_first_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
     return (0);
 }
 
-
 static int test_first_msh_exec_stage_dup2_failure_first_call_with_redir_out(void)
 {
-    return (0);
     printf("Test: test_first_msh_exec_stage_dup2_failure_first_call_with_redir_out\n");
     // ls -l > outfile
     int p[2];
@@ -673,9 +671,1087 @@ static int test_first_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_
     return (0);
 }
 
-// exits on dup2 failure second call
-    // exits on execve failure 126
-    // exits on execve failure 127
+static int test_firsta_msh_exec_stage_dup2_failure_first_call_with_here_doc(void)
+{
+    printf("Test: test_firsta_msh_exec_stage_dup2_failure_first_call_with_here_doc\n");
+    // cat << EOF
+    int p[2];
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(3, "tests/unit/mock-files/.infile-hd-mock.txt", 1, -1); // here-doc
+    cmd->redirs = ft_lstnew(redir);
+
+    setup_dup2_mock(1);
+
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(0, redirs, -1, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        // never reaches here
+        exit(99);
+    }
+
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+// cmd MIDDLE exits on dup2 failure
+// MIDDLE command tests for dup2 failures
+static int test_middle_msh_exec_stage_dup2_failure_first_call_no_redir(void)
+{
+    printf("Test: test_middle_msh_exec_stage_dup2_failure_first_call_no_redir\n");
+    // middle cmd: cat (reads from previous pipe, writes to next pipe)
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+
+    in_fd = create_mock_pipe_with_data("test data\n");
+    mu_assert("in_fd should be valid", in_fd >= 0);
+
+    setup_dup2_mock(1);
+
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        redirs = cmd->redirs;
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        prepare_redirs(redirs);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, redirs, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
+{
+    printf("Test: test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_in\n");
+    // middle cmd: cat < infile (redir overrides previous pipe???)
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    // Mock previous pipe
+    in_fd = create_mock_pipe_with_data("test data, will be overwritten by redir in\n");
+
+    setup_dup2_mock(1);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, redirs, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_out(void)
+{
+    printf("Test: test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_out\n");
+    // middle cmd: cat > outfile (reads from previous pipe, writes to file)
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    // Mock previous pipe
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_dup2_mock(1);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, redirs, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out(void)
+{
+    printf("Test: test_middle_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out\n");
+    // middle cmd: cat < infile > outfile
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir_in = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    t_redir *redir_out = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_in));
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_out));
+    
+    // Mock previous pipe
+    int temp_pipe[2];
+    pipe(temp_pipe);
+    close(temp_pipe[1]);
+    in_fd = temp_pipe[0];
+    
+    setup_dup2_mock(2);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, redirs, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_dup2_failure_second_call_no_redir(void)
+{
+    printf("Test: test_middle_msh_exec_stage_dup2_failure_second_call_no_redir\n");
+    // middle cmd: cat (in_fd -> stdout goes to pipe, dup2 fails on second call)
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    // Mock previous pipe
+    int temp_pipe[2];
+    pipe(temp_pipe);
+    write(temp_pipe[1], "test\n", 5);
+    close(temp_pipe[1]);
+    in_fd = temp_pipe[0];
+    
+    setup_dup2_mock(2); // fail at second dup2 call
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+// // cmd LAST exits on dup2 failure
+// LAST command tests for dup2 failures
+// cmd LAST exits on dup2 failure
+static int test_last_msh_exec_stage_dup2_failure_first_call_no_redir(void)
+{
+    printf("Test: test_last_msh_exec_stage_dup2_failure_first_call_no_redir\n");
+    // last cmd: cat (reads from previous pipe, writes to stdout)
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    // Mock previous pipe
+    in_fd = create_mock_pipe_with_data("test data\n");
+    mu_assert("in_fd should be valid", in_fd >= 0);
+    
+    setup_dup2_mock(1);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
+{
+    printf("Test: test_last_msh_exec_stage_dup2_failure_first_call_with_redir_in\n");
+    // last cmd: cat < infile (redir overrides previous pipe)
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    // Mock previous pipe
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_dup2_mock(1);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_dup2_failure_first_call_with_redir_out(void)
+{
+    printf("Test: test_last_msh_exec_stage_dup2_failure_first_call_with_redir_out\n");
+    // last cmd: cat > outfile (reads from previous pipe, writes to file)
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    // Mock previous pipe
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_dup2_mock(1);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out(void)
+{
+    printf("Test: test_last_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out\n");
+    // last cmd: cat < infile > outfile
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir_in = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    t_redir *redir_out = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_in));
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_out));
+    
+    // Mock previous pipe
+    int temp_pipe[2];
+    pipe(temp_pipe);
+    close(temp_pipe[1]);
+    in_fd = temp_pipe[0];
+    
+    setup_dup2_mock(2);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_dup2_failure_first_call_with_here_doc(void)
+{
+    printf("Test: test_last_msh_exec_stage_dup2_failure_first_call_with_here_doc\n");
+    // last cmd: cat << EOF
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    t_list *redirs;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(3, "tests/unit/mock-files/.infile-hd-mock.txt", 1, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    // Mock previous pipe (will be overridden by heredoc)
+    int temp_pipe[2];
+    pipe(temp_pipe);
+    close(temp_pipe[1]);
+    in_fd = temp_pipe[0];
+    
+    setup_dup2_mock(1);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        redirs = cmd->redirs;
+        int result_prep_red = prepare_redirs(redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be EXIT_FAILURE", WEXITSTATUS(status), EXIT_FAILURE);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_dup2_mock();
+    return (0);
+}
+
+// execve failure (test for 126 and 127)
+// execve failure tests (126 and 127 exit codes)
+
+// FIRST command execve failures
+static int test_first_msh_exec_stage_execve_failure_126_no_redir(void)
+{
+    printf("Test: test_first_msh_exec_stage_execve_failure_126_no_redir\n");
+    int p[2];
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"ls", "-l"};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+    
+    setup_execve_mock(1, 126);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        prepare_redirs(cmd->redirs);
+        t_stage_io *stage_io = prepare_stage_io(FIRST, cmd->redirs, -1, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_first_msh_exec_stage_execve_failure_127_no_redir(void)
+{
+    printf("Test: test_first_msh_exec_stage_execve_failure_127_no_redir\n");
+    int p[2];
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"ls", "-l"};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+    
+    setup_execve_mock(1, 127);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(FIRST, NULL, -1, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 127", WEXITSTATUS(status), 127);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_first_msh_exec_stage_execve_failure_126_with_redir(void)
+{
+    printf("Test: test_first_msh_exec_stage_execve_failure_126_with_redir\n");
+    int p[2];
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"ls", "-l"};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+    t_redir *redir = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    setup_execve_mock(1, 126);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        int result_prep_red = prepare_redirs(cmd->redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(FIRST, cmd->redirs, -1, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+// MIDDLE command execve failures
+static int test_middle_msh_exec_stage_execve_failure_126_no_redir(void)
+{
+    printf("Test: test_middle_msh_exec_stage_execve_failure_126_no_redir\n");
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    mu_assert("in_fd should be valid", in_fd >= 0);
+    
+    setup_execve_mock(1, 126);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_execve_failure_127_no_redir(void)
+{
+    printf("Test: test_middle_msh_exec_stage_execve_failure_127_no_redir\n");
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_execve_mock(1, 127);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 127", WEXITSTATUS(status), 127);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_middle_msh_exec_stage_execve_failure_126_with_redirs(void)
+{
+    printf("Test: test_middle_msh_exec_stage_execve_failure_126_with_redirs\n");
+    int p[2];
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir_in = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    t_redir *redir_out = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_in));
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_out));
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_execve_mock(1, 126);
+    
+    pipe(p);
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        int result_prep_red = prepare_redirs(cmd->redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(MIDDLE, cmd->redirs, in_fd, p);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, p);
+        exit(99);
+    }
+    
+    close(in_fd);
+    close(p[0]);
+    close(p[1]);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+// LAST command execve failures
+static int test_last_msh_exec_stage_execve_failure_126_no_redir(void)
+{
+    printf("Test: test_last_msh_exec_stage_execve_failure_126_no_redir\n");
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_execve_mock(1, 126);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_execve_failure_127_no_redir(void)
+{
+    printf("Test: test_last_msh_exec_stage_execve_failure_127_no_redir\n");
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_execve_mock(1, 127);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 127", WEXITSTATUS(status), 127);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_execve_failure_126_with_redirs(void)
+{
+    printf("Test: test_last_msh_exec_stage_execve_failure_126_with_redirs\n");
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir_in = make_redir(0, "tests/unit/mock-files/infile.txt", 0, -1);
+    t_redir *redir_out = make_redir(1, "tests/unit/mock-files/outfile.txt", 0, -1);
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_in));
+    ft_lstadd_back(&(cmd->redirs), ft_lstnew(redir_out));
+    
+    in_fd = create_mock_pipe_with_data("test data\n");
+    
+    setup_execve_mock(1, 126);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        int result_prep_red = prepare_redirs(cmd->redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, cmd->redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 126", WEXITSTATUS(status), 126);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
+
+static int test_last_msh_exec_stage_execve_failure_127_with_here_doc(void)
+{
+    printf("Test: test_last_msh_exec_stage_execve_failure_127_with_here_doc\n");
+    int in_fd;
+    pid_t pid;
+    t_shell *sh;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        "SHELL=/bin/bash",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+    t_redir *redir = make_redir(3, "tests/unit/mock-files/.infile-hd-mock.txt", 1, -1);
+    cmd->redirs = ft_lstnew(redir);
+    
+    int temp_pipe[2];
+    pipe(temp_pipe);
+    close(temp_pipe[1]);
+    in_fd = temp_pipe[0];
+    
+    setup_execve_mock(1, 127);
+    
+    pid = fork();
+    if (pid == 0)
+    {
+        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        int result_prep_red = prepare_redirs(cmd->redirs);
+        mu_assert("prepare_redirs should succeed", result_prep_red == 0);
+        t_stage_io *stage_io = prepare_stage_io(LAST, cmd->redirs, in_fd, NULL);
+        cmd->stage_io = stage_io;
+        msh_exec_stage(sh, cmd, sh->env, NULL);
+        exit(99);
+    }
+    
+    close(in_fd);
+    waitpid(pid, &status, 0);
+    
+    mu_assert("child should have exited normally", WIFEXITED(status));
+    mu_assert_intcmp("child exit status should be 127", WEXITSTATUS(status), 127);
+    
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    teardown_execve_mock();
+    return (0);
+}
 
 // cmd MIDDLE PLACE
 
@@ -700,10 +1776,33 @@ int main(void)
     mu_run_test(test_msh_resolve_path_happy_path_found_in_args0);
 
     // msh_exec_stage
+    //  dup2 failure
     mu_run_test(test_first_msh_exec_stage_dup2_failure_first_call);
     mu_run_test(test_first_msh_exec_stage_dup2_failure_first_call_with_redir_in);
     mu_run_test(test_first_msh_exec_stage_dup2_failure_first_call_with_redir_out);
     mu_run_test(test_first_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out);
+    mu_run_test(test_firsta_msh_exec_stage_dup2_failure_first_call_with_here_doc);
+    mu_run_test(test_middle_msh_exec_stage_dup2_failure_first_call_no_redir);
+    mu_run_test(test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_in);
+    mu_run_test(test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_out);
+    mu_run_test(test_middle_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out);
+    mu_run_test(test_middle_msh_exec_stage_dup2_failure_second_call_no_redir);
+    mu_run_test(test_last_msh_exec_stage_dup2_failure_first_call_no_redir);
+    mu_run_test(test_last_msh_exec_stage_dup2_failure_first_call_with_redir_in);
+    mu_run_test(test_last_msh_exec_stage_dup2_failure_first_call_with_here_doc);
+    mu_run_test(test_last_msh_exec_stage_dup2_failure_first_call_with_redir_out);
+    mu_run_test(test_last_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_out);
+    // execve failure
+    mu_run_test(test_first_msh_exec_stage_execve_failure_126_no_redir);
+    mu_run_test(test_first_msh_exec_stage_execve_failure_127_no_redir);
+    mu_run_test(test_first_msh_exec_stage_execve_failure_126_with_redir);
+    mu_run_test(test_middle_msh_exec_stage_execve_failure_126_no_redir);
+    mu_run_test(test_middle_msh_exec_stage_execve_failure_127_no_redir);
+    mu_run_test(test_middle_msh_exec_stage_execve_failure_126_with_redirs);
+    mu_run_test(test_last_msh_exec_stage_execve_failure_126_no_redir);
+    mu_run_test(test_last_msh_exec_stage_execve_failure_127_no_redir);
+    mu_run_test(test_last_msh_exec_stage_execve_failure_126_with_redirs);
+    mu_run_test(test_last_msh_exec_stage_execve_failure_127_with_here_doc);
 
     // test child process leaks using valgrind
     /*

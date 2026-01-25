@@ -45,7 +45,9 @@ envp/env_init \
 envp/print_env \
 envp/free_env \
 envp/export \
-envp/unset
+envp/unset \
+builtins_orq \
+fds_utils
 
 
 

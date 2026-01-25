@@ -6,71 +6,36 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/24 16:44:52 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 12:06:28 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
 
+// stage utils 1
 void		safe_close_p(int *p);
 void		ft_split_free(char **paths);
 const char	*get_path_envp(t_list *env);
-char	*ft_strjoin_prot(char const *str1, char const *str2);
-void    safe_close_redirs(t_list *redirs);
-int		is_builtin(char *cmd);
-int		exec_builtin(t_cmd *cmd, t_shell *sh);
-void	free_cmd_struct(void *input);
-void free_shell_child(t_shell *sh);
+char		*ft_strjoin_prot(char const *str1, char const *str2);
+char *const	*envp_from_env_list(t_list *env);
 
-char *const	*envp_from_env_list(t_list *env)
-{
-	t_env	*env_var;
-	char	**envp;
-	char	*pair;
-	int		size;
-	int		i;
+// stage utils 2
+void		free_shell_child(t_shell *sh);
+void		free_cmd_struct(void *input);
+char *build_path(const char *dir, const char *file);
+void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
-	size = ft_lstsize(env);
-	envp = (char **)malloc(sizeof(char *) * (size + 1));
-	if (!envp)
-		return (NULL);
-	i = 0;
-	while (env)
-	{
-		env_var = (t_env *)env->content;
-		if (env_var)
-		{
-			pair = ft_strjoin_prot(env_var->key, "=");
-			envp[i] = ft_strjoin_prot(pair, env_var->value);
-			free(pair);
-			i++;
-		}
-		env = env->next;
-	}
-	envp[i] = NULL;
-	return (envp);
-}
+// exec and file descriptors utils fds_utils.c
+void	safe_close_rd_fds(t_list *redirs);
+void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
+int		msh_save_fds(int *save_in, int *save_out, int *save_err);
+void	msh_restore_fds(int save_in, int save_out, int save_err);
 
-char *build_path(const char *dir, const char *file)
-{
-	char *path;
-	char *tmp;
+// fre cmds
+void free_envp(const char **envp);
 
-	if (!dir || !file)
-		return (NULL);
-	tmp = ft_strjoin_prot(dir, "/");
-	if (!tmp)
-		return (NULL);
-	path = ft_strjoin_prot(tmp, file);
-	if (!path)
-	{
-		free(tmp);
-		return (NULL);
-	}
-	free(tmp);
-	return (path);
-}
+
 /*
 Returns: 
 - path is the path allocated if found, NULL if not found
@@ -183,39 +148,34 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 	return (path);
 }
 
-void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
+void msh_exec_not_builtin(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
-	safe_close_p(p);
-	safe_close_redirs(cmd->redirs);
-	free((t_stage_io *) cmd->stage_io);
-	msh_print_last_error(sh);
-	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
-	close(sh->save_in);
-	close(sh->save_out);
-	close(sh->save_err);
-	free_shell_child(sh);
-	free_cmd_struct(cmd);
-	exit(exit_code);
+	(void)sh;
+	(void)cmd;
+	(void)env;
+	(void)p;
 }
 
-
-void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
+// TODO: use builtins_orq to manage builtin execution
+void	msh_exec_builtin(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
-	const t_stage_io	*rdr_spec;
+	int	st;
+	(void)env;
+	(void)p;
 
-	rdr_spec = cmd->stage_io;
-	if (rdr_spec->in_fd != -1)
-		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
-			{
-				msh_set_error(sh, DUP2_OP);
-				stage_exit(sh, cmd, p, EXIT_FAILURE);
-			}
-	if (rdr_spec->out_fd != -1)
-		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
-		{
-			msh_set_error(sh, DUP2_OP);
-			stage_exit(sh, cmd, p, EXIT_FAILURE);
-		}
+	st = exec_builtin(cmd, sh);
+	// FIXME: handle errors, free memory... and so on
+	exit(st & 0xff);
+}
+
+void exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p)
+{
+	if (ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
+		stage_exit(sh, cmd, p, EXIT_FAILURE);
+	if (sh->last_errno == EACCES)
+		stage_exit(sh, cmd, p, 126);
+	msh_set_error(sh, cmd->argv[0]);
+	stage_exit(sh, cmd, p, 127);
 }
 
 // Entry point for execution
@@ -238,34 +198,24 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
 	char				*path;
 	int					st;
+	char *const			*envp;
 
 	dup2_stage_io(sh, cmd, p);
-	path = msh_resolve_path(cmd->argv, env, sh);
+    path = msh_resolve_path(cmd->argv, env, sh);
 	if (!path)
-	{
-		if (ft_strncmp(sh->last_err_op, MALLOC_OP, ft_strlen(sh->last_err_op)) == 0)
-		{
-			dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' memory allocation failed\n", cmd->argv[0]);
-			stage_exit(sh, cmd, p, EXIT_FAILURE);
-		}
-		if (sh->last_errno == EACCES)
-		{
-			dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' permission denied\n", cmd->argv[0]);
-			stage_exit(sh, cmd, p, 126);
-		}
-		dprintf(STDERR_FILENO, "[msh_exec_stage]: '%s' command not found\n", cmd->argv[0]);
-		msh_set_error(sh, cmd->argv[0]);
-		stage_exit(sh, cmd, p, 127);
-	}
+		exit_from_no_path(sh, cmd, p);
 	if (is_builtin(cmd->argv[0]))
+		msh_exec_builtin(sh, cmd, env, p);
+	envp = envp_from_env_list(env);
+	if (!envp)
 	{
-    	st = exec_builtin(cmd, sh);
-    	exit(st & 0xff);
-	}
-	else if (execve_wrap(path, cmd->argv, envp_from_env_list(env)) == -1)
-	{
-		dprintf(STDERR_FILENO, "[msh_exec_stage]: execve failed\n");
 		free(path);
+		stage_exit(sh, cmd, p, EXIT_FAILURE);
+	}
+	else if (execve_wrap(path, cmd->argv, envp) == -1)
+	{
+		free(path);
+		free_envp((const char **) envp);
 		st = msh_status_from_execve_error(errno);
 		msh_set_error(sh, EXECVE_OP);
 		stage_exit(sh, cmd, p, st);
@@ -273,4 +223,4 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	free(path);
 	exit(EXIT_FAILURE);
 }
-
+	

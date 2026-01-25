@@ -1,7 +1,35 @@
 #include "../include/minishell.h"
 
-void	env_set(t_list **env, char *var);
+// stage utils 1
+char	*ft_strjoin_prot(char const *str1, char const *str2);
+void	safe_close_p(int *p);
 
+// fds utils
+void	safe_close_rd_fds(t_list *redirs);
+
+// free cmds
+void	free_cmd_struct(void *input);
+
+
+char *build_path(const char *dir, const char *file)
+{
+	char *path;
+	char *tmp;
+
+	if (!dir || !file)
+		return (NULL);
+	tmp = ft_strjoin_prot(dir, "/");
+	if (!tmp)
+		return (NULL);
+	path = ft_strjoin_prot(tmp, file);
+	if (!path)
+	{
+		free(tmp);
+		return (NULL);
+	}
+	free(tmp);
+	return (path);
+}
 
 void free_env_struct_child(void *env)
 {
@@ -20,40 +48,31 @@ void free_shell_child(t_shell *sh)
     free(sh);
 }
 
-
-int		is_builtin(char *cmd)
+void safe_close_stage_io(t_stage_io *stage_io)
 {
-	// if (ft_strcmp(cmd, "echo") == 0)
-	// 	return (1);
-	// if (ft_strcmp(cmd, "cd") == 0)
-	// 	return (1);
-	// if (ft_strcmp(cmd, "pwd") == 0)
-	// 	return (1);
-	// if (ft_strcmp(cmd, "env") == 0)
-	// 	return (1);
-	if (ft_strncmp(cmd, "export", 6) == 0)
-		return (1);
-	// if (ft_strcmp(cmd, "unset") == 0)
-	// 	return (1);
-	return (0);
+	if (!stage_io) return;
+	safe_close_p(&stage_io->in_fd);
+	safe_close_p(&stage_io->out_fd);
 }
 
-int		exec_builtin(t_cmd *cmd, t_shell *sh)
+void stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 {
-	int		result;
-
-	result = 0;
-	// if (ft_strcmp(args[0], "echo") == 0)
-	// 	result = ft_echo(args);
-	// if (ft_strcmp(args[0], "cd") == 0)
-	// 	result = ft_cd(args, mini->env);
-	// if (ft_strcmp(args[0], "pwd") == 0)
-	// 	result = ft_pwd();
-	// if (ft_strcmp(args[0], "env") == 0)
-	// 	ft_env(mini->env);
-	if (ft_strncmp(cmd->argv[0], "export", 6) == 0)
-		env_set(&sh->env, cmd->argv[1]);
-	// if (ft_strcmp(cmd->argv[0], "unset") == 0)
-	// 	ft_unset(cmd->argv, sh);
-	return (result);
+	safe_close_p(p);
+	safe_close_rd_fds(cmd->redirs);
+	safe_close_stage_io(cmd->stage_io);
+	free(cmd->stage_io);
+	msh_print_last_error(sh);
+	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	close(sh->save_in);
+	close(sh->save_out);
+	close(sh->save_err);
+	free_shell_child(sh);
+	free_cmd_struct(cmd);
+	exit(exit_code);
 }
+
+
+
+
+
+

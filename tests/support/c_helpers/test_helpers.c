@@ -100,3 +100,27 @@ t_shell *create_test_shell(const char **test_env, int last_status)
     sh->save_err = -1;
     return sh;
 }
+
+
+/* Create a pipe with test data written to it, return read end */
+int create_mock_pipe_with_data(const char *data)
+{
+    int temp_pipe[2];
+    size_t len;
+    
+    if (pipe(temp_pipe) == -1)
+        return -1;
+    
+    len = data ? ft_strlen(data) : 0;
+    if (len > 0)
+    {
+        if (write(temp_pipe[1], data, len) == -1)
+        {
+            close(temp_pipe[0]);
+            close(temp_pipe[1]);
+            return -1;
+        }
+    }
+    close(temp_pipe[1]);
+    return temp_pipe[0];
+}

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:05:36 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/23 17:12:07 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/25 08:37:54 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,33 @@ const char	*get_path_envp(t_list *env)
 		env = env->next;
 	}
 	return (NULL);
+}
+
+char *const	*envp_from_env_list(t_list *env)
+{
+	t_env	*env_var;
+	char	**envp;
+	char	*pair;
+	int		size;
+	int		i;
+
+	size = ft_lstsize(env);
+	envp = (char **)malloc(sizeof(char *) * (size + 1));
+	if (!envp)
+		return (NULL);
+	i = 0;
+	while (env)
+	{
+		env_var = (t_env *)env->content;
+		if (env_var)
+		{
+			pair = ft_strjoin_prot(env_var->key, "=");
+			envp[i] = ft_strjoin_prot(pair, env_var->value);
+			free(pair);
+			i++;
+		}
+		env = env->next;
+	}
+	envp[i] = NULL;
+	return (envp);
 }
