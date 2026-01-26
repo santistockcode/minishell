@@ -385,8 +385,8 @@ static int test_msh_exec_simple_external_with_output_redir(void)
         mu_assert("file should contain 'hello_redir'",
             ft_strncmp(buf, "hello_redir", 11) == 0);
     }
-
-    // unlink("tests/unit/mock-files/outfile_test_simple.txt");
+    close(fd);
+    unlink("tests/unit/mock-files/outfile_test_simple.txt");
     free_cmds(ft_lstnew(cmd));
     free_shell(sh);
     return 0;
@@ -433,7 +433,7 @@ static int test_msh_exec_simple_external_with_input_redir(void)
         close(fd);
         mu_assert("wc output should contain '3'", ft_strchr(buf, '3') != NULL);
     }
-
+    close(fd);
     unlink(in_file);
     unlink(out_file);
     free_cmds(ft_lstnew(cmd));
@@ -486,34 +486,30 @@ static int test_msh_exec_simple_empty_argv(void)
 
 int main(void)
 {
-    // FIXME: Every test run perfectly when alone but when I uncomment all of them, fd's are mixed and output from valgrind cannot be read
     printf("=== Unit Tests for exec_simple ===\n\n");
 
-
-    // FIXME: unit test for exec goes in other part of the project
     // /* exec_builtin_in_parent tests */
     mu_run_test(test_exec_builtin_in_parent_export_new_var);
     mu_run_test(test_exec_builtin_in_parent_export_overwrite_var);
     mu_run_test(test_exec_builtin_in_parent_export_no_value);
     mu_run_test(test_exec_builtin_in_parent_unset_existing_var);
     mu_run_test(test_exec_builtin_in_parent_unset_nonexistent_var);
-    // // mu_run_test(test_exec_builtin_in_parent_unset_multiple_vars); // bug in unset
+    // // // mu_run_test(test_exec_builtin_in_parent_unset_multiple_vars); // bug in unset
     mu_run_test(test_exec_builtin_in_parent_export_with_output_redir);
 
     // // /* msh_exec_simple with external commands */
-    // FIXME: here's were valgrind logs start being chaos
-    // mu_run_test(test_msh_exec_simple_external_cmd_true);
-    // mu_run_test(test_msh_exec_simple_external_cmd_false);
-    // mu_run_test(test_msh_exec_simple_command_not_found);
-    // mu_run_test(test_msh_exec_simple_external_with_args);
+    mu_run_test(test_msh_exec_simple_external_cmd_true);
+    mu_run_test(test_msh_exec_simple_external_cmd_false);
+    mu_run_test(test_msh_exec_simple_command_not_found);
+    mu_run_test(test_msh_exec_simple_external_with_args);
 
     // /* msh_exec_simple with builtins that modify shell */
-    // mu_run_test(test_msh_exec_simple_export_modifies_parent);
-    // mu_run_test(test_msh_exec_simple_unset_modifies_parent);
+    mu_run_test(test_msh_exec_simple_export_modifies_parent);
+    mu_run_test(test_msh_exec_simple_unset_modifies_parent);
 
-    /* msh_exec_simple with redirections */
-    // mu_run_test(test_msh_exec_simple_external_with_output_redir);
-    // mu_run_test(test_msh_exec_simple_external_with_input_redir);
+    // /* msh_exec_simple with redirections */
+    mu_run_test(test_msh_exec_simple_external_with_output_redir);
+    mu_run_test(test_msh_exec_simple_external_with_input_redir);
 
     /* edge cases */
     // mu_run_test(test_msh_exec_simple_null_cmd);

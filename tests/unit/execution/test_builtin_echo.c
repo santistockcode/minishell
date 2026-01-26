@@ -27,15 +27,18 @@ static int test_echo_no_flags_prints_correctly(void)
     int saved_stdout = dup(STDOUT_FILENO);
     
     char *args[] = {"echo", "hello", "world", NULL};
-    echo(args, fd);
-    
-    dup2(saved_stdout, STDOUT_FILENO);
-    close(saved_stdout);
-    
+
+    dup2(fd, STDOUT_FILENO);
+
+    echo(args);
+
+
     char *output = read_temp_file(fd);
     mu_assert("echo without flags should print args with newline", 
-              strcmp(output, "hello world\n") == 0);
-    
+        strcmp(output, "hello world\n") == 0);
+        
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
     free(output);
     close(fd);
     return (0);
@@ -49,7 +52,7 @@ static int test_echo_with_n_flag(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-n", "hello", "world", NULL};
-    echo(args, fd);
+    echo(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -71,7 +74,7 @@ static int test_echo_multiple_n_flags(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-n", "-n", "-n", "test", NULL};
-    echo(args, fd);
+    echo(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -93,7 +96,7 @@ static int test_echo_combined_n_flags(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-nnn", "test", NULL};
-    echo(args, fd);
+    echo(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -115,7 +118,7 @@ static int test_echo_invalid_flag(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-x", "test", NULL};
-    echo(args, fd);
+    echo(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -137,7 +140,7 @@ static int test_echo_empty_args(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", NULL};
-    echo(args, fd);
+    echo(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);

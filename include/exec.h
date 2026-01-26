@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 18:34:55 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/26 08:15:01 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ int		is_builtin(char *cmd);
 int		exec_builtin(t_cmd *cmd, t_shell *sh);
 
 // FINALLY THE BUILTINS
-void	echo(char **argv, int out_fd);
+void	echo(char **argv);
 
 
 /* 

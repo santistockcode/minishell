@@ -2,7 +2,7 @@
 
 int		export(t_list **env, char *var);
 void	env_unset(t_list **env, char *key);
-void	echo(char **argv, int fd);
+void	echo(char **argv);
 
 // exit utils
 void	safe_close_p(int *p);
@@ -60,7 +60,7 @@ int		exec_builtin(t_cmd *cmd, t_shell *sh)
 
 	result = 0;
 	if (ft_strncmp(cmd->argv[0], "echo", 4) == 0)
-		echo(cmd->argv, cmd->stage_io->out_fd);
+		echo(cmd->argv);
 	// if (ft_strcmp(args[0], "cd") == 0)
 	// 	result = ft_cd(args, mini->env);
 	// if (ft_strcmp(args[0], "pwd") == 0)

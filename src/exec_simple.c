@@ -32,8 +32,8 @@ int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
     }
     dup2_stage_io(sh, cmd, NULL);
 	status = exec_builtin(cmd, sh);
-	safe_close_rd_fds(redirs); // TODO: IS THIS CORRECT?
-    safe_close_stage_io(cmd->stage_io); // TODO: IS THIS CORRECT?
+	safe_close_rd_fds(redirs);
+    safe_close_stage_io(cmd->stage_io);
     free(cmd->stage_io);
 	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	return (status);
@@ -44,6 +44,7 @@ int msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
 {
     pid_t	pid;
     int		status;
+	t_list *redirs;
 
     if (is_builtin(cmd->argv[0]))
         return (exec_builtin_in_parent(sh, cmd));
@@ -54,9 +55,10 @@ int msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
     {
         if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
             stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
-        if (prepare_redirs(cmd->redirs) == -1)
+        redirs = cmd->redirs;
+        if (prepare_redirs(redirs) == -1)
             stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
-        cmd->stage_io = prepare_stage_io(LAST, cmd->redirs, -1, NULL);
+        cmd->stage_io = prepare_stage_io(LAST, redirs, -1, NULL);
 		if (!cmd->stage_io)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
         msh_exec_stage(sh, cmd, env, NULL);

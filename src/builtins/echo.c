@@ -23,7 +23,7 @@ int count_n_flags(char **argv)
 /*
 argv[0] = 'echo'
 */
-void	echo(char **argv, int fd)
+void	echo(char **argv)
 {
     char    *to_print;
     int     flag;
@@ -39,14 +39,14 @@ void	echo(char **argv, int fd)
         to_print = argv[i];
         if (to_print)
         {
-            ft_putstr_fd(to_print, fd);
+            ft_putstr_fd(to_print, STDOUT_FILENO);
             i++;
             if (argv[i])
-                ft_putchar_fd(' ', fd);
+                ft_putchar_fd(' ', STDOUT_FILENO);
         }
         else
             break ;
     }
     if (!flag)
-        ft_putchar_fd('\n', fd);
+        ft_putchar_fd('\n', STDOUT_FILENO);
 }
