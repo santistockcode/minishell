@@ -3,7 +3,7 @@
 // export, unset, exit, cd affect the shell when in simple command
 // env, echo, pwd do not affect the shell state
 
-int         prepare_redirs(t_list *redirs);
+int         prepare_redirs(t_list *redirs, t_shell *sh);
 void        safe_close_rd_fds(t_list *redirs);
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p);
 void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
@@ -18,7 +18,7 @@ int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 	redirs = cmd->redirs;
 	if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
 		return (msh_set_error(sh, DUP_OP), -1);
-	if (prepare_redirs(redirs) == -1)
+	if (prepare_redirs(redirs, sh) == -1)
 	{
 		msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 		return (safe_close_rd_fds(redirs), -1);
@@ -56,7 +56,7 @@ int msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
         if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
             stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
         redirs = cmd->redirs;
-        if (prepare_redirs(redirs) == -1)
+        if (prepare_redirs(redirs, sh) == -1)
             stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
         cmd->stage_io = prepare_stage_io(LAST, redirs, -1, NULL);
 		if (!cmd->stage_io)

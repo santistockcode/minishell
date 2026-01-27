@@ -4,6 +4,7 @@ Minunit unit test compiler and runner for minishell.
 Refactored from unit_tests_exec_part.py
 """
 
+from posixpath import basename
 import subprocess
 import sys
 import argparse
@@ -100,6 +101,16 @@ class UnitTestRunner:
             ],
             "test_builtin_echo.c": [
                 "builtins/echo.c", "syswrap.c", "logger.c"
+            ],
+            "test_exec_pipeline.c": [
+                "syswrap.c", "logger.c",
+                "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
+                "exec_stage.c","builtins/echo.c",
+                "builtins/export.c", "path_utils.c", "exit_utils.c",
+                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
+                "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
+                "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c"
             ]
         }
         
@@ -158,14 +169,20 @@ class UnitTestRunner:
         self.log(f"\n{'='*60}", Colors.BOLD_CYAN)
         self.log(f"Running {binary.name}", Colors.BOLD_CYAN)
         self.log(f"{'='*60}", Colors.BOLD_CYAN)
+
+        if self.valgrind:
+                    valgrind_dir = self.bin_dir / "valgrind-leaks-results"
+                    valgrind_dir.mkdir(exist_ok=True)
         
         if self.valgrind:
             cmd = [
                 "valgrind",
                 "--leak-check=full",
                 "--show-leak-kinds=all",
+                "--trace-children=yes",
+                "--child-silent-after-fork=no",
                 "--track-origins=yes",
-                "--log-file={}/valgrind_{}.log".format(self.bin_dir, binary.name),
+                "--log-file={}/valgrind-leaks-results/valgrind_%p_{}.log".format(self.bin_dir, binary.name),
                 str(binary)
             ]
         else:
@@ -195,10 +212,14 @@ class UnitTestRunner:
 
         if self.valgrind:
             self.log(Colors.info("Cleaning up Valgrind logs"))
-            for binary in self.compiled_binaries:
-                log_file = self.bin_dir / f"valgrind_{binary.name}.log"
-                if log_file.exists():
-                    log_file.unlink()
+            valgrind_dir = self.bin_dir / "valgrind-leaks-results"
+            if valgrind_dir.exists():
+                for log_file in valgrind_dir.glob("*.log"):
+                    if log_file.exists():
+                        log_file.unlink()
+                # Remove directory if empty
+                if not any(valgrind_dir.iterdir()):
+                    valgrind_dir.rmdir()
 
         self.log(Colors.success("Cleaned up binaries"))
     
@@ -255,13 +276,15 @@ class UnitTestRunner:
         self.log(f"{'='*60}", Colors.BOLD_CYAN)
 
         for binary in self.compiled_binaries:
-            log_file = self.bin_dir / f"valgrind_{binary.name}.log"
-            if log_file.exists():
-                self.log(f"Valgrind log for {binary.name}:")
-                with log_file.open() as f:
-                    self.log(f.read())
+            valgrind_dir = self.bin_dir / "valgrind-leaks-results"
+            if valgrind_dir.exists():
+                for log_file in valgrind_dir.glob("*.log"):
+                    self.log(f"\nValgrind log: {log_file.name}", Colors.BOLD_BLUE)
+                    with log_file.open() as f:
+                        self.log(f.read())
             else:
-                self.log(f"No Valgrind log found for {binary.name}")
+                self.log(Colors.warning("No Valgrind logs directory found"))
+                return
 
         self.log(f"{'='*60}", Colors.BOLD_CYAN)
 

@@ -41,6 +41,26 @@
             ],
             "miDebuggerPath": "/usr/bin/gdb"
         },
+                {
+            "name": "Unit-test exec PIPELINE",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_pipeline",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
         {
             "name": "Unit-test exec SIMPLE",
             "type": "cppdbg",
@@ -106,6 +126,36 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_stage",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Follow child process on fork",
+                    "text": "set follow-fork-mode child",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Detach parent on fork (optional)",
+                    "text": "set detach-on-fork on",
+                    "ignoreFailures": false
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Unit-test EXEC PIPELINE (follow child)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_pipeline",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

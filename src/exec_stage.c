@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/26 08:17:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/27 21:44:20 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,13 +185,13 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	char *const			*envp;
 
 	dup2_stage_io(sh, cmd, p);
+	if (is_builtin(cmd->argv[0]))
+		msh_exec_builtin_child(sh, cmd, p);
 	path = msh_resolve_path(cmd->argv, env, sh);
 	if (!path)
 		exit_from_no_path(sh, cmd, p);
-	if (is_builtin(cmd->argv[0]))
-		msh_exec_builtin_child(sh, cmd, p);
 	envp = envp_from_env_list(env);
-	if (!envp)
+	if (!envp) // fixme: my mini can't run without envp?
 	{
 		free(path);
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);

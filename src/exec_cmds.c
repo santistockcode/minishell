@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 15:25:09 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/27 17:45:35 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 		return (last_pipeline_st);
 	}
 	logger("exec_cmds", "Executing simple command");
+	// FIXME: msh_exec_simple won't work on NULL cmd, check before callling
 	last_pipeline_st = msh_exec_simple(sh, (t_cmd*)cmd_first->content, sh->env);
 	if (last_pipeline_st == -1)
 	{

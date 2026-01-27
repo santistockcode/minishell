@@ -15,7 +15,7 @@ void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 				msh_set_error(sh, DUP2_OP);
 				stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 			}
-			safe_close(rdr_spec->in_fd);
+        safe_close(rdr_spec->in_fd);
 	}
 	if (rdr_spec && rdr_spec->out_fd != -1)
 	{
@@ -24,7 +24,7 @@ void dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 			msh_set_error(sh, DUP2_OP);
 			stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 		}
-		safe_close(rdr_spec->out_fd);
+        safe_close(rdr_spec->out_fd);
 	}
 }
 

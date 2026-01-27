@@ -4,6 +4,8 @@ import pytest
 import sys
 from pathlib import Path
 import pexpect
+import re
+ansi = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "support"))
@@ -230,42 +232,56 @@ def test_shell_script_correctly_executes(test_runner_tty):
     test_runner_tty.sendline("EXIT")
 
 
-# def test_basic_builtin_export_works_as_expected_in_pipe(test_runner_tty):
-#     # echo "exporting EXAMPLE_VAR" | export EXAMPLE_VAR=VALUE
-#     test_runner_tty.sendline("CREATE 2 0")
-#     test_runner_tty.expect("OK")
+# '< no-file grep hello | wc > output': Should create output file
+def test_no_file_grep_hello_wc_creates_output_file(test_runner_tty):
+    test_runner_tty.sendline("CREATE 2 0")
+    test_runner_tty.expect("OK")
 
-#     # Add first command: export VAR=VALUE
-#     test_runner_tty.sendline("ADD_CMD 0 2 echo 'exporting EXAMPLE_VAR'")
-#     test_runner_tty.expect("OK")
+    # Add first command: grep hello
+    test_runner_tty.sendline("ADD_CMD 0 2 grep hello")
+    test_runner_tty.expect("OK")
 
-#     # Add second command: grep VAR
-#     test_runner_tty.sendline("ADD_CMD 1 2 export EXAMPLE_VAR=myvar")
-#     test_runner_tty.expect("OK")
+    # Add second command: wc
+    test_runner_tty.sendline("ADD_CMD 1 2 wc")
+    test_runner_tty.expect("OK")
 
-#     # Set environment variables
-#     test_runner_tty.sendline(
-#         "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-#     )
-#     test_runner_tty.expect("OK")
+    # Add redirection: input of grep to file
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 invent 0")
+    test_runner_tty.expect("OK")
 
-#     # Build the context
-#     test_runner_tty.sendline("BUILD_CONTEXT")
-#     test_runner_tty.expect("OK")
+    # Add redirection: output of wc to file output
+    test_runner_tty.sendline("ADD_REDIR 1 1 0 ../mocks/output-test 0")
+    test_runner_tty.expect("OK")
 
-#     # Execute the pipeline
-#     test_runner_tty.sendline("EXEC_PIPELINE")
-#     test_runner_tty.expect("RESULT 0")
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
 
-#     # Get env variable EXAMPLE_VAR
-#     test_runner_tty.sendline("GET_ENV EXAMPLE_VAR")
-#     test_runner_tty.expect("VALUE myvar")
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
 
-#     # # Cleanup
-#     test_runner_tty.sendline("DESTROY")
-#     test_runner_tty.expect("OK")
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_PIPELINE")
 
-#     test_runner_tty.sendline("EXIT")
+    test_runner_tty.expect(r"minishell: open: No such file or directory")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file = Path("../mocks/output-test")
+
+    with output_file.open() as f:
+        content = f.read()
+        assert content == "      0       0       0\n"
+
+    output_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
 
 
 # cmd > output1 > output2 creates both files

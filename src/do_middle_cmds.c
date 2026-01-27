@@ -1,6 +1,6 @@
 #include "../include/minishell.h"
 
-int     prepare_redirs(t_list *redirs);
+int     prepare_redirs(t_list *redirs, t_shell *sh);
 void    safe_close_rd_fds(t_list *redirs);
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p);
 
@@ -18,13 +18,27 @@ int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 	if (pid == 0)
 	{
 		// todo: test and manage dup error
-		msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
+		{
+			msh_print_last_error(sh);
+			exit(1);
+		}
 		redirs = cmd->redirs;
-		if (prepare_redirs(redirs) == -1)
-			return (safe_close_rd_fds(redirs), -1); // FIXME: should exit here, and should restore fds
+		if (prepare_redirs(redirs, sh) == -1)
+		{
+			msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+			msh_print_last_error(sh);
+			safe_close_rd_fds(redirs);
+			exit(1);
+		}
 		rdr_spec = prepare_stage_io(MIDDLE, redirs, in_fd, p);
 		if (!rdr_spec)
-			return (safe_close_rd_fds(redirs), -1); // FIXME: should exit here, and should restore fds
+		{
+			msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+			msh_print_last_error(sh);
+			safe_close_rd_fds(redirs);
+			exit(1);
+		}
 		cmd->stage_io = rdr_spec;
 		msh_exec_stage(sh, cmd, sh->env, p);
 	}

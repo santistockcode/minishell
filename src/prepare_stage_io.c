@@ -4,6 +4,8 @@ int get_r_in_redir_fd(t_list *redirs);
 int get_r_out_redir_fd(t_list *redirs);
 int get_r_out_mode(t_list *redirs);
 
+
+// TODO: refactor to norminette (shouldn't be difficult)
 t_stage_io  *prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd, int *p)
 {
 	t_stage_io *rdr_spec;
