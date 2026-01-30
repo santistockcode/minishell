@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/01/18 00:29:51 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/29 21:16:02 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ int main(int argc, char** argv,char **envp)
 	while(1)
 	{
 		minishell->term_token->term_line = readline("minishell");
+		//minishell->lexing->buff = readline("minishell")
+		//if(minishell->lexing->buff = readline("minishell"))
+			//break;
 		if (!minishell->term_token->term_line)
 			break ;
 		add_history(minishell->term_token->term_line);

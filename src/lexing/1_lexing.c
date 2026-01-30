@@ -1,30 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexing.h                                           :+:      :+:    :+:   */
+/*   1_lexing.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/18 18:06:38 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/29 23:20:34 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/01/29 22:27:44 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/01/29 22:27:55 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LEXING_H
-# define LEXING_H
 
-#include "minishell.h"
+#include "../../include/minishell.h"
 
-# define NO_QUOTE 0
-# define SINGLE_QUOTE 1
-# define DOUBLE_QUOTE 2
-# define BREAK 4
-# define INVALID_STR -1
+int lexing(t_shell	* minishell)
+{
 
+	if(!get_tokens(minishell->term_token))
+		return(INPUT_ERROR);
+	if(!syntax_quotes(minishell->term_token))
+		return(INPUT_ERROR);
+	if (reval_assign_token(minishell->term_token) != SUCCESS)
+		return (INPUT_ERROR);
+	return(SUCCESS);
 
-int lexing(t_shell	* minishell);
-
-
-
-
-#endif
+}

@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/21 01:47:44 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/01/29 23:20:52 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,20 +45,28 @@ typedef struct s_env
      char            *value;
 }   t_env;
 
-typedef struct s_vector
+
+typedef struct s_token
 {
-	size_t	size;
-	size_t	capacity;
-	size_t	elem_size;
-	void	*data;
-}	t_vector;
+	int				id;
+	t_token_type	type;
+	char			*value;
+	int				syntax_error;
+}	t_token;
+
+typedef struct s_lexing
+{
+	char	*buff;			// Buffer de entrada (lexing_buff de shell)
+	char	*current;		// Puntero actual en el buffer
+	int		token_id;		// ID secuencial del token
+	t_list	*tokens;		// Lista de tokens
+}	t_lexing;
 
 
 typedef struct s_shell
 {
 	t_list	*env;
-	t_vector			*local_var;
-	t_term_token		*term_token;
+	char *			lexing_buff;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
 	char	*last_err_op; // last operation that caused an error
