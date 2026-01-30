@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/26 08:15:01 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/30 20:59:52 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,12 @@ int					msh_exec_pipeline(t_shell *sh, t_list *cmd_first,
 /*Execute simple command (no pipelines involved)*/
 int					msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env);
 
+int require_standard_fds(t_shell *sh);
+
 /* Jobs in the pipeline */
 int do_first_command(t_shell *sh, t_cmd *cmd, int *p);
 int do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd);
-int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd);
+int do_last_command(t_shell *sh, t_cmd *cmd, int last_fd, int *pid);
 
 /* Execute a stage in pipeline: applies redirs (already prepared),
 	runs builtin or external. */

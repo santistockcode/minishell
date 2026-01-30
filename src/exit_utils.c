@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 12:46:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 16:22:28 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/30 20:00:38 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,12 @@ void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	close(sh->save_in);
 	close(sh->save_out);
 	close(sh->save_err);
+	if (sh->cmds_start)
+	{
+		free_cmds(sh->cmds_start);
+	}
+	else
+		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	free_cmd_struct(cmd);
 	exit(exit_code);
 }

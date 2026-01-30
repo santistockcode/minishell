@@ -48,9 +48,9 @@ void    safe_close_rd_fds(t_list *redirs)
 
 int msh_save_fds(int *save_in, int *save_out, int *save_err)
 {
-    *save_in = dup(STDIN_FILENO);
-    *save_out = dup(STDOUT_FILENO);
-    *save_err = dup(STDERR_FILENO);
+    *save_in = dup_wrap(STDIN_FILENO);
+    *save_out = dup_wrap(STDOUT_FILENO);
+    *save_err = dup_wrap(STDERR_FILENO);
     if (*save_in == -1 || *save_out == -1 || *save_err == -1)
     {
         if (*save_in != -1) close(*save_in);

@@ -13,4 +13,10 @@ void    free_env_struct(void *env);
 void    free_shell(t_shell *sh);
 t_shell *create_test_shell(const char **test_env, int last_status);
 
+t_list *create_middle_cmd_list_with_redir_in_on_second(void);
+t_list *create_middle_cmd_list(void);
+t_list *create_middle_cmd_list_with_redir_out_on_third(void);
+void wait_for_all_children(int *statuses, int count);
+int create_mock_pipe_with_data(const char *data);
+
 #endif

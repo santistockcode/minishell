@@ -4,6 +4,94 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Helper to create a linked list of commands for recursive middle tests
+ * Returns a list of 3 middle commands (cmd2, cmd3, cmd4) - cmd1 would be first_command
+ */
+t_list *create_middle_cmd_list(void)
+{
+    t_list *cmds = NULL;
+    
+    // cmd2: cat (passes through)
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    // cmd3: head -n 1 (gets first line)
+    const char *argv3[] = {"head", "-n", "1", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 3);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4: wc -c (counts characters)
+    const char *argv4[] = {"wc", "-c", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    return cmds;
+}
+
+/*
+ * Helper to create middle commands with redirections on specific commands
+ */
+t_list *create_middle_cmd_list_with_redir_in_on_second(void)
+{
+    t_list *cmds = NULL;
+    
+    // cmd2: cat < infile.txt (input redir)
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    t_redir *redir = make_redir(R_IN, "tests/unit/mock-files/infile.txt", 0, -1);
+    cmd2->redirs = ft_lstnew(redir);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    // cmd3: tr 'a-z' 'A-Z'
+    const char *argv3[] = {"tr", "a-z", "A-Z", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 3);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4: wc -c
+    const char *argv4[] = {"wc", "-c", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    return cmds;
+}
+
+t_list *create_middle_cmd_list_with_redir_out_on_third(void)
+{
+    t_list *cmds = NULL;
+    
+
+    // cmd2: cat
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    // cmd3: head -n 1
+    const char *argv3[] = {"head", "-n", "1", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 3);
+    t_redir *redir = make_redir(R_OUT_TRUNC, "tests/unit/mock-files/test_recursive_out.txt", 0, -1);
+    cmd3->redirs = ft_lstnew(redir);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4: wc -c
+    const char *argv4[] = {"wc", "-c", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    return cmds;
+}
+
+/*
+ * Helper to wait for all children and collect statuses
+ */
+void wait_for_all_children(int *statuses, int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        wait(&statuses[i]);
+    }
+}
+
 /* duplicate argv strings and allocate argv array on heap */
 char **dup_argv(const char *const *argv_in, size_t argc)
 {
@@ -99,6 +187,7 @@ t_shell *create_test_shell(const char **test_env, int last_status)
     sh->save_in = -1;
     sh->save_out = -1;
     sh->save_err = -1;
+    sh->cmds_start = NULL;
     return sh;
 }
 

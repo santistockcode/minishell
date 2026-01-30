@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/29 08:27:34 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/30 16:54:26 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	if (!path)
 		exit_from_no_path(sh, cmd, p);
 	envp = envp_from_env_list(env);
-	if (!envp) // fixme: my mini can't run without envp?
+	if (!envp)
 	{
 		free(path);
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
@@ -206,3 +206,12 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	}
 	exit(EXIT_FAILURE);
 }
+/*
+lr-x------ 1 saalarco 2019 64 Jan 29 17:37 0 -> /home/saalarco/Dev/minishell/tests/unit/mock-files/infile.txt
+l-wx------ 1 saalarco 2019 64 Jan 29 17:37 1 -> 'pipe:[495373]'
+lrwx------ 1 saalarco 2019 64 Jan 29 17:37 2 -> /dev/pts/5
+lr-x------ 1 saalarco 2019 64 Jan 29 17:37 3 -> 'pipe:[495373]'
+lrwx------ 1 saalarco 2019 64 Jan 29 17:37 5 -> /dev/pts/1
+lrwx------ 1 saalarco 2019 64 Jan 29 17:37 6 -> /dev/pts/4
+lrwx------ 1 saalarco 2019 64 Jan 29 17:37 7 -> /dev/pts/5
+*/

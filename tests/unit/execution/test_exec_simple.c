@@ -309,10 +309,10 @@ static int test_msh_exec_simple_export_modifies_parent(void)
         "USER=saalarco",
         NULL
     };
+
     t_shell *sh = create_test_shell(test_env, 0);
     const char *argv[] = {"export", "SIMPLE_VAR=from_simple", NULL};
     t_cmd *cmd = new_cmd_from_args(argv, 2);
-
     int status = msh_exec_simple(sh, cmd, sh->env);
 
     mu_assert_intcmp("export should return 0", status, 0);
@@ -439,44 +439,6 @@ static int test_msh_exec_simple_external_with_input_redir(void)
     return 0;
 }
 
-// ============================================================================
-// Tests for edge cases
-// ============================================================================
-
-// FIXME: edge case
-static int test_msh_exec_simple_null_cmd(void)
-{
-    printf("Test: msh_exec_simple with NULL cmd\n");
-    const char *test_env[] = {"PATH=/usr/bin", NULL};
-    t_shell *sh = create_test_shell(test_env, 0);
-
-    int status = msh_exec_simple(sh, NULL, sh->env);
-
-    mu_assert_intcmp("NULL cmd should return 0 (no-op)", status, 0);
-
-    free_shell(sh);
-    return 0;
-}
-
-// FIXME: edge case
-static int test_msh_exec_simple_empty_argv(void)
-{
-    printf("Test: msh_exec_simple with empty argv\n");
-    const char *test_env[] = {"PATH=/usr/bin", NULL};
-    t_shell *sh = create_test_shell(test_env, 0);
-    t_cmd *cmd = malloc(sizeof(t_cmd));
-    cmd->argv = NULL;
-    cmd->redirs = NULL;
-    cmd->stage_io = NULL;
-
-    int status = msh_exec_simple(sh, cmd, sh->env);
-
-    mu_assert_intcmp("empty argv should return 0 (no-op)", status, 0);
-
-    free(cmd);
-    free_shell(sh);
-    return 0;
-}
 
 // ============================================================================
 // Main test runner
@@ -486,7 +448,7 @@ int main(void)
 {
     printf("=== Unit Tests for exec_simple ===\n\n");
 
-    // /* exec_builtin_in_parent tests */
+    /* exec_builtin_in_parent tests */
     mu_run_test(test_exec_builtin_in_parent_export_new_var);
     mu_run_test(test_exec_builtin_in_parent_export_overwrite_var);
     mu_run_test(test_exec_builtin_in_parent_export_no_value);
@@ -509,9 +471,13 @@ int main(void)
     mu_run_test(test_msh_exec_simple_external_with_output_redir);
     mu_run_test(test_msh_exec_simple_external_with_input_redir);
 
-    /* edge cases */
-    // mu_run_test(test_msh_exec_simple_null_cmd); // pending check before calling
-    // mu_run_test(test_msh_exec_simple_empty_argv);  // pending check before calling
+    /* TODO: failing access, dup2, fork, execve, open and dup */
+    // mu_run_test(test_msh_exec_simple_failing_access);
+    // mu_run_test(test_msh_exec_simple_failing_dup2);
+    // mu_run_test(test_msh_exec_simple_failing_fork);
+    // mu_run_test(test_msh_exec_simple_failing_execve);
+    // mu_run_test(test_msh_exec_simple_failing_open);
+    // mu_run_test(test_msh_exec_simple_failing_dup);
 
     printf("\n=== All tests passed! ===\n");
     mu_summary();

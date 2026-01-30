@@ -29,8 +29,13 @@ void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	close(sh->save_in);
 	close(sh->save_out);
 	close(sh->save_err);
+	if (sh->cmds_start)
+	{
+		free_cmds(sh->cmds_start);
+	}
+	else
+		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	free_cmd_struct(cmd);
 	exit(exit_code & 0xff);
 }
 

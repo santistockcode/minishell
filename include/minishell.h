@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <readline/readline.h>
+# include <fcntl.h>
 
 # include "../Libft/include/libft.h"
 #include "log.h"
@@ -30,18 +31,20 @@ typedef struct s_env
      char            *value;
 }   t_env;
 
-
 typedef struct s_shell
 {
 	t_list	*env;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
+	t_list	*cmds_start; // only used (maybe) for cleanining up, DO NOT USE
+	// please note that: in case this exceeds 25 lines I can encapsule all bellow attributes in a differente structure and refactor the shit out of it. 
 	char	*last_err_op; // last operation that caused an error
 	int		last_errno; // last errno value
 	int		save_in; // only to be used by exec part
 	int		save_out; // only to be used by exec part
 	int		save_err; // only to be used by exec part
 }			t_shell;
+
 
 
 int init_minishell(t_shell **minishell,char **envp);

@@ -10,34 +10,33 @@ void	msh_restore_fds(int save_in, int save_out, int save_err);
 /*
 Not checkign if nstages < 1 because of norminette.
 Do not call run_pipeline with incorrect cmd_first.
-Returns (-1) on error (because that's what do_last_command returns)
+Returns -1 on fork error (ya sea en first, middle or last)
 */
-int run_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
+int run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 {
 	int p[2];
-	int i;
 	int in_fd;
 	t_list *current_cmd_node;
 
+	sh->cmds_start = cmd_first;
 	if (pipe_wrap(p) == -1)
 		return (msh_set_error(sh, PIPE_OP), -1);
 	current_cmd_node = cmd_first;
 	if (do_first_command(sh, (t_cmd *)current_cmd_node->content, p) == -1)
 		return (-1);
 	in_fd = p[0];
-	i = 1;
 	current_cmd_node = current_cmd_node->next;
-	while (i < nstages - 1)
+	while (nstages-- > 2)
 	{
 		if (pipe_wrap(p) == -1)
-			return (msh_set_error(sh, PIPE_OP), -1);
+			return (msh_set_error(sh, PIPE_OP), -1); 
 		if (do_middle_commands(sh, (t_cmd *)current_cmd_node->content, p, in_fd) == -1)
 			return (-1);
 		in_fd = p[0];
 		current_cmd_node = current_cmd_node->next;
-		i++;
 	}
-	return (do_last_command(sh, (t_cmd *)current_cmd_node->content, in_fd));
+	sh->cmds_start = NULL;
+	return (do_last_command(sh, (t_cmd *)current_cmd_node->content, in_fd, pid));
 }
 
 int require_standard_fds(t_shell *sh)
@@ -100,12 +99,26 @@ int require_standard_fds(t_shell *sh)
 // 	}
 // }
 
-
+// returns -1 on fork error happened before last command on parent
+// it interrupted pipeline: FATAL!
 int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 {
 	logger_ctx(sh, cmd_first, "EXEC_PIPELINE", "[line 93]");
 	//detailed_logger(cmd_first);
 	if (require_standard_fds(sh) == -1)
 		return (-1);
-	return (run_pipeline(sh, cmd_first, nstages));
+	int result;
+	int wtpd_resp;
+	int status;
+	pid_t pid;
+
+	result = run_pipeline(sh, cmd_first, nstages, &pid);
+	if (result == -1)
+		return (-1); 
+	wtpd_resp = waitpid(pid, &status, 0);
+	if (wtpd_resp == -1)
+		return (msh_set_error(sh, WAITPID_OP), -1);
+	if (WIFEXITED(status))
+		return WEXITSTATUS(status);
+	return (result);
 }
