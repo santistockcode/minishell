@@ -17,14 +17,84 @@ t_list *create_middle_cmd_list_with_redir_out_on_third(void);
 void wait_for_all_children(int *statuses, int count);
 int create_mock_pipe_with_data(const char *data);
 
+int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid);
+
 volatile static t_dup2_fn    s_dup2_fn    = NULL;
 
 volatile sig_atomic_t g_exit_status = 0;
 
+// Helper to create a standard 6-command pipeline list
+static t_list *create_6_cmd_pipeline(void)
+{
+    t_list *cmds = NULL;
+    
+    const char *argv1[] = {"echo", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    const char *argv3[] = {"cat", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    const char *argv4[] = {"cat", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    const char *argv5[] = {"cat", NULL};
+    t_cmd *cmd5 = new_cmd_from_args(argv5, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd5));
+    
+    const char *argv6[] = {"wc", "-c", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    return cmds;
+}
+
+// ============================================================================
+// Pipe failure tests
+// ============================================================================
+
+// Generic pipe mock
+typedef struct s_pipe_mock {
+    int call_count;
+    int fail_at;
+} t_pipe_mock;
+
+static t_pipe_mock g_pipe_mock = {0, 0};
+
+static int pipe_mock_nth(int pipefd[2])
+{
+    g_pipe_mock.call_count++;
+    if (g_pipe_mock.call_count == g_pipe_mock.fail_at)
+    {
+        errno = EMFILE;  // Too many open files
+        return -1;
+    }
+    return pipe(pipefd);
+}
+
+static void setup_pipe_mock(int fail_at)
+{
+    g_pipe_mock.call_count = 0;
+    g_pipe_mock.fail_at = fail_at;
+    syswrap_set_pipe((t_pipe_fn)pipe_mock_nth);
+}
+
+static void teardown_pipe_mock(void)
+{
+    g_pipe_mock.call_count = 0;
+    g_pipe_mock.fail_at = 0;
+    syswrap_set_pipe(NULL);
+}
+
 // ============================================================================
 // Generic fork fails
 // ============================================================================
-
 
 static int fork_fail(void) {
     errno = EAGAIN;
@@ -3303,10 +3373,818 @@ static int test_run_pipeline_last_of_three_intermediate_failures_affect_last(voi
     return (0);
 }
 
-// NORMINETTE DA SHIT
-// TEST WITH BUILTINS
-// test run pipeline (later)
-// COMMIT
+
+// ============================================================================
+// Tests for run_pipeline with 6 commands
+// ============================================================================
+
+// 6-stage pipeline: echo "hello world" | cat | cat | cat | cat | wc -c
+static int test_run_pipeline_6_cmds_pipe_happy_path(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_happy_path\n");
+    t_shell *sh;
+    t_list *cmds = NULL;
+    pid_t last_pid;
+    int status;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    
+    // cmd1: echo "hello world"
+    const char *argv1[] = {"echo", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    // cmd2: cat
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    // cmd3: cat
+    const char *argv3[] = {"cat", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4: cat
+    const char *argv4[] = {"cat", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    // cmd5: cat
+    const char *argv5[] = {"cat", NULL};
+    t_cmd *cmd5 = new_cmd_from_args(argv5, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd5));
+    
+    // cmd6: wc -c (count characters)
+    const char *argv6[] = {"wc", "-c", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    // Capture stdout for verification
+    int stdout_pipe[2];
+    pipe(stdout_pipe);
+    fcntl(stdout_pipe[0], F_SETFD, FD_CLOEXEC);
+
+    int saved_stdout = dup(STDOUT_FILENO);
+    fcntl(saved_stdout, F_SETFD, FD_CLOEXEC); 
+
+    dup2(stdout_pipe[1], STDOUT_FILENO);
+    close(stdout_pipe[1]);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    // Restore stdout
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+    
+    mu_assert_intcmp("run_pipeline should return 0", result, 0);
+    
+    // Wait for all 6 children
+    int statuses[6];
+    for (int i = 0; i < 6; i++)
+        wait(&statuses[i]);
+    
+    // Read output from wc -c
+    char buf[128] = {0};
+    read(stdout_pipe[0], buf, sizeof(buf) - 1);
+    close(stdout_pipe[0]);
+    
+    // "hello world\n" = 12 characters
+    // wc -c outputs the count (possibly with whitespace padding)
+    mu_assert("output should contain character count", ft_strlen(buf) > 0);
+    mu_assert("output should contain '12'", strstr(buf, "12") != NULL);
+    
+    // All children should exit successfully
+    int all_success = 1;
+    for (int i = 0; i < 6; i++)
+    {
+        if (!WIFEXITED(statuses[i]) || WEXITSTATUS(statuses[i]) != 0)
+            all_success = 0;
+    }
+    mu_assert("all 6 children should exit with status 0", all_success);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+
+static int test_run_pipeline_6_cmds_pipe_happy_path_redir_out(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_happy_path_redir_out\n");
+    t_shell *sh;
+    t_list *cmds = NULL;
+    pid_t last_pid;
+    const char *out_file = "tests/unit/mock-files/pipeline_6_out.txt";
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    // Clean up any previous test file
+    unlink(out_file);
+    
+    sh = create_test_shell(test_env, 0);
+    
+    // cmd1: echo "hello world"
+    const char *argv1[] = {"echo", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    // cmd2: cat
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    // cmd3: cat
+    const char *argv3[] = {"cat", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4: cat
+    const char *argv4[] = {"cat", NULL};
+    t_cmd *cmd4 = new_cmd_from_args(argv4, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd4));
+    
+    // cmd5: cat
+    const char *argv5[] = {"cat", NULL};
+    t_cmd *cmd5 = new_cmd_from_args(argv5, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd5));
+    
+    // cmd6: wc -c > outfile (count characters, redirect to file)
+    const char *argv6[] = {"wc", "-c", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 2);
+    t_redir *redir = make_redir(R_OUT_TRUNC, out_file, 0, -1);
+    cmd6->redirs = ft_lstnew(redir);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return 0", result, 0);
+    
+    // Wait for all 6 children
+    int statuses[6];
+    for (int i = 0; i < 6; i++)
+        wait(&statuses[i]);
+    
+    // Verify output file exists and contains correct count
+    int fd = open(out_file, O_RDONLY);
+    mu_assert("output file should exist", fd >= 0);
+    
+    char file_buf[128] = {0};
+    if (fd >= 0)
+    {
+        read(fd, file_buf, sizeof(file_buf) - 1);
+        close(fd);
+    }
+    
+    // "hello world\n" = 12 characters
+    mu_assert("file should contain character count", ft_strlen(file_buf) > 0);
+    mu_assert("file should contain '12'", strstr(file_buf, "12") != NULL);
+    
+    // All children should exit successfully
+    int all_success = 1;
+    for (int i = 0; i < 6; i++)
+    {
+        if (!WIFEXITED(statuses[i]) || WEXITSTATUS(statuses[i]) != 0)
+            all_success = 0;
+    }
+    mu_assert("all 6 children should exit with status 0", all_success);
+    
+    // Clean up test file
+    unlink(out_file);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Pipe fails at first command (before any fork)
+static int test_run_pipeline_6_cmds_pipe_fails_at_first_cmd(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_fails_at_first_cmd\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on first pipe() call
+    setup_pipe_mock(1);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on pipe failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'pipe'", sh->last_err_op, PIPE_OP);
+    mu_assert_intcmp("last_errno should be EMFILE", sh->last_errno, EMFILE);
+    
+    teardown_pipe_mock();
+    
+    // No children should have been created
+    // (wait should return -1 with ECHILD)
+    int wait_result = wait(NULL);
+    mu_assert("no children should exist", wait_result == -1 && errno == ECHILD);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Pipe fails at middle command 1 (2nd pipe() call, between cmd1 and cmd2)
+static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 2nd pipe() call (for first middle command)
+    setup_pipe_mock(2);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on pipe failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'pipe'", sh->last_err_op, PIPE_OP);
+    
+    teardown_pipe_mock();
+    
+    // Wait for any children that were created (first command)
+    while (wait(NULL) > 0)
+        ;
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Pipe fails at middle command 2 (3rd pipe() call)
+static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 3rd pipe() call (for second middle command)
+    setup_pipe_mock(3);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on pipe failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'pipe'", sh->last_err_op, PIPE_OP);
+    
+    teardown_pipe_mock();
+    
+    // Wait for children (first + first middle)
+    while (wait(NULL) > 0)
+        ;
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Pipe fails at middle command 3 (4th pipe() call)
+static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 4th pipe() call (for third middle command)
+    setup_pipe_mock(4);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on pipe failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'pipe'", sh->last_err_op, PIPE_OP);
+    
+    teardown_pipe_mock();
+    
+    // Wait for children (first + 2 middle)
+    while (wait(NULL) > 0)
+        ;
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Pipe fails at middle command 4 (5th pipe() call) - last middle before final cmd
+static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_4(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_4\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 5th pipe() call (for fourth middle command)
+    setup_pipe_mock(5);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on pipe failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'pipe'", sh->last_err_op, PIPE_OP);
+    
+    teardown_pipe_mock();
+    
+    // Wait for children (first + 3 middle)
+    while (wait(NULL) > 0)
+        ;
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// ============================================================================
+// Fork failure tests
+// ============================================================================
+
+// Fork fails at first command
+static int test_run_pipeline_6_cmds_fork_fails_at_first_cmd(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_first_cmd\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on first fork() call
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 1;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    mu_assert_intcmp("last_errno should be EAGAIN", sh->last_errno, EAGAIN);
+    
+    syswrap_set_fork(NULL);
+    
+    // No children should have been created
+    int wait_result = wait(NULL);
+    mu_assert("no children should exist", wait_result == -1 && errno == ECHILD);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Fork fails at middle command 1 (2nd fork)
+static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    int children_reaped = 0;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 2nd fork() call (first middle command)
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 2;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    
+    syswrap_set_fork(NULL);
+    
+    // Wait for 1 child (first command)
+    while (wait(NULL) > 0)
+        children_reaped++;
+    
+    mu_assert_intcmp("should have reaped 1 child", children_reaped, 1);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Fork fails at middle command 2 (3rd fork)
+static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    int children_reaped = 0;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 3rd fork() call (second middle command)
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 3;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    
+    syswrap_set_fork(NULL);
+    
+    // Wait for 2 children (first + first middle)
+    while (wait(NULL) > 0)
+        children_reaped++;
+    
+    mu_assert_intcmp("should have reaped 2 children", children_reaped, 2);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Fork fails at middle command 3 (4th fork)
+static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    int children_reaped = 0;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 4th fork() call (third middle command)
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 4;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    
+    syswrap_set_fork(NULL);
+    
+    // Wait for 3 children (first + 2 middle)
+    while (wait(NULL) > 0)
+        children_reaped++;
+    
+    mu_assert_intcmp("should have reaped 3 children", children_reaped, 3);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Fork fails at middle command 4 (5th fork) - last middle
+static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_4(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_4\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    int children_reaped = 0;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 5th fork() call (fourth middle command)
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 5;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    
+    syswrap_set_fork(NULL);
+    
+    // Wait for 4 children (first + 3 middle)
+    while (wait(NULL) > 0)
+        children_reaped++;
+    
+    mu_assert_intcmp("should have reaped 4 children", children_reaped, 4);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Fork fails at last command (6th fork)
+static int test_run_pipeline_6_cmds_fork_fails_at_last_cmd(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_fork_fails_at_last_cmd\n");
+    t_shell *sh;
+    t_list *cmds;
+    pid_t last_pid;
+    int children_reaped = 0;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    cmds = create_6_cmd_pipeline();
+    
+    // Fail on 6th fork() call (last command)
+    g_fork_mock.call_count = 0;
+    g_fork_mock.fail_at = 6;
+    syswrap_set_fork((t_fork_fn)fork_mock_nth);
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return -1 on fork failure", result, -1);
+    mu_assert_strcmp("last_err_op should be 'fork'", sh->last_err_op, FORK_OP);
+    
+    syswrap_set_fork(NULL);
+    
+    // Wait for 5 children (first + 4 middle)
+    while (wait(NULL) > 0)
+        children_reaped++;
+    
+    mu_assert_intcmp("should have reaped 5 children", children_reaped, 5);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// ============================================================================
+// Execve failure tests for 6-command pipeline
+// ============================================================================
+
+// Execve fails at first command (exit 127)
+static int test_run_pipeline_6_cmds_execve_fails_at_first_cmd_127(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_execve_fails_at_first_cmd_127\n");
+    t_shell *sh;
+    t_list *cmds = NULL;
+    pid_t last_pid;
+    const char *out_file = "tests/unit/mock-files/pipeline_6_execve_fail.txt";
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    unlink(out_file);
+    sh = create_test_shell(test_env, 0);
+    
+    // cmd1: nonexistent command (will fail with 127)
+    const char *argv1[] = {"nonexistent_first_cmd_xyz", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    // cmd2-5: cat
+    for (int i = 0; i < 4; i++)
+    {
+        const char *argv[] = {"cat", NULL};
+        t_cmd *cmd = new_cmd_from_args(argv, 1);
+        ft_lstadd_back(&cmds, ft_lstnew(cmd));
+    }
+    
+    // cmd6: wc -c > outfile
+    const char *argv6[] = {"wc", "-c", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 2);
+    t_redir *redir = make_redir(R_OUT_TRUNC, out_file, 0, -1);
+    cmd6->redirs = ft_lstnew(redir);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return 0 (fork succeeded)", result, 0);
+    
+    // Wait for all children
+    int statuses[6];
+    for (int i = 0; i < 6; i++)
+        wait(&statuses[i]);
+    
+    // At least one should exit with 127
+    int found_127 = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        if (WIFEXITED(statuses[i]) && WEXITSTATUS(statuses[i]) == 127)
+            found_127 = 1;
+    }
+    mu_assert("first command should exit with 127", found_127);
+    
+    unlink(out_file);
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Execve fails at middle command (exit 127)
+static int test_run_pipeline_6_cmds_execve_fails_at_middle_cmd_127(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_execve_fails_at_middle_cmd_127\n");
+    t_shell *sh;
+    t_list *cmds = NULL;
+    pid_t last_pid;
+    const char *out_file = "tests/unit/mock-files/pipeline_6_execve_mid_fail.txt";
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    unlink(out_file);
+    sh = create_test_shell(test_env, 0);
+    
+    // cmd1: echo
+    const char *argv1[] = {"echo", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    // cmd2: cat
+    const char *argv2[] = {"cat", NULL};
+    t_cmd *cmd2 = new_cmd_from_args(argv2, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd2));
+    
+    // cmd3: nonexistent (will fail with 127)
+    const char *argv3[] = {"nonexistent_middle_cmd_xyz", NULL};
+    t_cmd *cmd3 = new_cmd_from_args(argv3, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd3));
+    
+    // cmd4-5: cat
+    for (int i = 0; i < 2; i++)
+    {
+        const char *argv[] = {"cat", NULL};
+        t_cmd *cmd = new_cmd_from_args(argv, 1);
+        ft_lstadd_back(&cmds, ft_lstnew(cmd));
+    }
+    
+    // cmd6: wc -c > outfile
+    const char *argv6[] = {"wc", "-c", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 2);
+    t_redir *redir = make_redir(R_OUT_TRUNC, out_file, 0, -1);
+    cmd6->redirs = ft_lstnew(redir);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return 0 (fork succeeded)", result, 0);
+    
+    // Wait for all children
+    int statuses[6];
+    for (int i = 0; i < 6; i++)
+        wait(&statuses[i]);
+    
+    // At least one should exit with 127
+    int found_127 = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        if (WIFEXITED(statuses[i]) && WEXITSTATUS(statuses[i]) == 127)
+            found_127 = 1;
+    }
+    mu_assert("middle command should exit with 127", found_127);
+    
+    unlink(out_file);
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+// Execve fails at last command (exit 127)
+static int test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127(void)
+{
+    printf("Test: test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127\n");
+    t_shell *sh;
+    t_list *cmds = NULL;
+    pid_t last_pid;
+    const char *test_env[] = {
+        "USER=saalarco",
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    
+    sh = create_test_shell(test_env, 0);
+    
+    // cmd1: echo
+    const char *argv1[] = {"echo", "hello world", NULL};
+    t_cmd *cmd1 = new_cmd_from_args(argv1, 2);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd1));
+    
+    // cmd2-5: cat
+    for (int i = 0; i < 4; i++)
+    {
+        const char *argv[] = {"cat", NULL};
+        t_cmd *cmd = new_cmd_from_args(argv, 1);
+        ft_lstadd_back(&cmds, ft_lstnew(cmd));
+    }
+    
+    // cmd6: nonexistent (will fail with 127)
+    const char *argv6[] = {"nonexistent_last_cmd_xyz", NULL};
+    t_cmd *cmd6 = new_cmd_from_args(argv6, 1);
+    ft_lstadd_back(&cmds, ft_lstnew(cmd6));
+    
+    int result = run_pipeline(sh, cmds, 6, &last_pid);
+    
+    mu_assert_intcmp("run_pipeline should return 0 (fork succeeded)", result, 0);
+    
+    // Wait for all children
+    int statuses[6];
+    for (int i = 0; i < 6; i++)
+        wait(&statuses[i]);
+    
+    // At least one should exit with 127
+    int found_127 = 0;
+    for (int i = 0; i < 6; i++)
+    {
+        if (WIFEXITED(statuses[i]) && WEXITSTATUS(statuses[i]) == 127)
+            found_127 = 1;
+    }
+    mu_assert("last command should exit with 127", found_127);
+    
+    free_cmds(cmds);
+    free_shell(sh);
+    return (0);
+}
+
+
+// static int test_run_pipeline_6_cmds_pipe_fails_at_first_cmd(void)
+// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1(void)
+// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2(void)
+// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3(void)
+// static int test_run_pipeline_6_cmds_fork_fails_at_first_cmd(void)
+// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1(void)
+// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2(void)
+// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3(void)
+// static int test_run_pipeline_6_cmds_fork_fails_at_last_cmd(void)
 
 int main(void)
 {
@@ -3369,7 +4247,7 @@ int main(void)
     mu_run_test(test_do_last_command_execve_failure_127);
     mu_run_test(test_do_last_command_access_failure_path_resolution);
 
-    // printf("\n--- do_last_command as final stage (two-stage pipeline) ---\n");
+    printf("\n--- do_last_command as final stage (two-stage pipeline) ---\n");
     mu_run_test(test_run_pipeline_last_of_two_happy_path);
     mu_run_test(test_run_pipeline_last_of_two_with_redir_on_last);
     mu_run_test(test_run_pipeline_last_of_two_fork_failure_on_last);
@@ -3377,7 +4255,7 @@ int main(void)
     mu_run_test(test_run_pipeline_last_of_two_execve_failure_on_last_127);
     mu_run_test(test_run_pipeline_last_of_two_dup2_failure_on_last);
 
-    // printf("\n--- do_last_command as final stage (three-stage pipeline) ---\n");
+    printf("\n--- do_last_command as final stage (three-stage pipeline) ---\n");
     mu_run_test(test_run_pipeline_last_of_three_happy_path);
     mu_run_test(test_run_pipeline_last_of_three_with_redir_on_last);
     mu_run_test(test_run_pipeline_last_of_three_fork_failure_on_last);
@@ -3385,8 +4263,34 @@ int main(void)
     mu_run_test(test_run_pipeline_last_of_three_execve_failure_on_last_127);
     mu_run_test(test_run_pipeline_last_of_three_dup2_failure_on_last);
 
-    // printf("\n--- Integration-like tests ---\n");
+    printf("\n--- Integration-like tests ---\n");
     mu_run_test(test_run_pipeline_last_of_three_intermediate_failures_affect_last);
+
+    printf("\n--- Tests with 6 cmds ---\n");
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path); // misleading fds on valgrind logs
+    mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path_redir_out);
+
+    printf("\n--- Tests with 6 cmds - UNHAPPY PATHS ---\n");
+    
+    printf("\n  -- Pipe failures --\n");
+    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_first_cmd);
+    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1);
+    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2);
+    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3);
+    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_4);
+    
+    printf("\n  -- Fork failures --\n");
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_first_cmd);
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1);
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2);
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3);
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_4);
+    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_last_cmd);
+    
+    printf("\n  -- Execve failures (127) --\n");
+    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_first_cmd_127);
+    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_middle_cmd_127);
+    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127);
 
     mu_summary();
     return 0;

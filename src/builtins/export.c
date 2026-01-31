@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:46:33 by mario             #+#    #+#             */
-/*   Updated: 2026/01/25 17:22:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 17:47:48 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,26 @@
 
 void	putstr_fd_err(int n, ...);
 
-t_env *env_get(t_list *env, char *key)
+/*
+ * Get an environment variable by key.
+ */
+t_env	*env_get(t_list *env, char *key)
 {
-	t_env *var;
-	
-	while(env)
+	t_env	*var;
+
+	while (env)
 	{
 		var = (t_env *)env->content;
 		if (ft_strncmp(var->key, key, ft_strlen(var->key)) == 0)
 			return (var);
 		env = env->next;
 	}
-	return(NULL);
+	return (NULL);
 }
 
+/*
+ * Set an environment variable.
+ */
 int	env_set(t_list **env, char *var)
 {
 	t_env	*node;
@@ -41,7 +47,7 @@ int	env_set(t_list **env, char *var)
 	if (aux)
 	{
 		free(aux->value);
-		aux->value = node->value; 
+		aux->value = node->value;
 		free(node->key);
 		free(node);
 		return (0);

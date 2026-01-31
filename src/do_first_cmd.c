@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/27 19:41:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/30 21:15:03 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 17:50:54 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,13 @@
 
 int			prepare_redirs(t_list *redirs, t_shell *sh);
 void		safe_close_rd_fds(t_list *redirs);
-t_stage_io	*prepare_stage_io(
-				t_stage_type pos, t_list *redirs, int in_fd, int *p);
-void	free_cmd_struct(void *input);
+t_stage_io	*prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd,
+				int *p);
+void		free_cmd_struct(void *input);
 void		free_shell_child(t_shell *sh);
-void	safe_close_p(int *p);
+void		safe_close_p(int *p);
 
-void special_first_exit(t_shell *sh, t_cmd *cmd, int *p)
+void	special_first_exit(t_shell *sh, t_cmd *cmd, int *p)
 {
 	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	if (p)
@@ -45,7 +45,7 @@ int	do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 		return (safe_close_p(p), msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		// fprintf(stderr, "[CHILD-l] PID %d, parent %d, cmd=%s\n", 
+		// fprintf(stderr, "[CHILD-l] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
 		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
 			special_first_exit(sh, cmd, p);

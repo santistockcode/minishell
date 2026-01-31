@@ -6,13 +6,13 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 22:08:46 by mario             #+#    #+#             */
-/*   Updated: 2026/01/25 12:30:56 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 17:50:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-extern volatile sig_atomic_t g_exit_status;
+extern volatile sig_atomic_t	g_exit_status;
 
 void	setup_signals_child(void)
 {
@@ -25,6 +25,7 @@ void	setup_signals_ignore(void)
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 }
+
 void	ft_ctrl_mini(sig_atomic_t signal)
 {
 	(void)signal;

@@ -322,6 +322,9 @@ def test_that_interacts_with_child_processes():
 def test_cat_infile_to_outfile_with_permission_denied(test_runner_tty):
     pass
 
+# Test for every possible t_stage_io (see prepare_stage_io)
 
-# include here rest of pipex tests
+# Test for various consequtive out redirections 
+
+# All manual pipex tests
 

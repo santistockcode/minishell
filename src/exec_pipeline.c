@@ -1,9 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_pipeline.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
+/*   Updated: 2026/01/31 19:31:56 by saalarco         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 // fds_utils.c
 void	safe_close_rd_fds(t_list *redirs);
 int		msh_save_fds(int *save_in, int *save_out, int *save_err);
 void	msh_restore_fds(int save_in, int save_out, int save_err);
+
+// exit utils
+void	safe_close_p(int *p);
+
 
 /* EXEC_PIPELINE */
 
@@ -12,37 +28,39 @@ Not checkign if nstages < 1 because of norminette.
 Do not call run_pipeline with incorrect cmd_first.
 Returns -1 on fork error (ya sea en first, middle or last)
 */
-int run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
+int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 {
-	int p[2];
-	int in_fd;
-	t_list *current_cmd_node;
+	int		p[2];
+	int		in_fd;
+	t_list	*current_cmd_node;
 
 	sh->cmds_start = cmd_first;
 	if (pipe_wrap(p) == -1)
 		return (msh_set_error(sh, PIPE_OP), -1);
 	current_cmd_node = cmd_first;
 	if (do_first_command(sh, (t_cmd *)current_cmd_node->content, p) == -1)
-		return (-1);
+		return (safe_close_p(p), -1);
 	in_fd = p[0];
 	current_cmd_node = current_cmd_node->next;
 	while (nstages-- > 2)
 	{
 		if (pipe_wrap(p) == -1)
-			return (msh_set_error(sh, PIPE_OP), -1); 
-		if (do_middle_commands(sh, (t_cmd *)current_cmd_node->content, p, in_fd) == -1)
-			return (-1);
+			return (safe_close_p(p), msh_set_error(sh, PIPE_OP), -1);
+		if (do_middle_commands(sh, (t_cmd *)current_cmd_node->content, p,
+				in_fd) == -1)
+			return (safe_close_p(p), -1);
 		in_fd = p[0];
 		current_cmd_node = current_cmd_node->next;
 	}
 	sh->cmds_start = NULL;
-	return (do_last_command(sh, (t_cmd *)current_cmd_node->content, in_fd, pid));
+	return (do_last_command(sh, (t_cmd *)current_cmd_node->content, in_fd,
+			pid));
 }
 
-int require_standard_fds(t_shell *sh)
+int	require_standard_fds(t_shell *sh)
 {
-	struct stat *statbuf;
-	int fd;
+	struct stat	*statbuf;
+	int			fd;
 
 	fd = 0;
 	statbuf = malloc(sizeof(struct stat));
@@ -101,24 +119,24 @@ int require_standard_fds(t_shell *sh)
 
 // returns -1 on fork error happened before last command on parent
 // it interrupted pipeline: FATAL!
-int msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
+int	msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 {
+	int		result;
+	int		wtpd_resp;
+	int		status;
+	pid_t	pid;
+
 	logger_ctx(sh, cmd_first, "EXEC_PIPELINE", "[line 93]");
-	//detailed_logger(cmd_first);
+	// detailed_logger(cmd_first);
 	if (require_standard_fds(sh) == -1)
 		return (-1);
-	int result;
-	int wtpd_resp;
-	int status;
-	pid_t pid;
-
 	result = run_pipeline(sh, cmd_first, nstages, &pid);
 	if (result == -1)
-		return (-1); 
+		return (-1);
 	wtpd_resp = waitpid(pid, &status, 0);
 	if (wtpd_resp == -1)
 		return (msh_set_error(sh, WAITPID_OP), -1);
 	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
+		return (WEXITSTATUS(status));
 	return (result);
 }

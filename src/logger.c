@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/13 16:44:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 18:04:47 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,8 @@ void	logger(const char *tag, const char *message)
 }
 
 // FIXME: don't present this (does't pass norminette)
-void	logger_ctx(t_shell *sh, t_list *cmd,
-	const char *tag, const char *message)
+void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
+		const char *message)
 {
 	time_t	now;
 	char	time_str[26];

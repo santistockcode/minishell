@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/30 16:54:26 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 18:03:15 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void		exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p);
 void		ft_spfr(char **paths);
 const char	*get_path_envp(t_list *env);
 char		*ft_strjoin_prot(char const *str1, char const *str2);
-char *const	*envp_from_env_list(t_list *env);
+char	*const	*envp_from_env_list(t_list *env);
 char		*build_path(const char *dir, const char *file);
 
 // fds utils
@@ -37,12 +37,12 @@ void		stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 void		free_envp(const char **envp);
 
 // builtins_orq
-void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
+void		builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 
 /*
-Returns: 
+Returns:
 - path is the path allocated if found, NULL if not found
-- acc_ret is set to 0 on access didn't fail, -1 on syscall error 
+- acc_ret is set to 0 on access didn't fail, -1 on syscall error
 (access failed ENOENT excluded)
 - returns -1 if couldn't access, 1 if access succeeded
 - ñapa: if malloc fails on libft call: path is NULL, acc_ret is -2, returns -1
@@ -88,13 +88,13 @@ int	try_access(char **pre_paths, char **path, char *file, int *acc_ret)
 }
 
 /*
-Syscall access needs to be controled. 
+Syscall access needs to be controled.
 Should return path on found, NULL on not found.
 acc_ret should be set to 0 on success or malloc fail,
 -1 on error syscall if not ENOENT.
 */
 char	*msh_path_from_cmdname(char *arg, t_list *env, t_shell *sh,
-	int *acc_ret)
+		int *acc_ret)
 {
 	char		**all_paths;
 	char		*path;
@@ -156,7 +156,7 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 
 void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 {
-	int		st;
+	int	st;
 
 	st = exec_builtin(cmd, sh);
 	builtin_stage_exit(sh, cmd, p, st);
@@ -164,15 +164,16 @@ void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 
 // Entry point for execution
 /*
-This function is responsible for executing a command. 
+This function is responsible for executing a command.
 Syscalls: execve, dup2, access, malloc + malloc inside libft calls ⁉️
-Also this function is top level for forked process, should exit on syscall error.
+Also this function is top level for forked process,
+	should exit on syscall error.
 Print and exits on sys error
 	- dup2
 	- access
 	- execve
 	- malloc
-Before exiting: 
+Before exiting:
 	- frees path if allocated
 	- closes all file descriptors
 	- frees redirection structures
@@ -180,9 +181,9 @@ Before exiting:
 */
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
-	char				*path;
-	int					st;
-	char *const			*envp;
+	char		*path;
+	int			st;
+	char *const	*envp;
 
 	dup2_stage_io(sh, cmd, p);
 	if (is_builtin(cmd->argv[0]))
@@ -199,7 +200,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	else if (execve_wrap(path, cmd->argv, envp) == -1)
 	{
 		free(path);
-		free_envp((const char **) envp);
+		free_envp((const char **)envp);
 		st = msh_status_from_execve_error(errno);
 		msh_set_error(sh, EXECVE_OP);
 		stage_exit_print(sh, cmd, p, st);
@@ -207,7 +208,8 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	exit(EXIT_FAILURE);
 }
 /*
-lr-x------ 1 saalarco 2019 64 Jan 29 17:37 0 -> /home/saalarco/Dev/minishell/tests/unit/mock-files/infile.txt
+lr-x------ 1 saalarco 2019 64 Jan 29 17:37 0 ->
+	/home/saalarco/Dev/minishell/tests/unit/mock-files/infile.txt
 l-wx------ 1 saalarco 2019 64 Jan 29 17:37 1 -> 'pipe:[495373]'
 lrwx------ 1 saalarco 2019 64 Jan 29 17:37 2 -> /dev/pts/5
 lr-x------ 1 saalarco 2019 64 Jan 29 17:37 3 -> 'pipe:[495373]'

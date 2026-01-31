@@ -6,12 +6,13 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/25 12:31:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 18:21:37 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-extern volatile sig_atomic_t g_exit_status;
+
+extern volatile sig_atomic_t	g_exit_status;
 
 /*
 Note on syscalls: 

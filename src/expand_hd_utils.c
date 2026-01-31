@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:11:21 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/09 15:12:58 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/31 18:03:58 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,13 @@ char	*list_to_alloc_string(t_list *chars_list)
 
 	size = ft_lstsize(chars_list);
 	i = 0;
-	complete_string = malloc (sizeof(char) * (size + 1));
+	complete_string = malloc(sizeof(char) * (size + 1));
 	if (!complete_string)
 		return (NULL);
 	current_node = chars_list;
 	while (i < size)
 	{
-		complete_string[i] = (char)(size_t) current_node->content;
+		complete_string[i] = (char)(size_t)current_node->content;
 		current_node = current_node->next;
 		i++;
 	}
@@ -107,12 +107,12 @@ int	get_env_from_key(char *key, t_list *env, char **res_value)
 		{
 			*res_value = ft_strdup(pair->value);
 			if (!*res_value)
-				return (free (original_key), -1);
-			return (free (original_key), 0);
+				return (free(original_key), -1);
+			return (free(original_key), 0);
 		}
 		current = current->next;
 	}
-	free (original_key);
+	free(original_key);
 	*res_value = NULL;
 	return (0);
 }
