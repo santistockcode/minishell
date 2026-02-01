@@ -328,3 +328,16 @@ def test_cat_infile_to_outfile_with_permission_denied(test_runner_tty):
 
 # All manual pipex tests
 
+# Exit tiene que hacer overflow:
+    # calling exit 258 inside bash, is really calling bash that exists with 258 that then if I do: echo $?
+    # prints 2. 
+    # y lo mismo para atrás, si llamo a exit con -1
+
+# Test minishell calls another minishell
+
+# Test minishell calls a executable that stucks in a loop, if control+c, only exits the executable
+
+# Test that if I'm in folderB inside of folderA and I delete folderA,
+    # no segfault on minishell
+    # if I go cd ../ or cd ../.. I have not sefault
+

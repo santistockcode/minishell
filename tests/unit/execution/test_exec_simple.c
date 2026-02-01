@@ -850,6 +850,49 @@ static int test_msh_exec_simple_failing_open_redir_in(void)
     return 0;
 }
 
+/*
+(.env) c1r6s2% echo < intexistant 
+zsh: no such file or directory: intexistant
+(.env) c1r6s2% echo $?
+1
+(.env) c1r6s2% echo "shall not pass" > inex
+(.env) c1r6s2% cat inex 
+shall not pass
+(.env) c1r6s2% chmod 000 inex
+(.env) c1r6s2% echo < inex
+zsh: permission denied: inex
+(.env) c1r6s2% echo $?
+1
+*/
+// Open failure with input redirection
+static int test_msh_exec_simple_failing_open_redir_in_but_builtin(void)
+{
+    printf("Test: msh_exec_simple failing open (input redirection)\n");
+    const char *test_env[] = {
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    t_shell *sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"echo", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 1);
+
+    // Add input redirection to nonexistent file
+    t_redir *redir = make_redir(R_IN, "tests/unit/mock-files/nonexistent_simple.txt", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+
+    int status = msh_exec_simple(sh, cmd, sh->env);
+
+    // Open failure on redir should return 1
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
+
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    return 0;
+}
+
 // Open failure with output redirection (using mock)
 static int test_msh_exec_simple_failing_open_redir_out(void)
 {
@@ -873,7 +916,10 @@ static int test_msh_exec_simple_failing_open_redir_out(void)
 
     syswrap_set_open(NULL);
 
-    mu_assert_intcmp("open failure should return 1", status, 1);
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
 
     free_cmds(ft_lstnew(cmd));
     free_shell(sh);
@@ -882,6 +928,35 @@ static int test_msh_exec_simple_failing_open_redir_out(void)
 
 // Dup failure when saving fds
 static int test_msh_exec_simple_failing_dup(void)
+{
+    printf("Test: msh_exec_simple failing dup (save fds)\n");
+    const char *test_env[] = {
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    t_shell *sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", "test", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+
+    // Make dup() fail on first call (when saving stdin)
+    setup_dup_mock(1);
+
+    int status = msh_exec_simple(sh, cmd, sh->env);
+
+    teardown_dup_mock();
+
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
+
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    return 0;
+}
+
+
+static int test_msh_exec_simple_failing_dup_but_builtin(void)
 {
     printf("Test: msh_exec_simple failing dup (save fds)\n");
     const char *test_env[] = {
@@ -899,8 +974,10 @@ static int test_msh_exec_simple_failing_dup(void)
 
     teardown_dup_mock();
 
-    // Dup failure should return error status (1 or -1 depending on implementation)
-    mu_assert("dup failure should return error", status != 0);
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
 
     free_cmds(ft_lstnew(cmd));
     free_shell(sh);
@@ -909,6 +986,38 @@ static int test_msh_exec_simple_failing_dup(void)
 
 // Dup2 failure when redirecting
 static int test_msh_exec_simple_failing_dup2(void)
+{
+    printf("Test: msh_exec_simple failing dup2 (redirect)\n");
+    const char *test_env[] = {
+        "PATH=/usr/bin:/bin",
+        NULL
+    };
+    t_shell *sh = create_test_shell(test_env, 0);
+    const char *argv[] = {"cat", "test", NULL};
+    t_cmd *cmd = new_cmd_from_args(argv, 2);
+
+    // Add redirection so dup2 is called
+    t_redir *redir = make_redir(R_OUT_TRUNC, "/dev/null", 0, -1);
+    cmd->redirs = ft_lstnew(redir);
+
+    // Make dup2() fail on first call
+    setup_dup2_mock(1);
+
+    int status = msh_exec_simple(sh, cmd, sh->env);
+
+    teardown_dup2_mock();
+
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
+
+    free_cmds(ft_lstnew(cmd));
+    free_shell(sh);
+    return 0;
+}
+
+static int test_msh_exec_simple_failing_dup2_but_builtin(void)
 {
     printf("Test: msh_exec_simple failing dup2 (redirect)\n");
     const char *test_env[] = {
@@ -930,7 +1039,11 @@ static int test_msh_exec_simple_failing_dup2(void)
 
     teardown_dup2_mock();
 
-    mu_assert("dup2 failure should return error", status != 0);
+    if (is_builtin((char *) argv[0]))
+        mu_assert_intcmp("open failure should return -1", -1, status);
+    else
+        mu_assert_intcmp("open failure should return 1", 1, status);
+
 
     free_cmds(ft_lstnew(cmd));
     free_shell(sh);
@@ -1025,7 +1138,7 @@ static int test_msh_exec_simple_failing_open_builtin(void)
 
     syswrap_set_open(NULL);
 
-    mu_assert_intcmp("open failure for builtin should return 1", status, 1);
+    mu_assert_intcmp("open failure for builtin should return -1", status, -1);
 
     free_cmds(ft_lstnew(cmd));
     free_shell(sh);
@@ -1210,53 +1323,55 @@ static int test_msh_exec_simple_restores_fds_on_dup2_failure(void)
 
 int main(void)
 {
-    // printf("=== Unit Tests for exec_simple ===\n\n");
+    printf("=== Unit Tests for exec_simple ===\n\n");
 
-    // /* exec_builtin_in_parent tests */
-    // mu_run_test(test_exec_builtin_in_parent_export_new_var);
-    // mu_run_test(test_exec_builtin_in_parent_export_overwrite_var);
-    // mu_run_test(test_exec_builtin_in_parent_export_no_value);
-    // mu_run_test(test_exec_builtin_in_parent_unset_existing_var);
-    // mu_run_test(test_exec_builtin_in_parent_unset_nonexistent_var);
-    // // // // // mu_run_test(test_exec_builtin_in_parent_unset_multiple_vars); // bug in unset
-    // mu_run_test(test_exec_builtin_in_parent_export_with_output_redir);
+    /* exec_builtin_in_parent tests */
+    mu_run_test(test_exec_builtin_in_parent_export_new_var);
+    mu_run_test(test_exec_builtin_in_parent_export_overwrite_var);
+    mu_run_test(test_exec_builtin_in_parent_export_no_value);
+    mu_run_test(test_exec_builtin_in_parent_unset_existing_var);
+    mu_run_test(test_exec_builtin_in_parent_unset_nonexistent_var);
+    // mu_run_test(test_exec_builtin_in_parent_unset_multiple_vars); // bug in unset
+    mu_run_test(test_exec_builtin_in_parent_export_with_output_redir);
 
-    // // // // /* msh_exec_simple with external commands */
-    // mu_run_test(test_msh_exec_simple_external_cmd_true);
-    // mu_run_test(test_msh_exec_simple_external_cmd_false);
-    // mu_run_test(test_msh_exec_simple_command_not_found);
-    // // mu_run_test(test_msh_exec_simple_external_with_args); // deuda técnica
+    /* msh_exec_simple with external commands */
+    mu_run_test(test_msh_exec_simple_external_cmd_true);
+    mu_run_test(test_msh_exec_simple_external_cmd_false);
+    mu_run_test(test_msh_exec_simple_command_not_found);
+    mu_run_test(test_msh_exec_simple_external_with_args); // deuda técnica
 
-    // // /* msh_exec_simple with builtins that modify shell */
-    // mu_run_test(test_msh_exec_simple_export_modifies_parent);
-    // mu_run_test(test_msh_exec_simple_unset_modifies_parent);
+    // /* msh_exec_simple with builtins that modify shell */
+    mu_run_test(test_msh_exec_simple_export_modifies_parent);
+    mu_run_test(test_msh_exec_simple_unset_modifies_parent);
 
-    // // // /* msh_exec_simple with redirections */
-    // mu_run_test(test_msh_exec_simple_external_with_output_redir);
-    // mu_run_test(test_msh_exec_simple_external_with_input_redir);
+    // /* msh_exec_simple with redirections */
+    mu_run_test(test_msh_exec_simple_external_with_output_redir);
+    mu_run_test(test_msh_exec_simple_external_with_input_redir);
 
-    // printf("\n--- Failing syscalls (external commands) ---\n");
-    // mu_run_test(test_msh_exec_simple_failing_access);
-    // mu_run_test(test_msh_exec_simple_failing_fork);
-    // mu_run_test(test_msh_exec_simple_failing_execve_126);
-    // mu_run_test(test_msh_exec_simple_failing_execve_127);
-    // mu_run_test(test_msh_exec_simple_failing_open_redir_in);
-    // VOY POR AQUÍ (esto hay que refactorizarlo)
+    printf("\n--- Failing syscalls (external commands) ---\n");
+    mu_run_test(test_msh_exec_simple_failing_access);
+    mu_run_test(test_msh_exec_simple_failing_fork);
+    mu_run_test(test_msh_exec_simple_failing_execve_126);
+    mu_run_test(test_msh_exec_simple_failing_execve_127);
+    mu_run_test(test_msh_exec_simple_failing_open_redir_in);
+    mu_run_test(test_msh_exec_simple_failing_open_redir_in_but_builtin);
     mu_run_test(test_msh_exec_simple_failing_open_redir_out);
-    // mu_run_test(test_msh_exec_simple_failing_dup);
-    // mu_run_test(test_msh_exec_simple_failing_dup2);
+    mu_run_test(test_msh_exec_simple_failing_dup);
+    mu_run_test(test_msh_exec_simple_failing_dup_but_builtin);
+    mu_run_test(test_msh_exec_simple_failing_dup2);
+    mu_run_test(test_msh_exec_simple_failing_dup2_but_builtin);
 
-    // printf("\n--- Failing syscalls (builtins) ---\n");
-    // mu_run_test(test_msh_exec_simple_failing_dup_builtin);
-    // mu_run_test(test_msh_exec_simple_failing_dup2_builtin);
-    // mu_run_test(test_msh_exec_simple_failing_open_builtin);
-    // mu_run_test(test_msh_exec_simple_export_no_modify_on_dup_failure);
-    // mu_run_test(test_msh_exec_simple_unset_no_modify_on_dup_failure);
-    // mu_run_test(test_msh_exec_simple_cd_no_change_on_dup_failure);
+    printf("\n--- Failing syscalls (builtins) ---\n");
+    mu_run_test(test_msh_exec_simple_failing_dup_builtin);
+    mu_run_test(test_msh_exec_simple_failing_dup2_builtin);
+    mu_run_test(test_msh_exec_simple_failing_open_builtin);
+    mu_run_test(test_msh_exec_simple_export_no_modify_on_dup_failure);
+    mu_run_test(test_msh_exec_simple_unset_no_modify_on_dup_failure);
+    mu_run_test(test_msh_exec_simple_cd_no_change_on_dup_failure);
 
-    // printf("\n--- FD restoration tests ---\n");
-    // mu_run_test(test_msh_exec_simple_restores_fds_on_open_failure);
-    // mu_run_test(test_msh_exec_simple_restores_fds_on_dup2_failure);
+    printf("\n--- FD restoration tests ---\n");
+    mu_run_test(test_msh_exec_simple_restores_fds_on_open_failure);
+    mu_run_test(test_msh_exec_simple_restores_fds_on_dup2_failure);
 
     printf("\n=== All tests passed! ===\n");
     mu_summary();

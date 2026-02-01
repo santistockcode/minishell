@@ -68,6 +68,14 @@ static int test_on_signal_c_last_status_set_to_130_when_set_here_docs(void)
     return 0;
 }
 
+// is builtin simple and builtin goes ok
+// is builtin simple and something fails
+// manual: is builtin simple but echo returns -1 (malloc fail)
+// is external simple and it goes ok
+// is external simple and fork fails
+// is last in pipeline builtin and it goes ok
+// is last in pipeline external and fork fails
+
 int main(void)
 {
     mu_run_test(test_empty_pipeline_returns_zero);

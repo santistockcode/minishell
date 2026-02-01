@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:04:14 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:04:21 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/01 10:16:26 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,28 @@ void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 		}
 		safe_close(rdr_spec->out_fd);
 	}
+}
+
+int	require_standard_fds(t_shell *sh)
+{
+	struct stat	*statbuf;
+	int			fd;
+
+	fd = 0;
+	statbuf = malloc(sizeof(struct stat));
+	if (!statbuf)
+		return (msh_set_error(sh, MALLOC_OP), -1);
+	while (fd <= 2)
+	{
+		if (fstat(fd, statbuf) == -1)
+		{
+			msh_set_error(sh, MISSING_FDS_OP);
+			return (-1);
+		}
+		fd++;
+	}
+	free(statbuf);
+	return (0);
 }
 
 void	safe_close_rd_fds(t_list *redirs)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   log.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:17:49 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:18:50 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/01 10:44:35 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define LOG_H
 
 typedef struct s_shell	t_shell;
+typedef struct s_cmd    t_cmd;
 typedef struct s_list	t_list;
 
 
@@ -34,5 +35,6 @@ typedef struct s_list	t_list;
 
 void	logger(const char *tag, const char *message);
 void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag, const char *message);
+void    logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *message);
 
 #endif

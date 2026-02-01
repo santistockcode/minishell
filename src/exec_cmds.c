@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:23:14 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/01 11:03:17 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,23 @@
 
 extern volatile sig_atomic_t	g_exit_status;
 
+/*
+One would think that status 126 and 127 would be exposed, but: 
+(.env) c1r6s2% echo < intexistant 
+zsh: no such file or directory: intexistant
+(.env) c1r6s2% echo $?
+1
+(.env) c1r6s2% echo "shall not pass" > inex
+(.env) c1r6s2% cat inex 
+shall not pass
+(.env) c1r6s2% chmod 000 inex
+(.env) c1r6s2% echo < inex
+zsh: permission denied: inex
+(.env) c1r6s2% echo $?
+1
+
+So returning EXIT_FAILURE is ok
+*/
 int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 {
 	int		last_status;
@@ -30,7 +47,7 @@ int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 		sh->last_status = 1;
 		msh_print_last_error(sh);
 		unlink_hds(cmd_first);
-		return (1);
+		return (EXIT_FAILURE);
 	}
 	return (last_status);
 }

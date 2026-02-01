@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:04:47 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/01 11:17:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,17 +33,32 @@ void	print_cmd_node(t_cmd *cmd)
 {
 	int		i;
 	t_cmd	*cmd_content;
+	t_list	*redir_node;
+	t_redir	*current_redir;
 
 	cmd_content = cmd;
 	i = 0;
 	if (cmd_content->redirs)
 	{
-		printf("[Redirections present]->");
+		printf("[Redirections present");
+		redir_node = cmd->redirs;
+		while (redir_node)
+		{
+			printf(" (%d)", i);
+			current_redir = (t_redir *)redir_node->content;
+			printf(" type:%d", current_redir->type);
+			printf(" target:%s", current_redir->target);
+			redir_node = redir_node->next;
+			i++;
+		}
+		printf("]->");
+
 	}
 	else
 	{
 		printf("[No redirections]->");
 	}
+	i = 0;
 	if (cmd_content->argv)
 	{
 		while (cmd_content->argv[i])
@@ -93,6 +108,27 @@ void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
 			time_str, tag, sh->last_status,
 			sh->last_err_op ? sh->last_err_op : "none", message);
 		ft_lstiter(cmd, (void (*)(void *))print_cmd_node);
+	}
+	printf(COLOR_RESET);
+	printf("\n");
+}
+
+void logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *message)
+{
+	time_t now;
+	char time_str[26];
+
+	time(&now);
+	printf(COLOR_RESET);
+	printf(COLOR_MAGENTA);
+	if (LOG == 1)
+	{
+		strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S",
+			localtime(&now));
+		printf("%s [%s] (last_status: %d, last_err_op: %s): %s, COMMAND:\n",
+			time_str, tag, sh->last_status,
+			sh->last_err_op ? sh->last_err_op : "none", message);
+		print_cmd_node(cmd);
 	}
 	printf(COLOR_RESET);
 	printf("\n");
