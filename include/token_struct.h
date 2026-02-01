@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 22:43:36 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/20 22:54:23 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/01 18:34:26 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,21 +40,6 @@ typedef enum e_syntax_error
 	SYNTAX_OPERATOR, // Incomplete redirection with < << > >>
 }	t_syntax_error;
 
-// Individual Token struct
-typedef struct s_token
-{
-	int				id;					// A unique ID for each token
-	t_token_type	type;		// The type of token (from enum t_token_type)
-	char			*value;			// The string representation of the token
-	int				syntax_error;
-}	t_token;
-
-// Minishell input
-typedef struct s_term_token
-{
-	char			*term_line;
-	t_vector		*token_array;
-}	t_term_token;
 
 void	ft_vector_init(t_vector *vector, size_t elem_size);
 void	ft_vector_free(t_vector *vector);

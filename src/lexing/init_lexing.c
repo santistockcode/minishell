@@ -1,37 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_lexing.c                                      :+:      :+:    :+:   */
+/*   init_lexing_list.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/20 22:47:55 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/20 22:48:28 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/02/01 19:21:49 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
-
-char	*ft_getenv(char *value)
-{
-	if (!value)
-		return (NULL);
-	if (getenv(value))
-		return (ft_strdup(getenv(value)));
-	return (NULL);
-}
-int	init_lexing_utils(t_term_token *term_token, char **term_copy,
-	char **term_i, int *token_id)
-{
-	*token_id = 0;
-	*term_copy = ft_strdup(term_token->term_line);
-	*term_i = *term_copy;
-	term_token->token_array = malloc(sizeof(t_vector));
-	if (!term_token->token_array)
-		return (MALLOC_ERROR);
-	ft_vector_init(term_token->token_array, sizeof(t_token *));
-	return (SUCCESS);
-}
 
 int	init_new_token(t_token **new_token, int token_id)
 {
@@ -43,4 +22,113 @@ int	init_new_token(t_token **new_token, int token_id)
 	(*new_token)->value = NULL;
 	(*new_token)->syntax_error = SYNTAX_OK;
 	return (SUCCESS);
+}
+
+/*
+** ============================================================================
+** REVAL_ASSIGN_TOKEN - Reasigna tipos para variables de asignación
+** ============================================================================
+**
+** DESCRIPCIÓN:
+**   Itera lista de tokens y reconoce patrones VAR=valor.
+**   Cambia tipo de TOKEN_WORD a TOKEN_ASSIGN_WORD si cumple reglas.
+**
+** PARÁMETROS:
+**   - tokens: Lista de tokens ya procesados
+**
+** REGLAS DE ASIGNACIÓN:
+**   - Debe estar en posición inicial (token 0) O
+**   - Anterior no es TOKEN_HEREDOC
+**   - Formato: nombre=valor donde nombre es alfanumérico + _
+**
+** LÓGICA:
+**   1. Iterar lista
+**   2. Si es primer token (i==0) y es WORD → call assign_var_token()
+**   3. Si no es heredoc y es WORD → call assign_var_token()
+**
+** EJEMPLO:
+**   VÁLIDO: VAR=valor (inicio)
+**   VÁLIDO: echo VAR=valor (después de palabra)
+**   INVÁLIDO: << VAR=valor (después de heredoc)
+** ============================================================================
+*/
+
+void	reval_assign_token(t_list *tokens)
+{
+	t_token	*token;
+	t_token	*prev;
+	size_t	i;
+	t_list	*current;
+
+	if (!tokens)
+		return ;
+
+	i = 0;
+	current = tokens;
+	while (current)
+	{
+		token = (t_token *)current->content;
+		if (!token)
+		{
+			current = current->next;
+			i++;
+			continue ;
+		}
+		if (i == 0)
+		{
+			if (token->type == TOKEN_WORD)
+				assign_var_token(token);
+		}
+		else
+		{
+			prev = (t_token *)ft_lstfirst((tokens)->content);
+			/* Obtener anterior correctamente */
+			for (size_t j = 0; j < i - 1; j++)
+				prev = (t_token *)ft_lstfirst((tokens)->next->content);
+
+			if (prev && prev->type != TOKEN_HEREDOC && token->type == TOKEN_WORD)
+				assign_var_token(token);
+		}
+		current = current->next;
+		i++;
+	}
+}
+
+int	syntax_quotes(t_list *tokens)
+{
+	t_token	*token;
+	t_list	*current;
+
+	current = tokens;
+	while (current)
+	{
+		token = (t_token *)current->content;
+		if (token && token->syntax_error != SYNTAX_OK)
+			return (INPUT_ERROR);
+		current = current->next;
+	}
+	return (SUCCESS);
+}
+
+
+void	free_tokens_list(t_list *tokens)
+{
+	t_list	*current;
+	t_list	*next;
+	t_token	*token;
+
+	current = tokens;
+	while (current)
+	{
+		next = current->next;
+		token = (t_token *)current->content;
+		if (token)
+		{
+			if (token->value)
+				free(token->value);
+			free(token);
+		}
+		free(current);
+		current = next;
+	}
 }

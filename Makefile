@@ -44,7 +44,6 @@ envp/free_env \
 envp/export \
 envp/unset\
 lexing/lexing\
-lexing/ft_vector\
 lexing/init_lexing\
 lexing/free_lexing\
 lexing/automa_lexing\
