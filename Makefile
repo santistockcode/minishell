@@ -45,9 +45,11 @@ envp/export \
 envp/unset\
 lexing/lexing\
 lexing/init_lexing\
-lexing/free_lexing\
 lexing/automa_lexing\
-lexing/assing_lexing
+lexing/assing_lexing\
+lexing/free_lexing\
+lexing/utils_lexing
+
 
 
 # Files add

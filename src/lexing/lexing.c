@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 19:48:53 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/01 23:41:33 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,16 +91,28 @@ int	lexing(t_shell *minishell)
 	if (!minishell)
 		return (INPUT_ERROR);
 	lexing_ctx = ft_calloc(sizeof(t_lexing),1);
-	if(!(lexing_ctx->buff = readline("minishell")))
-		return(INPUT_ERROR);
+	if (!lexing_ctx)
+		return (MALLOC_ERROR);
+	lexing_ctx->buff = readline("./minishell ");
+	if (!(lexing_ctx->buff))
+	{
+		free(lexing_ctx);
+		return (INPUT_ERROR);
+	}
 	lexing_ctx->current = NULL;
 	lexing_ctx->token_id = 0;
 	lexing_ctx->tokens = NULL;
 	if (get_tokens_list(lexing_ctx) != SUCCESS)
+	{
+		free(lexing_ctx->buff);
+		free(lexing_ctx);
 		return (INPUT_ERROR);
+	}
 	if (syntax_quotes(lexing_ctx->tokens) != SUCCESS)
 	{
 		free_tokens_list(lexing_ctx->tokens);
+		free(lexing_ctx->buff);
+		free(lexing_ctx);
 		return (INPUT_ERROR);
 	}
 	reval_assign_token(lexing_ctx->tokens);
