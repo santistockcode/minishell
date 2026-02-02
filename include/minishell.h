@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 18:39:48 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 19:28:07 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@
 
 extern volatile sig_atomic_t exit_status;
 
-
 typedef struct s_env
 {
      char            *key;
@@ -56,9 +55,7 @@ typedef struct s_shell
 	int		last_errno; // last errno value
 }			t_shell;
 
-
 int init_minishell(t_shell **minishell,char **envp);
-
 
 //SEÑALES
 void 	setup_signal();

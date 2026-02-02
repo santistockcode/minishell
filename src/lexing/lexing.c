@@ -6,24 +6,25 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 12:16:03 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 18:46:45 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-int	not_tokens(t_minishell *minishell)
+int	not_tokens(t_shell *minishell)
 {
-	t_token		*token;
+	t_token	*token;
+	t_list	*first_node;
 
-	token = *(t_token **)ft_vector_get(minishell->term_token->token_array, 0);
-	if (token->type == TOKEN_EOF)
-	{
-		free_input(minishell);
+	if (!minishell || !minishell->lexing || !minishell->lexing->tokens)
 		return (1);
-	}
-	return(0);
-}
+	first_node = minishell->lexing->tokens;
+	token = (t_token *)first_node->content;
+	if (!token || token->type == TOKEN_EOF)
+		return (1);
+	return (0);
+} 
 int	get_tokens_list(t_lexing *lexing)
 {
 	t_token	*token_eof;
@@ -40,7 +41,7 @@ int	get_tokens_list(t_lexing *lexing)
 			continue ;
 		}
 		if (add_token_list(lexing, &(lexing->current)) != SUCCESS)
-			return (INPUT_ERROR);
+			return (MALLOC_ERROR);
 
 		(lexing->token_id)++;
 	}
@@ -63,7 +64,8 @@ int	add_token_list(t_lexing *lexing, char **current)
 
 	if (token_switch(new_token, current) != SUCCESS)
 	{
-		free(new_token->value);
+		if (new_token->value)
+			free(new_token->value);
 		free(new_token);
 		return (INPUT_ERROR);
 	}
@@ -81,6 +83,8 @@ int	add_token_list(t_lexing *lexing, char **current)
 
 int	token_switch(t_token *new_token, char **current)
 {
+	if (!new_token)
+		return (MALLOC_ERROR);
 	if (ft_strchr("<>", **current))
 		assign_redir_token(current, &new_token);
 	else if (ft_strchr("|", **current))
@@ -105,15 +109,16 @@ int	lexing(t_shell *minishell)
 		return (MALLOC_ERROR);
 	lexing_ctx->buff = readline("./minishell ");
 	if (!(lexing_ctx->buff))
-		return (free_lexing(lexing_ctx),INPUT_ERROR);
+		return (free_lexing(lexing_ctx),EOF);
 	lexing_ctx->current = NULL;
 	lexing_ctx->token_id = 0;
 	lexing_ctx->tokens = NULL;
 	if (get_tokens_list(lexing_ctx) != SUCCESS)
 		return (free_lexing(lexing_ctx),MALLOC_ERROR);	
 	if (syntax_quotes(lexing_ctx->tokens) != SUCCESS)
-		return (free_lexing(lexing_ctx),MALLOC_ERROR);
-	reval_assign_token(lexing_ctx->tokens);
+		return (free_lexing(lexing_ctx),INPUT_ERROR);
+	if (lexing_ctx->tokens)
+		reval_assign_token(lexing_ctx->tokens);
 	minishell->lexing = lexing_ctx;
 	return (SUCCESS);
 }
