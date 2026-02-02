@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 11:30:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 08:36:52 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 
 	redirs = cmd->redirs;
 	if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		return (msh_set_error(sh, DUP_OP), -1);
+		return (msh_restore_fds(sh->save_in, sh->save_out, sh->save_err), msh_set_error(sh, DUP_OP), -1);
 	if (prepare_redirs(redirs, sh) == -1)
 		return (msh_restore_fds(sh->save_in, sh->save_out, sh->save_err),
 			safe_close_rd_fds(redirs), (-1));
@@ -82,8 +82,8 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 	{
 		// fprintf(stderr, "[simple] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
-		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
+		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
+		// 	stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs, sh) == -1)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);

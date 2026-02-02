@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/27 19:41:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 10:22:22 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 08:28:55 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void		safe_close_p(int *p);
 
 void	special_first_exit(t_shell *sh, t_cmd *cmd, int *p)
 {
-	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	if (p)
 		safe_close_p(p);
 	msh_print_last_error(sh);
@@ -47,8 +47,8 @@ int	do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 	{
 		// fprintf(stderr, "[CHILD-l] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
-		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-			special_first_exit(sh, cmd, p);
+		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
+		// 	special_first_exit(sh, cmd, p);
 		if (prepare_redirs(cmd->redirs, sh) == -1)
 			special_first_exit(sh, cmd, p);
 		rdr_spec = prepare_stage_io(FIRST, cmd->redirs, -1, p);

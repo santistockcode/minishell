@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 18:08:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 17:59:24 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 08:26:24 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ void	msh_print_last_error(t_shell *sh)
 {
 	char	*op;
 
+	// FIXME: when op is the cmd should print "minishell: <cmd>: command not found"
 	op = NULL;
 	if (sh && sh->last_err_op)
 		op = sh->last_err_op;

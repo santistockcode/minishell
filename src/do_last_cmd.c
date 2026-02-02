@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:51:22 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 17:51:32 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 08:29:01 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void		safe_close_p(int *p);
 
 void	special_last_exit(t_shell *sh, t_cmd *cmd, int in_fd)
 {
-	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	safe_close(in_fd);
 	msh_print_last_error(sh);
 	safe_close_rd_fds((cmd->redirs));
@@ -47,8 +47,8 @@ int	do_last_command(t_shell *sh, t_cmd *cmd, int last_fd, pid_t *pid)
 	{
 		// fprintf(stderr, "[CHILD-l] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
-		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-			special_last_exit(sh, cmd, last_fd);
+		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
+		// 	special_last_exit(sh, cmd, last_fd);
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs, sh) == -1)
 			special_last_exit(sh, cmd, last_fd);

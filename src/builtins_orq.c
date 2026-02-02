@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 19:02:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 08:29:27 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	safe_close_rd_fds(cmd->redirs);
 	safe_close_stage_io(cmd->stage_io);
 	free(cmd->stage_io);
-	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	safe_close(sh->save_in);
 	safe_close(sh->save_out);
 	safe_close(sh->save_err);
