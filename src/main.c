@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/01 23:40:31 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 12:15:47 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,10 @@ int main(int argc, char** argv, char **envp)
 		return (MALLOC_ERROR);
 	
 	setup_signal();
-	
 	while(1)
 	{
 		if (lexing(minishell) != SUCCESS)
 			break;
-		if (!minishell->lexing || !minishell->lexing->buff)
-			continue;
 		add_history(minishell->lexing->buff);
 		// parsing 
 		// ft_set_to_exec()

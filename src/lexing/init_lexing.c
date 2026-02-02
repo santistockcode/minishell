@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 23:16:29 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 12:06:54 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void	reval_assign_token(t_list *tokens)
 		if (!prev_node)
 		{
 			if (token->type == TOKEN_WORD)
-				assign_var_token(token);
+			assign_var_token(token);
 		}
 		else
 		{
@@ -86,7 +86,6 @@ void	reval_assign_token(t_list *tokens)
 			if (prev && prev->type != TOKEN_HEREDOC && token->type == TOKEN_WORD)
 				assign_var_token(token);
 		}
-
 		prev_node = current;
 		current = current->next;
 	}

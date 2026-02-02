@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:38 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 23:17:33 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 12:06:35 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,5 +63,7 @@ void	reval_assign_token(t_list *tokens);
 void	free_tokens_list(t_list *tokens);
 int		syntax_quotes(t_list *tokens);
 int	ft_isoperator(int c);
+void free_lexing(t_lexing *lexing);
+
 
 #endif
