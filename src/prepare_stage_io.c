@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:06:54 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:27:28 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 19:59:22 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,12 @@ void	assign_middle(t_stage_io **rdr_spec, t_list *redirs, int *p, int in_fd)
 		safe_close(in_fd);
 	}
 	else
+	{
 		(*rdr_spec)->in_fd = in_fd;
+		safe_close(p[0]); //this works but
+		// PENDING THIS TEST: cat > file > /dev/stdout
+		// AND PENDING THIS TEST: cat > /dev/stdout > file 
+	}
 	if (out_redir_fd != -1)
 	{
 		(*rdr_spec)->out_fd = out_redir_fd;
@@ -80,6 +85,9 @@ void	assign_first(t_stage_io **rdr_spec, t_list *redirs, int *p)
 	int	out_redir_fd;
 
 	(*rdr_spec)->in_fd = get_r_in_redir_fd(redirs);
+	safe_close(p[0]); // this works but: 
+	// PENDING THIS TEST: cat > file > /dev/stdout
+	// AND PENDING THIS TEST: cat > /dev/stdout > file 
 	out_redir_fd = get_r_out_redir_fd(redirs);
 	if (out_redir_fd != -1)
 	{

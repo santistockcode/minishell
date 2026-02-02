@@ -730,44 +730,46 @@ static int test_do_first_command_dup2_failure_second_call(void)
     return (0);
 }
 
-// Dup failure in msh_save_fds
-static int test_do_first_command_dup_failure_save_fds(void)
-{
-    printf("Test: test_do_first_command_dup_failure_save_fds\n");
-    t_shell *sh;
-    int p[2];
-    int status;
-    const char *test_env[] = {
-        "USER=saalarco",
-        "PATH=/usr/bin:/bin",
-        NULL
-    };
+// PASS: no dup in child now since I don't store fds
+// static int test_do_first_command_dup_failure_save_fds(void)
+// {
+//     printf("Test: test_do_first_command_dup_failure_save_fds\n");
+//     t_shell *sh;
+//     int p[2];
+//     int status;
+//     const char *test_env[] = {
+//         "USER=saalarco",
+//         "PATH=/usr/bin:/bin",
+//         NULL
+//     };
     
-    sh = create_test_shell(test_env, 0);
-    const char *argv[] = {"echo", "test", NULL};
-    t_cmd *cmd = new_cmd_from_args(argv, 2);
+//     sh = create_test_shell(test_env, 0);
+//     const char *argv[] = {"echo", "test", NULL};
+//     t_cmd *cmd = new_cmd_from_args(argv, 2);
     
-    pipe(p);
+//     pipe(p);
     
-    // Mock dup to fail (used in msh_save_fds)
-    typedef int (*t_dup_fn)(int);
+//     // Mock dup to fail (used in msh_save_fds)
+//     typedef int (*t_dup_fn)(int);
     
-    setup_dup_mock(1);
+//     setup_dup_mock(1);
     
-    int result = do_first_command(sh, cmd, p);
+//     int result = do_first_command(sh, cmd, p);
     
-    mu_assert_intcmp("do_first_command should return 0 (fork succeeded)", result, 0);
+//     mu_assert_intcmp("do_first_command should return 0 (fork succeeded)", result, 0);
     
-    close(p[0]);
-    wait(&status);
-    mu_assert("child should have exited normally", WIFEXITED(status));
-    mu_assert_intcmp("child exit status should be 1", WEXITSTATUS(status), 1);
-    
-    syswrap_set_dup(NULL);
-    free_cmds(ft_lstnew(cmd));
-    free_shell(sh);
-    return (0);
-}
+//     close(p[0]);
+//     wait(&status);
+//     mu_assert("child should have exited normally", WIFEXITED(status));
+//     if (is_builtin((char *) argv[0]))
+//         mu_assert_intcmp("open failure should return -1", -1, status);
+//     else
+//         mu_assert_intcmp("open failure should return 1", 1, status);
+//     syswrap_set_dup(NULL);
+//     free_cmds(ft_lstnew(cmd));
+//     free_shell(sh);
+//     return (0);
+// }
 
 // Execve failure (126 - permission denied)
 static int test_do_first_command_execve_failure_126(void)
@@ -1306,50 +1308,50 @@ static int test_do_middle_command_dup2_failure_second_call(void)
     return (0);
 }
 
-// Dup failure in msh_save_fds
-static int test_do_middle_command_dup_failure_save_fds(void)
-{
-    printf("Test: test_do_middle_command_dup_failure_save_fds\n");
-    t_shell *sh;
-    int p[2];
-    int in_fd;
-    int status;
-    const char *test_env[] = {
-        "USER=saalarco",
-        "PATH=/usr/bin:/bin",
-        NULL
-    };
+// PASS: no dup now in child cmds
+// static int test_do_middle_command_dup_failure_save_fds(void)
+// {
+//     printf("Test: test_do_middle_command_dup_failure_save_fds\n");
+//     t_shell *sh;
+//     int p[2];
+//     int in_fd;
+//     int status;
+//     const char *test_env[] = {
+//         "USER=saalarco",
+//         "PATH=/usr/bin:/bin",
+//         NULL
+//     };
     
-    sh = create_test_shell(test_env, 0);
-    const char *argv[] = {"cat", NULL};
-    t_cmd *cmd = new_cmd_from_args(argv, 1);
+//     sh = create_test_shell(test_env, 0);
+//     const char *argv[] = {"cat", NULL};
+//     t_cmd *cmd = new_cmd_from_args(argv, 1);
     
-    int input_pipe[2];
-    pipe(input_pipe);
-    write(input_pipe[1], "data\n", 5);
-    close(input_pipe[1]);
-    in_fd = input_pipe[0];
+//     int input_pipe[2];
+//     pipe(input_pipe);
+//     write(input_pipe[1], "data\n", 5);
+//     close(input_pipe[1]);
+//     in_fd = input_pipe[0];
     
-    pipe(p);
+//     pipe(p);
     
-    setup_dup_mock(1);
+//     setup_dup_mock(1);
 
-    t_list *cmds_list = ft_lstnew(cmd);
-    sh->cmds_start = cmds_list;
-    int result = do_middle_commands(sh, cmd, p, in_fd);
+//     t_list *cmds_list = ft_lstnew(cmd);
+//     sh->cmds_start = cmds_list;
+//     int result = do_middle_commands(sh, cmd, p, in_fd);
     
-    mu_assert_intcmp("do_middle_commands should return 0 (fork succeeded)", result, 0);
+//     mu_assert_intcmp("do_middle_commands should return 0 (fork succeeded)", result, 0);
     
-    close(p[0]);
-    wait(&status);
-    mu_assert("child should have exited normally", WIFEXITED(status));
-    mu_assert_intcmp("child exit status should be 1", WEXITSTATUS(status), 1);
+//     close(p[0]);
+//     wait(&status);
+//     mu_assert("child should have exited normally", WIFEXITED(status));
+//     mu_assert_intcmp("child exit status should be 1", WEXITSTATUS(status), 1);
     
-    teardown_dup_mock();
-    free_cmds(cmds_list);
-    free_shell(sh);
-    return (0);
-}
+//     teardown_dup_mock();
+//     free_cmds(cmds_list);
+//     free_shell(sh);
+//     return (0);
+// }
 
 // Execve failure (126 - permission denied)
 static int test_do_middle_command_execve_failure_126(void)
@@ -2398,45 +2400,45 @@ static int test_do_last_command_open_failure_redir_out_mock(void)
     return (0);
 }
 
-// Dup failure in msh_save_fds
-static int test_do_last_command_dup_failure_save_fds(void)
-{
-    printf("Test: test_do_last_command_dup_failure_save_fds\n");
-    t_shell *sh;
-    int in_fd;
-    pid_t pid;
-    int status;
-    const char *test_env[] = {
-        "USER=saalarco",
-        "PATH=/usr/bin:/bin",
-        NULL
-    };
+// pass: no Dup on child processes for now
+// static int test_do_last_command_dup_failure_save_fds(void)
+// {
+//     printf("Test: test_do_last_command_dup_failure_save_fds\n");
+//     t_shell *sh;
+//     int in_fd;
+//     pid_t pid;
+//     int status;
+//     const char *test_env[] = {
+//         "USER=saalarco",
+//         "PATH=/usr/bin:/bin",
+//         NULL
+//     };
     
-    sh = create_test_shell(test_env, 0);
-    const char *argv[] = {"cat", NULL};
-    t_cmd *cmd = new_cmd_from_args(argv, 1);
+//     sh = create_test_shell(test_env, 0);
+//     const char *argv[] = {"cat", NULL};
+//     t_cmd *cmd = new_cmd_from_args(argv, 1);
     
-    in_fd = create_mock_pipe_with_data("data\n");
+//     in_fd = create_mock_pipe_with_data("data\n");
     
-    setup_dup_mock(1);
+//     setup_dup_mock(1);
     
-    t_list *cmds_list = ft_lstnew(cmd);
-    sh->cmds_start = cmds_list;
+//     t_list *cmds_list = ft_lstnew(cmd);
+//     sh->cmds_start = cmds_list;
 
-    int result = do_last_command(sh, cmd, in_fd, &pid);
+//     int result = do_last_command(sh, cmd, in_fd, &pid);
 
-    mu_assert_intcmp("do_last_command should return 0 (fork succeeded)", result, 0);
+//     mu_assert_intcmp("do_last_command should return 0 (fork succeeded)", result, 0);
     
-    wait(&status);
-    mu_assert("child should have exited normally", WIFEXITED(status));
-    mu_assert_intcmp("child exit status should be 1", WEXITSTATUS(status), 1);
+//     wait(&status);
+//     mu_assert("child should have exited normally", WIFEXITED(status));
+//     mu_assert_intcmp("child exit status should be 1", WEXITSTATUS(status), 1);
     
-    teardown_dup_mock();
-    sh->cmds_start = NULL;
-    free_cmds(cmds_list);
-    free_shell(sh);
-    return (0);
-}
+//     teardown_dup_mock();
+//     sh->cmds_start = NULL;
+//     free_cmds(cmds_list);
+//     free_shell(sh);
+//     return (0);
+// }
 
 // Dup2 failure (first call - stdin)
 static int test_do_last_command_dup2_failure_first_call(void)
@@ -4176,15 +4178,6 @@ static int test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127(void)
 }
 
 
-// static int test_run_pipeline_6_cmds_pipe_fails_at_first_cmd(void)
-// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1(void)
-// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2(void)
-// static int test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3(void)
-// static int test_run_pipeline_6_cmds_fork_fails_at_first_cmd(void)
-// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1(void)
-// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2(void)
-// static int test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3(void)
-// static int test_run_pipeline_6_cmds_fork_fails_at_last_cmd(void)
 
 int main(void)
 {
@@ -4200,7 +4193,6 @@ int main(void)
     mu_run_test(test_do_first_command_open_failure_redir_out_mock);
     mu_run_test(test_do_first_command_dup2_failure_first_call);
     mu_run_test(test_do_first_command_dup2_failure_second_call);
-    mu_run_test(test_do_first_command_dup_failure_save_fds);
     mu_run_test(test_do_first_command_execve_failure_126);
     mu_run_test(test_do_first_command_execve_failure_127);
     mu_run_test(test_do_first_command_access_failure_path_resolution);
@@ -4215,7 +4207,6 @@ int main(void)
     mu_run_test(test_do_middle_command_open_failure_redir_out_mock);
     mu_run_test(test_do_middle_command_dup2_failure_first_call);
     mu_run_test(test_do_middle_command_dup2_failure_second_call);
-    mu_run_test(test_do_middle_command_dup_failure_save_fds);
     mu_run_test(test_do_middle_command_execve_failure_126);
     mu_run_test(test_do_middle_command_execve_failure_127);
     mu_run_test(test_do_middle_command_access_failure_path_resolution);
@@ -4240,7 +4231,6 @@ int main(void)
     mu_run_test(test_do_last_command_fork_failure);
     mu_run_test(test_do_last_command_open_failure_redir_in);
     mu_run_test(test_do_last_command_open_failure_redir_out_mock);
-    mu_run_test(test_do_last_command_dup_failure_save_fds);
     mu_run_test(test_do_last_command_dup2_failure_first_call);
     mu_run_test(test_do_last_command_dup2_failure_second_call);
     mu_run_test(test_do_last_command_execve_failure_126);

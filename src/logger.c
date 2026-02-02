@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 11:17:40 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 18:48:29 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,25 @@ void logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *mes
 	}
 	printf(COLOR_RESET);
 	printf("\n");
+}
+
+void	logger_open_fds(const char *starttag, const char *endtag)
+{
+	char	proc_path[64];
+	char	cmd[128];
+	pid_t	pid;
+
+	if (LOG == 0)
+		return ;
+	pid = getpid();
+	snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
+	snprintf(cmd, sizeof(cmd), "ls -l %s 1>&2", proc_path);
+	printf(COLOR_RESET);
+	fprintf(stderr, COLOR_CYAN "[%s] Open file descriptors for PID %d:\n" COLOR_RESET,
+		starttag, pid);
+	system(cmd);
+	fprintf(stderr, COLOR_CYAN "[%s] End of FD list\n" COLOR_RESET, endtag);
+	printf(COLOR_RESET);
 }
 
 // Source - https://stackoverflow.com/a

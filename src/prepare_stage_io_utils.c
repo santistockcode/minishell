@@ -6,12 +6,24 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:43 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:06:46 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 19:58:23 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+
+// should fetch last input
+// FIXME: should fetch last one
+/*
+# Setup
+$ echo "content1" > in1.txt
+$ echo "content2" > in2.txt
+
+# Test: cat < in1.txt < in2.txt
+$ cat < in1.txt < in2.txt
+content2
+*/
 int	get_r_in_redir_fd(t_list *redirs)
 {
 	t_redir	*redir;

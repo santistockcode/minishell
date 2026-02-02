@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:17:49 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 10:44:35 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 18:08:44 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,6 @@ typedef struct s_list	t_list;
 void	logger(const char *tag, const char *message);
 void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag, const char *message);
 void    logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *message);
+void	logger_open_fds(const char *starttag, const char *endtag);
 
 #endif

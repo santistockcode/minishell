@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 10:17:50 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/02 19:09:45 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ int	msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 	if (require_standard_fds(sh) == -1)
 		return (-1);
 	result = run_pipeline(sh, cmd_first, nstages, &pid);
+	sh->cmds_start = NULL;
 	if (result == -1)
 		return (-1);
 	wtpd_resp = waitpid(pid, &status, 0);

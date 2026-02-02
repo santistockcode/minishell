@@ -48,3 +48,29 @@ Lo que lleva a pensar en dos problemas:
 Sin embargo he debuggeado el test y en ningún momento cierro un file descriptor, por lo que el extra viene de la terminal (de hecho si lo estuviese manejando yo aparecería en valgrind).
 
 EL PROBLEMA es el tema de (1 std) at exit, esto no tiene sentido para mí, valgrind debería identificar 5 y 6 como los std restantes pero no lo hace, y no sé explicar por qué. 
+
+
+1. Before execve (your child setup):
+       fd 0 → pipe_read (stdin from previous stage)
+       fd 1 → pipe_write (stdout to next stage) OR file
+       fd 2 → /dev/pts/0 (stderr, unchanged)
+       fd 4 → valgrind log (inherited)
+       fd 5 → valgrind log (inherited)
+       fd 6 → valgrind log (inherited)
+
+2. execve("/usr/bin/head", ...) runs
+       head reads from fd 0 (pipe) - WORKS!
+       head writes to fd 1 (pipe/file) - WORKS!
+       head may write errors to fd 2 - WORKS!
+
+3. head finishes, pipes close:
+       fd 0 → CLOSED (pipe EOF, head closed it)
+       fd 1 → CLOSED (head closed after writing)
+       fd 2 → CLOSED (process ending)
+       fd 4 → valgrind log (still open)
+       fd 5 → valgrind log (still open)
+       fd 6 → valgrind log (still open)
+
+4. Valgrind reports "at exit":
+       "0 std" because stdin/stdout/stderr were pipes that closed
+       4 fds open: 3, 4, 5, 6

@@ -496,7 +496,7 @@ static int test_first_msh_exec_stage_dup2_failure_first_call(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         // no redirs
         t_stage_io *stage_io = prepare_stage_io(0, NULL, -1, p);
         cmd->stage_io = stage_io;
@@ -544,7 +544,7 @@ static int test_first_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -595,7 +595,7 @@ static int test_first_msh_exec_stage_dup2_failure_first_call_with_redir_out(void
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -648,7 +648,7 @@ static int test_first_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -699,7 +699,7 @@ static int test_firsta_msh_exec_stage_dup2_failure_first_call_with_here_doc(void
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -756,7 +756,7 @@ static int test_middle_msh_exec_stage_dup2_failure_first_call_no_redir(void)
     if (pid == 0)
     {
         redirs = cmd->redirs;
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         prepare_redirs(redirs, sh);
         t_stage_io *stage_io = prepare_stage_io(MIDDLE, redirs, in_fd, p);
         cmd->stage_io = stage_io;
@@ -810,7 +810,7 @@ static int test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_in(void
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -866,7 +866,7 @@ static int test_middle_msh_exec_stage_dup2_failure_first_call_with_redir_out(voi
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -927,7 +927,7 @@ static int test_middle_msh_exec_stage_dup2_failure_second_call_with_redir_in_and
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -984,7 +984,7 @@ static int test_middle_msh_exec_stage_dup2_failure_second_call_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, p);
@@ -1036,7 +1036,7 @@ static int test_last_msh_exec_stage_dup2_failure_first_call_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, NULL);
@@ -1085,7 +1085,7 @@ static int test_last_msh_exec_stage_dup2_failure_first_call_with_redir_in(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -1137,7 +1137,7 @@ static int test_last_msh_exec_stage_dup2_failure_first_call_with_redir_out(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -1194,7 +1194,7 @@ static int test_last_msh_exec_stage_dup2_failure_second_call_with_redir_in_and_o
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -1249,7 +1249,7 @@ static int test_last_msh_exec_stage_dup2_failure_first_call_with_here_doc(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         redirs = cmd->redirs;
         int result_prep_red = prepare_redirs(redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
@@ -1299,7 +1299,7 @@ static int test_first_msh_exec_stage_execve_failure_126_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         prepare_redirs(cmd->redirs, sh);
         t_stage_io *stage_io = prepare_stage_io(FIRST, cmd->redirs, -1, p);
         cmd->stage_io = stage_io;
@@ -1344,7 +1344,7 @@ static int test_first_msh_exec_stage_execve_failure_127_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(FIRST, NULL, -1, p);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, p);
@@ -1390,7 +1390,7 @@ static int test_first_msh_exec_stage_execve_failure_126_with_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         int result_prep_red = prepare_redirs(cmd->redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
         t_stage_io *stage_io = prepare_stage_io(FIRST, cmd->redirs, -1, p);
@@ -1441,7 +1441,7 @@ static int test_middle_msh_exec_stage_execve_failure_126_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, p);
@@ -1489,7 +1489,7 @@ static int test_middle_msh_exec_stage_execve_failure_127_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(MIDDLE, NULL, in_fd, p);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, p);
@@ -1541,7 +1541,7 @@ static int test_middle_msh_exec_stage_execve_failure_126_with_redirs(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         int result_prep_red = prepare_redirs(cmd->redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
         t_stage_io *stage_io = prepare_stage_io(MIDDLE, cmd->redirs, in_fd, p);
@@ -1590,7 +1590,7 @@ static int test_last_msh_exec_stage_execve_failure_126_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, NULL);
@@ -1634,7 +1634,7 @@ static int test_last_msh_exec_stage_execve_failure_127_no_redir(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         t_stage_io *stage_io = prepare_stage_io(LAST, NULL, in_fd, NULL);
         cmd->stage_io = stage_io;
         msh_exec_stage(sh, cmd, sh->env, NULL);
@@ -1682,7 +1682,7 @@ static int test_last_msh_exec_stage_execve_failure_126_with_redirs(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         int result_prep_red = prepare_redirs(cmd->redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
         t_stage_io *stage_io = prepare_stage_io(LAST, cmd->redirs, in_fd, NULL);
@@ -1733,7 +1733,7 @@ static int test_last_msh_exec_stage_execve_failure_127_with_here_doc(void)
     pid = fork();
     if (pid == 0)
     {
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         int result_prep_red = prepare_redirs(cmd->redirs, sh);
         mu_assert("prepare_redirs should succeed", result_prep_red == 0);
         t_stage_io *stage_io = prepare_stage_io(LAST, cmd->redirs, in_fd, NULL);
@@ -1780,7 +1780,7 @@ static int test_msh_exec_builtin_child_export_success(void)
     if (pid == 0)
     {
         redirs = cmd->redirs;
-        msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
+        // msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err);
         prepare_redirs(redirs, sh);
         t_stage_io *stage_io = prepare_stage_io(FIRST, redirs, -1, p);
         cmd->stage_io = stage_io;

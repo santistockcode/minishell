@@ -21,6 +21,14 @@ for file in "$directory"/*; do
   fi
 done
 
+# # Print from FILE DESCRIPTORS to HEAP SUMMARY for each log file
+# for log in "$outdir"/*.log; do
+#   if [ -f "$log" ]; then
+#     echo "=== $(basename "$log") ==="
+#     sed -n '/FILE DESCRIPTORS:/,/HEAP SUMMARY/p' "$log"
+#     echo
+#   fi
+# done
 # Safely grep as text even if logs contain NULs
 grep -a "FILE DESCRIPTORS:" tests/unit/execution/bin/valgrind-fds-results/*.log \
   | sed -E 's#^.*(FILE DESCRIPTORS:.*)$#\1#'
