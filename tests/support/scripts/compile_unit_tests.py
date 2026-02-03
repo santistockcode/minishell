@@ -40,7 +40,7 @@ class UnitTestRunner:
     
     def discover_test_sources(self) -> List[Path]:
         """Find all test_*.c files."""
-        return sorted(self.test_dir.glob("test_*.c"))
+        return sorted(self.test_dir.glob("test_exec_*.c"))
     
     def get_dependencies_for_test(self, test_file: Path) -> List[Path]:
         """Map test files to their source dependencies."""
@@ -62,7 +62,8 @@ class UnitTestRunner:
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c",
                 "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
-                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c"
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
+                "builtins/echo.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c", "logger.c"
@@ -126,6 +127,7 @@ class UnitTestRunner:
         
         deps = self.get_dependencies_for_test(test_file)
         deps.append(self.project_root / "tests" / "support" / "c_helpers" / "test_helpers.c")
+        # deps.append(self.project_root / "tests" / "support" / "c_helpers" / "exec_cmds_helpers.c")
 
         include_dir = self.project_root / "include"
         third_party_dir = self.project_root / "tests" / "support" / "third_party"

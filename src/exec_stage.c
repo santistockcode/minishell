@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 19:33:31 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 07:19:28 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,10 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		free(path);
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 	}
-	else if (execve_wrap(path, cmd->argv, envp) == -1)
+	safe_close(sh->save_in);
+	safe_close(sh->save_out);
+	safe_close(sh->save_err);
+	if (execve_wrap(path, cmd->argv, envp) == -1)
 	{
 		free(path);
 		free_envp((const char **)envp);
@@ -205,6 +208,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		msh_set_error(sh, EXECVE_OP);
 		stage_exit_print(sh, cmd, p, st);
 	}
+	logger_open_fds( "🔥[msh_exec_stage.c]fuckedup🔥", "[msh_exec_stage.c]fuckedup");
 	exit(EXIT_FAILURE);
 }
 /*

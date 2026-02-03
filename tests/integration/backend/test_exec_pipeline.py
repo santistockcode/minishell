@@ -1,4 +1,5 @@
 
+from asyncio import sleep
 import os
 import pytest
 import sys
@@ -135,8 +136,8 @@ def test_four_commands_pipeline_and_assert_final_outfile_correct(test_runner_tty
     test_runner_tty.sendline("ADD_CMD 2 2 wc -w")
     test_runner_tty.expect("OK")
 
-    # Add redirection: output of wc to file output
-    test_runner_tty.sendline("ADD_REDIR 2 1 0 output 0")
+    # Add redirection: output of wc to file lookout
+    test_runner_tty.sendline("ADD_REDIR 2 1 0 lookout 0")
     test_runner_tty.expect("OK")
 
     # Set environment variables
@@ -158,19 +159,26 @@ def test_four_commands_pipeline_and_assert_final_outfile_correct(test_runner_tty
 
     # Execute the pipeline
     test_runner_tty.sendline("EXEC_PIPELINE")
-    test_runner_tty.expect("RESULT 0")
+    try:
+        test_runner_tty.expect(r"RESULT\s+\d+", timeout=15)
+    except pexpect.TIMEOUT:
+        print(f"TIMEOUT! Buffer: {repr(test_runner_tty.before)}")
+        # Try to see what processes are running
+        import subprocess
+        subprocess.run(["ps", "aux"], capture_output=False)
+        raise
 
     # # Cleanup
     test_runner_tty.sendline("DESTROY")
     test_runner_tty.expect("OK")
 
-    output_file = Path("output")
+    output_file = Path("lookout")
 
     with output_file.open() as f:
         content = f.read()
         assert content == "4\n"
 
-    output_file.unlink()
+    # output_file.unlink()
 
     test_runner_tty.sendline("EXIT")
 

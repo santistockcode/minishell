@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:06:54 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 19:59:22 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 08:51:26 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 int			get_r_in_redir_fd(t_list *redirs);
 int			get_r_out_redir_fd(t_list *redirs);
 int			get_r_out_mode(t_list *redirs);
+
+
+void	safe_close_p(int *p);
+
 
 /*
 If there's an input redirection on last command, use it;

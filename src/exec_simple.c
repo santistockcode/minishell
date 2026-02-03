@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 08:36:52 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 07:48:10 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,8 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 	{
 		// fprintf(stderr, "[simple] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
-		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		// 	stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
+		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
+			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs, sh) == -1)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
@@ -91,6 +91,7 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 		if (!cmd->stage_io)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		msh_exec_stage(sh, cmd, env, NULL);
+		logger_open_fds( "🔥[exec_simple.c]run_simple🔥", "[exec_simple.c]run_simple");
 		exit(EXIT_FAILURE);
 	}
 	return (0);

@@ -62,6 +62,26 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "Unit-test exec CMDS",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_cmds",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "Unit-test exec SIMPLE",
             "type": "cppdbg",
             "request": "launch",
@@ -148,6 +168,46 @@
                     "text": "set detach-on-fork on",
                     "ignoreFailures": false
                 }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Unit-test exec cmds (follow second child)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_exec_cmds",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Follow child process on fork",
+                "text": "set follow-fork-mode child",
+                "ignoreFailures": false
+            },
+            {
+                "description": "Detach parent on fork",
+                "text": "set detach-on-fork on",
+                "ignoreFailures": false
+            },
+            {
+                "description": "Continue on first fork",
+                "text": "catch fork",
+                "ignoreFailures": false
+            },
+            {
+                "description": "Auto-continue on first fork",
+                "text": "commands\nsilent\ncontinue\nend",
+                "ignoreFailures": false
+            }
             ],
             "miDebuggerPath": "/usr/bin/gdb"
         },

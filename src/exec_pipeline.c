@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 19:09:45 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 08:51:40 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 	if (pipe_wrap(p) == -1)
 		return (msh_set_error(sh, PIPE_OP), -1);
 	current_cmd_node = cmd_first;
+	sleep(2);
 	if (do_first_command(sh, (t_cmd *)current_cmd_node->content, p) == -1)
 		return (safe_close_p(p), -1);
 	in_fd = p[0];
@@ -48,6 +49,7 @@ int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 	{
 		if (pipe_wrap(p) == -1)
 			return (safe_close_p(p), msh_set_error(sh, PIPE_OP), -1);
+		sleep(2);
 		if (do_middle_commands(sh, (t_cmd *)current_cmd_node->content, p,
 				in_fd) == -1)
 			return (safe_close_p(p), -1);
@@ -55,6 +57,7 @@ int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 		current_cmd_node = current_cmd_node->next;
 	}
 	sh->cmds_start = NULL;
+	sleep(2);
 	return (do_last_command(sh, (t_cmd *)current_cmd_node->content, in_fd,
 			pid));
 }

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:51:22 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 08:29:01 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 06:25:00 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ void	special_last_exit(t_shell *sh, t_cmd *cmd, int in_fd)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
+	logger_open_fds( "🔥[do_last_cmd.c]special_last_exit🔥", "[do_last_cmd.c]special_last_exit");
 	exit(1);
 }
 

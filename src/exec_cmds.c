@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/01 11:03:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 07:48:42 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 	t_cmd	*cmd;
 
 	// FIXME: msh_exec_simple won't work on NULL cmd, check before callling
+	sh->cmds_start = cmd_first;
 	cmd = (t_cmd *)cmd_first->content;
 	logger("exec_cmds", "Executing simple command");
 	last_status = msh_exec_simple(sh, cmd, sh->env);

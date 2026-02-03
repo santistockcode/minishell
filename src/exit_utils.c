@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 12:46:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 08:30:03 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/03 08:28:24 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,9 @@ void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	if (p)
 		safe_close_p(p);
 	safe_close_rd_fds(cmd->redirs);
-	safe_close_stage_io(cmd->stage_io);
+	// safe_close_stage_io(cmd->stage_io);
 	free(cmd->stage_io);
-	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	msh_print_last_error(sh);
 	if (sh->cmds_start)
 	{
@@ -75,5 +75,6 @@ void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
+	logger_open_fds( "🔥[exit_utils.c]stage_exit_print🔥", "[exit_utils.c]stage_exit_print");
 	exit(exit_code);
 }
