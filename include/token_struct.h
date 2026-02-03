@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 22:43:36 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 18:34:26 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,50 @@ typedef enum e_syntax_error
 	SYNTAX_OPERATOR, // Incomplete redirection with < << > >>
 }	t_syntax_error;
 
+// Enum Token Type
+typedef enum e_io_redirect_type
+{
+	REDIR_IN, // <
+	REDIR_OUT, // >
+	REDIR_APPEND, // >>
+	HEREDOC, // <<
+}	t_io_redirect_type;
 
-void	ft_vector_init(t_vector *vector, size_t elem_size);
-void	ft_vector_free(t_vector *vector);
-int	ft_vector_push(t_vector *vector, const void *elem);
-void	*ft_vector_get(t_vector *vector, size_t index);
+typedef struct s_io_file
+{
+	int		type; // REDIR OUT o REDIR APPEND >> > < 
+	char	*filename;
+}	t_io_file;
+
+typedef struct s_io_here
+{
+	char	*filename;
+	char	*here_end; // <<
+}	t_io_here;
+
+typedef struct s_io_redirect
+{
+	t_io_file	*io_file;
+	t_io_here	*io_here;
+}	t_io_redirect;
+
+typedef struct s_prefix
+{
+	t_io_redirect	*io_redirect;
+	char			*assignment_word;
+}	t_prefix;
+
+typedef struct s_suffix
+{
+	t_io_redirect	*io_redirect;
+	char			*word;
+}	t_suffix;
+
+typedef struct s_command
+{
+	t_list		*cmd_prefix;	// List of t_prefix nodes
+	char		*cmd_word;		// Command name
+	t_list		*cmd_suffix;	// List of t_suffix nodes
+}	t_command;
 
 #endif

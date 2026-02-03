@@ -48,7 +48,12 @@ lexing/init_lexing\
 lexing/automa_lexing\
 lexing/assing_lexing\
 lexing/free_lexing\
-lexing/utils_lexing
+lexing/utils_lexing\
+parsing/parsing\
+parsing/parsing_prefix\
+parsing/parsing_suffix\
+parsing/utils_parsing\
+parsing/free_parsing
 
 
 

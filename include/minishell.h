@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 19:28:07 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 #include "syswrap.h"
 #include "token_struct.h"
 #include "lexing.h"
+#include "parsing.h"
 
 
 extern volatile sig_atomic_t exit_status;
@@ -49,6 +50,7 @@ typedef struct s_shell
 {
 	t_list	*env;
 	t_lexing *lexing;
+	t_list	*commands;
 	int		last_status; // last $? value
 	int		should_exit; // 1 if shell should exit so you can clean up
 	char	*last_err_op; // last operation that caused an error
