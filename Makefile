@@ -49,11 +49,17 @@ lexing/automa_lexing\
 lexing/assing_lexing\
 lexing/free_lexing\
 lexing/utils_lexing\
+expand/var_expand\
+expand/utils_expand\
+expand/utils_expand_2\
+expand/quote_state_expand\
+expand/quote_remove_expand\
 parsing/parsing\
 parsing/parsing_prefix\
 parsing/parsing_suffix\
 parsing/utils_parsing\
-parsing/free_parsing
+parsing/free_parsing\
+parsing/eval_parsing
 
 
 

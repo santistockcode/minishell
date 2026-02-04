@@ -1,39 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.h                                              :+:      :+:    :+:   */
+/*   utils_expand_2.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/18 18:06:55 by mnieto-m          #+#    #+#             */
+/*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
 /*   Updated: 2026/02/04 00:55:56 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ENVP_H
-# define ENVP_H
+#include "../../include/expand.h"
 
-typedef struct s_shell	t_shell;
-typedef struct s_list	t_list;
-typedef struct s_env	t_env;
+int	expand_and_quotes(char **string, t_list *env)
+{
+	int	status;
 
-// INIT
-
-t_list *init_envp(char **envp);
-t_env *init_node(char *str);
-
-//PRINT VALUES
-void	print_env_list(t_list *env);
-
-//FREES
-void free_env(t_env *aux);
-void free_list(t_list **env);
-
-//EXPORT
-t_env	*env_get(t_list *env, char *key);
-void	env_set(t_list **env, char *var);
-
-//UNSET
-void	env_unset(t_list **env, char *key);
-
-#endif
+	status = expand_var_value(string, env);
+	if (status != SUCCESS)
+		return (status);
+	return (remove_string_quotes(string));
+}

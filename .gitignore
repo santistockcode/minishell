@@ -57,6 +57,7 @@ dkms.conf
 # Docs private
 docs-private/
 parsing_no_pushear/
+expand_no_pusher/
 
 # Python
 __pycache__/

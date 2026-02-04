@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 00:03:26 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,19 +59,13 @@ int	parse_pipe_sequence(t_list **commands, t_list *tokens,
 	t_token		*token;
 
 	cmd = NULL;
-	
 	if (parse_simple_command(&cmd, tokens, index) != SUCCESS)
 		return (INPUT_ERROR);
-	
 	if (!cmd)
 		return (INPUT_ERROR);
-	
 	new_node = ft_lstnew(cmd);
 	if (!new_node)
-	{
-		free_command(cmd);
-		return (MALLOC_ERROR);
-	}
+		return (free_command(cmd),MALLOC_ERROR);
 	ft_lstadd_back(commands, new_node);
 	
 	token = get_token_at(tokens, *index);
@@ -81,7 +75,6 @@ int	parse_pipe_sequence(t_list **commands, t_list *tokens,
 		if (parse_pipe_sequence(commands, tokens, index, shell) != SUCCESS)
 			return (INPUT_ERROR);
 	}
-	
 	return (SUCCESS);
 }
 
