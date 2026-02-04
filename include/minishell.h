@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:11:55 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@
 #include "token_struct.h"
 #include "lexing.h"
 #include "parsing.h"
+#include "expand.h"
 
 
 extern volatile sig_atomic_t exit_status;

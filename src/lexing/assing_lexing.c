@@ -6,12 +6,11 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 17:30:12 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:50:36 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
-
 
 void	assign_redir_token(char **current, t_token **new_token)
 {

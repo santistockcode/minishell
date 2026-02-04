@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/03 15:59:35 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:00:08 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ int main(int argc, char** argv, char **envp)
 			continue;
 		add_history(minishell->lexing->buff);
 		parsing(minishell);
+		expand_variables(minishell);
 		// ft_set_to_exec()
 		//set_here_docs(sh, cmds)
 		// exec_cmds (sh, cmds)

@@ -6,12 +6,11 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:58:57 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
-#include "../../include/parsing.h"
 
 /**
  * is_io_redirect() - Check if token is an IO redirection

@@ -59,7 +59,6 @@ parsing/parsing_prefix\
 parsing/parsing_suffix\
 parsing/utils_parsing\
 parsing/free_parsing\
-parsing/eval_parsing
 
 
 

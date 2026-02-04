@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 17:30:12 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:54:57 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ int	state_doublequote(char **current, int flag)
 	}
 	return (flag);
 }
-
 
 int	state_switch(char *current, int flag)
 {

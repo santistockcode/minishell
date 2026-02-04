@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 17:16:31 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:55:10 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,8 @@ void	reval_assign_token(t_list *tokens)
 
 	if (!tokens)
 		return ;
-
 	current = tokens;
 	prev_node = NULL;
-
 	while (current)
 	{
 		token = (t_token *)current->content;
@@ -78,12 +76,13 @@ void	reval_assign_token(t_list *tokens)
 		if (!prev_node)
 		{
 			if (token->type == TOKEN_WORD)
-			assign_var_token(token);
+				assign_var_token(token);
 		}
 		else
 		{
 			prev = (t_token *)prev_node->content;
-			if (prev && prev->type != TOKEN_HEREDOC && token->type == TOKEN_WORD)
+			if (prev && prev->type != TOKEN_HEREDOC
+				&& token->type == TOKEN_WORD)
 				assign_var_token(token);
 		}
 		prev_node = current;
@@ -106,6 +105,3 @@ int	syntax_quotes(t_list *tokens)
 	}
 	return (SUCCESS);
 }
-
-
-

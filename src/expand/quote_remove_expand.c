@@ -6,11 +6,11 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 00:55:56 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:01:07 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/expand.h"
+#include "../../include/minishell.h"
 
 int	remove_string_quotes(char **string)
 {

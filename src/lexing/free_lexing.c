@@ -6,20 +6,19 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 19:28:12 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/02 17:26:02 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:54:51 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-
-void free_lexing(t_lexing *lexing)
+void	free_lexing(t_lexing *lexing)
 {
-	if(lexing->tokens != NULL)
+	if (lexing->tokens != NULL)
 		free_tokens_list(lexing->tokens);
-	if(lexing->buff != NULL)
+	if (lexing->buff != NULL)
 		free(lexing->buff);
-	if(lexing != NULL)
+	if (lexing != NULL)
 		free(lexing);
 }
 

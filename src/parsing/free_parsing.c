@@ -6,12 +6,11 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/03 16:30:37 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 19:59:35 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
-#include "../../include/parsing.h"
 
 /**
  * free_commands() - Free entire command list
@@ -45,7 +44,6 @@ void	free_command(t_command *cmd)
 {
 	if (!cmd)
 		return ;
-	
 	free(cmd->cmd_word);
 	cmd->cmd_word = NULL;
 	if (cmd->cmd_prefix)
@@ -57,6 +55,19 @@ void	free_command(t_command *cmd)
 	free(cmd);
 }
 
+void free_io_redirect(t_prefix *prefix)
+{
+	if(prefix->io_redirect->io_file->filename != NULL)
+		free(prefix->io_redirect->io_file->filename);
+	if(prefix->io_redirect->io_file != NULL)
+		free(prefix->io_redirect->io_file);
+	if(prefix->io_redirect->io_here->filename != NULL)
+		free(prefix->io_redirect->io_here->filename);
+	if(prefix->io_redirect->io_here->here_end != NULL)
+		free(prefix->io_redirect->io_here->here_end);
+	if(prefix->io_redirect->io_here != NULL)
+		free(prefix->io_redirect->io_here);
+}
 /**
  * free_prefixes() - Free prefix list
  * @prefix_list: List of t_prefix nodes
@@ -74,20 +85,12 @@ void	free_prefixes(t_list *prefix_list)
 		{
 			free(prefix->assignment_word);
 			prefix->assignment_word = NULL;
-			
 			if (prefix->io_redirect)
 			{
 				if (prefix->io_redirect->io_file)
-				{
-					free(prefix->io_redirect->io_file->filename);
-					free(prefix->io_redirect->io_file);
-				}
+					free_io_redirect(prefix);
 				if (prefix->io_redirect->io_here)
-				{
-					free(prefix->io_redirect->io_here->filename);
-					free(prefix->io_redirect->io_here->here_end);
-					free(prefix->io_redirect->io_here);
-				}
+					free_io_redirect(prefix);
 				free(prefix->io_redirect);
 			}
 			free(prefix);
@@ -114,20 +117,12 @@ void	free_suffixes(t_list *suffix_list)
 		{
 			free(suffix->word);
 			suffix->word = NULL;
-			
 			if (suffix->io_redirect)
 			{
 				if (suffix->io_redirect->io_file)
-				{
-					free(suffix->io_redirect->io_file->filename);
-					free(suffix->io_redirect->io_file);
-				}
+					free_io_redirect(suf);
 				if (suffix->io_redirect->io_here)
-				{
-					free(suffix->io_redirect->io_here->filename);
-					free(suffix->io_redirect->io_here->here_end);
-					free(suffix->io_redirect->io_here);
-				}
+					free_io_redirect(prefix);
 				free(suffix->io_redirect);
 			}
 			free(suffix);

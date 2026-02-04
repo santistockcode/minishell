@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/03 16:15:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/04 19:38:06 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,46 +31,29 @@ int	parse_prefix(t_list **prefix_list, t_list *tokens, int *index)
 	token = get_token_at(tokens, *index);
 	if (!token)
 		return (SUCCESS);
-	
 	if (!is_io_redirect(token->type) && token->type != TOKEN_ASSIGN_WORD)
 		return (SUCCESS);
-	
 	if (init_prefix(&prefix) != SUCCESS)
 		return (MALLOC_ERROR);
-	
 	if (is_io_redirect(token->type))
 	{
 		if (parse_io_redirect_prefix(&prefix, tokens, index,
-			token->type) != SUCCESS)
-		{
-			free(prefix);
-			return (INPUT_ERROR);
-		}
+				token->type) != SUCCESS)
+			return (free(prefix), INPUT_ERROR);
 	}
 	else if (token->type == TOKEN_ASSIGN_WORD)
 	{
 		prefix->assignment_word = ft_strdup(token->value);
 		if (!prefix->assignment_word)
-		{
-			free(prefix);
-			return (MALLOC_ERROR);
-		}
+			return (free(prefix), MALLOC_ERROR);
 		consume_token(index);
 	}
-	
 	new_node = ft_lstnew(prefix);
 	if (!new_node)
-	{
-		free(prefix->assignment_word);
-		free(prefix);
-		return (MALLOC_ERROR);
-	}
+		return (free(prefix->assignment_word), free(prefix), MALLOC_ERROR);
 	ft_lstadd_back(prefix_list, new_node);
-	
-	/* Recursively parse more prefixes */
 	if (parse_prefix(prefix_list, tokens, index) != SUCCESS)
 		return (INPUT_ERROR);
-	
 	return (SUCCESS);
 }
 
@@ -81,17 +64,16 @@ int	parse_prefix(t_list **prefix_list, t_list *tokens, int *index)
  * @index: Current position
  * @token_type: Type of redirection token
  */
-int	parse_io_redirect_prefix(t_prefix **prefix, t_list *tokens,
-	int *index, t_token_type token_type)
+int	parse_io_redirect_prefix(t_prefix **prefix, t_list *tokens, int *index,
+		t_token_type token_type)
 {
 	(*prefix)->io_redirect = ft_calloc(sizeof(t_io_redirect), 1);
 	if (!(*prefix)->io_redirect)
 		return (MALLOC_ERROR);
-	
 	if (token_type >= TOKEN_REDIR_IN && token_type <= TOKEN_REDIR_APPEND)
 	{
 		if (parse_io_file((*prefix)->io_redirect, tokens, index,
-			token_type) != SUCCESS)
+				token_type) != SUCCESS)
 			return (INPUT_ERROR);
 	}
 	else if (token_type == TOKEN_HEREDOC)
@@ -99,7 +81,6 @@ int	parse_io_redirect_prefix(t_prefix **prefix, t_list *tokens,
 		if (parse_io_here((*prefix)->io_redirect, tokens, index) != SUCCESS)
 			return (INPUT_ERROR);
 	}
-	
 	return (SUCCESS);
 }
 
@@ -110,8 +91,8 @@ int	parse_io_redirect_prefix(t_prefix **prefix, t_list *tokens,
  * @index: Current position
  * @token_type: Type of redirection
  */
-int	parse_io_file(t_io_redirect *io_redir, t_list *tokens,
-	int *index, t_token_type token_type)
+int	parse_io_file(t_io_redirect *io_redir, t_list *tokens, int *index,
+		t_token_type token_type)
 {
 	t_token		*token;
 	t_io_file	*io_file;
@@ -119,7 +100,6 @@ int	parse_io_file(t_io_redirect *io_redir, t_list *tokens,
 	io_file = ft_calloc(sizeof(t_io_file), 1);
 	if (!io_file)
 		return (MALLOC_ERROR);
-	
 	if (token_type == TOKEN_REDIR_IN)
 		io_file->type = REDIR_IN;
 	else if (token_type == TOKEN_REDIR_OUT)
@@ -127,27 +107,15 @@ int	parse_io_file(t_io_redirect *io_redir, t_list *tokens,
 	else if (token_type == TOKEN_REDIR_APPEND)
 		io_file->type = REDIR_APPEND;
 	else
-	{
-		free(io_file);
-		return (INPUT_ERROR);
-	}
-	
+		return (free(io_file), INPUT_ERROR);
 	consume_token(index);
 	token = get_token_at(tokens, *index);
-	
-	if (!token || (token->type != TOKEN_WORD && token->type != TOKEN_ASSIGN_WORD))
-	{
-		free(io_file);
-		return (INPUT_ERROR);
-	}
-	
+	if (!token || (token->type != TOKEN_WORD
+			&& token->type != TOKEN_ASSIGN_WORD))
+		return (free(io_file), INPUT_ERROR);
 	io_file->filename = ft_strdup(token->value);
 	if (!io_file->filename)
-	{
-		free(io_file);
-		return (MALLOC_ERROR);
-	}
-	
+		return (free(io_file), MALLOC_ERROR);
 	io_redir->io_file = io_file;
 	consume_token(index);
 	return (SUCCESS);
@@ -167,23 +135,20 @@ int	parse_io_here(t_io_redirect *io_redir, t_list *tokens, int *index)
 	io_here = ft_calloc(sizeof(t_io_here), 1);
 	if (!io_here)
 		return (MALLOC_ERROR);
-	
 	consume_token(index);
 	token = get_token_at(tokens, *index);
-	
-	if (!token || (token->type != TOKEN_WORD && token->type != TOKEN_ASSIGN_WORD))
+	if (!token || (token->type != TOKEN_WORD
+			&& token->type != TOKEN_ASSIGN_WORD))
 	{
 		free(io_here);
 		return (INPUT_ERROR);
 	}
-	
 	io_here->here_end = ft_strdup(token->value);
 	if (!io_here->here_end)
 	{
 		free(io_here);
 		return (MALLOC_ERROR);
 	}
-	
 	io_redir->io_here = io_here;
 	consume_token(index);
 	return (SUCCESS);
