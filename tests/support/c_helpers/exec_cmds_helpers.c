@@ -394,8 +394,13 @@ static t_mock_state g_pipe_mock = {0, 0};
 
 
 static int fork_mock_nth(void) {
-    errno = EAGAIN;
-    return -1;
+    if (g_fork_mock.call_count == g_fork_mock.fail_at)
+    {
+        errno = EAGAIN;
+        return -1;
+    }
+    g_fork_mock.call_count++;
+    return fork();
 }
 
 static int open_wrap_eaccess(const char *path, int oflag, int mode) 

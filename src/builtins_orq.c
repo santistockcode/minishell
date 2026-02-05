@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/03 08:28:14 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:08:53 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,12 @@ void	free_cmd_struct(void *input);
 // clean everything when child process ends successfully
 void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 {
-	if (p)
-		safe_close_p(p);
+	(void)p;
+	// if (p)
+	// 	safe_close_p(p);
+	// ACHTUNG: por algún motivo no cerrar p no leakea fds, es correcto.
 	safe_close_rd_fds(cmd->redirs);
-	// safe_close_stage_io(cmd->stage_io);
+	safe_close_stage_io(cmd->stage_io);
 	free(cmd->stage_io);
 	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	safe_close(sh->save_in);

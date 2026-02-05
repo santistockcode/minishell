@@ -274,7 +274,7 @@ def test_no_file_grep_hello_wc_creates_output_file(test_runner_tty):
     # Execute the pipeline
     test_runner_tty.sendline("EXEC_PIPELINE")
 
-    test_runner_tty.expect(r"minishell: open: No such file or directory")
+    test_runner_tty.expect(r"minishell: invent: No such file or directory")
 
     # # Cleanup
     test_runner_tty.sendline("DESTROY")
@@ -291,6 +291,178 @@ def test_no_file_grep_hello_wc_creates_output_file(test_runner_tty):
     test_runner_tty.sendline("EXIT")
 
 
+# cat input-example.txt > out1 > out2: if out1 is created successfully, test that out2 is also created (even if out1 is empty)
+def test_cat_infile_to_outfile_creates_both_files(test_runner_tty):
+
+    # First create input-example.txt
+
+    input_file = Path("input-example.txt")
+    input_file.write_text("Lorem ipsum\n")
+
+    test_runner_tty.sendline("CREATE 2 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: cat < infile
+    test_runner_tty.sendline("ADD_CMD 0 2 cat input-example.txt")
+    test_runner_tty.expect("OK")
+
+    # Add second command: > out1
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out1 0")
+    test_runner_tty.expect("OK")
+
+    # Add third command: > out2
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out2 0")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file1 = Path("out1")
+    output_file2 = Path("out2")
+
+    with output_file1.open() as f:
+        content = f.read()
+        assert content == ""
+
+    with output_file2.open() as f:
+        content = f.read()
+        assert content == "Lorem ipsum\n"
+
+    # output_file1.unlink()
+    # output_file2.unlink()
+    input_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
+
+
+# cat < nonexistant > out1 > out2 shouldn't create any out file
+def test_cat_nonexistent_infile_to_outfile_does_not_create_files(test_runner_tty):
+    """
+    CREATE 1 0 
+    OK
+    ADD_CMD 0 1 cat
+    OK
+    ADD_REDIR 0 0 0 nonexistant 0
+    OK
+    CREATE_ENVP PATH=/NOT    
+    OK
+    BUILD_CONTEXT
+    OK
+    EXEC_SIMPLE
+
+    """
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: cat < nonexistant
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add first command: < nonexistant
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 nonexistant 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: > out1
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: > out2
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out2 0")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+
+    test_runner_tty.expect(r"minishell: nonexistant: No such file or directory")
+    test_runner_tty.expect("RESULT 1")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file1 = Path("out1")
+    output_file2 = Path("out2")
+
+    assert not output_file1.exists()
+    assert not output_file2.exists()
+
+    test_runner_tty.sendline("EXIT")
+
+
+# echo "hello" | invalid | cat > outfile
+def test_echo_hello_invalid_command_cat(test_runner_tty):
+    test_runner_tty.sendline("CREATE 3 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: echo "hello"
+    test_runner_tty.sendline('ADD_CMD 0 2 echo hello')
+    test_runner_tty.expect("OK")
+
+    # Add second command: invalid
+    test_runner_tty.sendline("ADD_CMD 1 2 invalid")
+    test_runner_tty.expect("OK")
+
+    # Add third command: cat
+    test_runner_tty.sendline("ADD_CMD 2 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add redir to third command
+    test_runner_tty.sendline("ADD_REDIR 2 1 0 outfile 1")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_PIPELINE")
+    test_runner_tty.expect(r"invalid: command not found")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file = Path("outfile")
+
+    assert output_file.exists()
+
+    output_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
 
 # cmd > output1 > output2 creates both files
 @pytest.mark.skip("Not implemented yet")

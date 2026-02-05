@@ -125,7 +125,7 @@ int unlink_wrap(const char *path) {
 }
 
 int execve_wrap(const char *path, char *const argv[], char *const envp[]) {
-	logger_open_fds( "✨✨[execve_wrap]✨✨", "[execve_wrap]");
+	logger_open_fds( "[execve_wrap]✨", "[execve_wrap]");
 	if (s_execve_fn) return s_execve_fn(path, argv, envp);
 	return execve(path, argv, envp);
 }

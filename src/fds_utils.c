@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:04:14 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/02 17:43:26 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:02:39 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,17 +100,17 @@ int	msh_save_fds(int *save_in, int *save_out, int *save_err)
 
 void	msh_restore_fds(int save_in, int save_out, int save_err)
 {
-	if (save_in != -1)
+	if (save_in && save_in != -1)
 	{
 		dup2(save_in, STDIN_FILENO);
 		safe_close(save_in);
 	}
-	if (save_out != -1)
+	if (save_out && save_out != -1)
 	{
 		dup2(save_out, STDOUT_FILENO);
 		safe_close(save_out);
 	}
-	if (save_err != -1)
+	if (save_err && save_err != -1)
 	{
 		dup2(save_err, STDERR_FILENO);
 		safe_close(save_err);

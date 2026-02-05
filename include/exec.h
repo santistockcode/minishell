@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/30 20:59:52 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:04:02 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,8 @@ typedef enum e_stage_type
 {
 	FIRST = 0,
 	MIDDLE = 1,
-	LAST = 2
+	LAST = 2,
+	SIMPLE = 3
 }					t_stage_type;
 
 

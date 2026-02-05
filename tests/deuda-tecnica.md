@@ -45,9 +45,10 @@ Lo que lleva a pensar en dos problemas:
     - Hay un file descriptor extra abierto cuando el child termina (0, 5, 6, 7)
     - He cerrado standard file descriptors dentro del child: "... (1 std) at exit."
 
-Sin embargo he debuggeado el test y en ningún momento cierro un file descriptor, por lo que el extra viene de la terminal (de hecho si lo estuviese manejando yo aparecería en valgrind).
+Esto es un problema pero ya he visto como solucionarlo. 
 
-EL PROBLEMA es el tema de (1 std) at exit, esto no tiene sentido para mí, valgrind debería identificar 5 y 6 como los std restantes pero no lo hace, y no sé explicar por qué. 
+¿qué he decidido que no es un problema?
+Tener MENOS file descriptors en un child process antes del exit. Si voy a hacer exit el proceso padre tiene sus file descriptors intactos.
 
 
 1. Before execve (your child setup):
@@ -74,3 +75,60 @@ EL PROBLEMA es el tema de (1 std) at exit, esto no tiene sentido para mí, valgr
 4. Valgrind reports "at exit":
        "0 std" because stdin/stdout/stderr were pipes that closed
        4 fds open: 3, 4, 5, 6
+
+
+## El tema del SIGPIPE
+
+El caso es que en shell también aparece sigpipe cuando se hace un uso indebido de los pipes. Ejemplo: 
+
+```c
+echo "yes | head -n 1" > script.sh
+chmod 777 script.sh
+valgrind --leak-check=full --show-leak-kinds=all --trace-children=yes --child-silent-after-fork=no --track-origins=yes ./script.sh
+```
+
+El resutlado es algo tal que: 
+y
+==2684270== 
+==2684270== Process terminating with default action of signal 13 (SIGPIPE)
+==2684270==    at 0x4987907: write (write.c:26)
+==2684270==    by 0x10A7AF: ??? (in /usr/bin/yes)
+==2684270==    by 0x489CD8F: (below main) (libc_start_call_main.h:58)
+==2684270== 
+==2684270== HEAP SUMMARY:
+==2684270==     in use at exit: 12,252 bytes in 30 blocks
+==2684270==   total heap usage: 31 allocs, 1 frees, 12,257 bytes allocated
+
+
+Y pasa lo mismo con un builtin como 'echo' en vez de 'head' pasa lo mismo, entonces, sí, un SIGPIPE que me aparece es estandar bash behaviour. Lo importante es que no levanta ningún error, ni informa de ninguna forma de que esto ha pasado.
+
+
+
+## Si libero p en los builtins existosos obtengo SIGPIPES, si no lo libero, el extremo que no se usa del pipe en uso queda dangling.
+
+No tengo claro si es un problema o no, en todo caso son restaurados correctamente en el parent. 
+
+Test: builtin | builtin | builtin (all ok)
+2026-02-05 13:13:00 [msh_exec_pipeline] (last_status: 0, last_err_op: none): Entry point, COMMANDS:
+
+[No redirections]->argv[0]: echo   argv[1]: hello   
+[No redirections]->argv[0]: echo   argv[1]: world   
+[No redirections]->argv[0]: echo   argv[1]: done   
+2026-02-05 13:13:00 [exec_cmds]: Executing pipeline with more than 1 stage
+
+FIRST
+[PID 2823543] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 0 -> /dev/pts/5
+[PID 2823543] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 1 -> pipe:[14024915]
+[PID 2823543] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 2 -> /dev/pts/9
+[PID 2823543] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 3 -> pipe:[14024915]
+
+MIDDLE
+[PID 2823545] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 0 -> pipe:[14024915]
+[PID 2823545] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 1 -> pipe:[14024916]
+[PID 2823545] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 2 -> /dev/pts/9
+
+LAST
+[PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 0 -> pipe:[14024916]
+[PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 1 -> /dev/pts/8
+[PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 2 -> /dev/pts/9
+

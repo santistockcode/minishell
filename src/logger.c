@@ -6,13 +6,15 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/03 06:22:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:59:05 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 #include <time.h>
+#include <dirent.h>
 
+// ...existing code...
 // FIXME: do not present this file with time.h
 // void    valid_logger(const char* tag, const char* message)
 // {
@@ -40,7 +42,7 @@ void	print_cmd_node(t_cmd *cmd)
 	i = 0;
 	if (cmd_content->redirs)
 	{
-		printf("[Redirections present");
+		printf("\n[Redirections present");
 		redir_node = cmd->redirs;
 		while (redir_node)
 		{
@@ -56,7 +58,7 @@ void	print_cmd_node(t_cmd *cmd)
 	}
 	else
 	{
-		printf("[No redirections]->");
+		printf("\n[No redirections]->");
 	}
 	i = 0;
 	if (cmd_content->argv)
@@ -134,24 +136,77 @@ void logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *mes
 	printf("\n");
 }
 
+// void	logger_open_fds(const char *starttag, const char *endtag)
+// {
+// 	char	proc_path[64];
+// 	char	cmd[128];
+// 	pid_t	pid;
+
+// 	if (LOG == 0)
+// 		return ;
+// 	pid = getpid();
+// 	snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
+// 	snprintf(cmd, sizeof(cmd), "ls -l %s 1>&2", proc_path);
+// 	printf(COLOR_RESET);
+// 	fprintf(stderr, COLOR_CYAN "[%s] Open file descriptors for PID %d:\n" COLOR_RESET,
+// 		starttag, pid);
+// 	system(cmd);
+// 	fprintf(stderr, COLOR_CYAN "[%s] End of FD list\n" COLOR_RESET, endtag);
+// 	printf(COLOR_RESET);
+// }
+
+
+// ...existing code...
+
 void	logger_open_fds(const char *starttag, const char *endtag)
 {
-	char	proc_path[64];
-	char	cmd[128];
-	pid_t	pid;
+    char			proc_path[64];
+    char			link_path[64];
+    char			link_target[256];
+    pid_t			pid;
+    DIR				*dir;
+    struct dirent	*entry;
+    int				fd_num;
+    ssize_t			len;
+	(void)endtag;
 
-	if (LOG == 0)
-		return ;
-	pid = getpid();
-	snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
-	snprintf(cmd, sizeof(cmd), "ls -l %s 1>&2", proc_path);
-	printf(COLOR_RESET);
-	fprintf(stderr, COLOR_CYAN "[%s] Open file descriptors for PID %d:\n" COLOR_RESET,
-		starttag, pid);
-	system(cmd);
-	fprintf(stderr, COLOR_CYAN "[%s] End of FD list\n" COLOR_RESET, endtag);
-	printf(COLOR_RESET);
+    if (LOG == 0)
+        return ;
+    pid = getpid();
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
+    // fprintf(stderr, COLOR_CYAN "[PID %d] [%s] Open file descriptors:\n" COLOR_RESET,
+    //     pid, starttag);
+    dir = opendir(proc_path);
+    if (!dir)
+    {
+        fprintf(stderr, "[PID %d] Failed to open %s\n", pid, proc_path);
+        return ;
+    }
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_name[0] == '.')
+            continue ;
+        fd_num = atoi(entry->d_name);
+        if (fd_num == dirfd(dir))
+            continue ;
+        snprintf(link_path, sizeof(link_path), "/proc/%d/fd/%s",
+            pid, entry->d_name);
+        len = readlink(link_path, link_target, sizeof(link_target) - 1);
+        if (len != -1)
+        {
+            link_target[len] = '\0';
+            fprintf(stderr, "[PID %d] %s  fd %d -> %s\n", pid, starttag, fd_num, link_target);
+        }
+        else
+            fprintf(stderr, "[PID %d] %s  fd %d -> (unknown)\n", pid, starttag, fd_num);
+    }
+    closedir(dir);
+    // fprintf(stderr, COLOR_CYAN "[PID %d] [%s] End of FD list\n" COLOR_RESET,
+    //     pid, endtag);
 }
+
+// ...existing code...
+
 
 // Source - https://stackoverflow.com/a
 // Posted by Edwin Buck, modified by community.

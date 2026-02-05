@@ -40,7 +40,7 @@ class UnitTestRunner:
     
     def discover_test_sources(self) -> List[Path]:
         """Find all test_*.c files."""
-        return sorted(self.test_dir.glob("test_exec_*.c"))
+        return sorted(self.test_dir.glob("test_exec_cmds.c"))
     
     def get_dependencies_for_test(self, test_file: Path) -> List[Path]:
         """Map test files to their source dependencies."""
@@ -127,7 +127,7 @@ class UnitTestRunner:
         
         deps = self.get_dependencies_for_test(test_file)
         deps.append(self.project_root / "tests" / "support" / "c_helpers" / "test_helpers.c")
-        # deps.append(self.project_root / "tests" / "support" / "c_helpers" / "exec_cmds_helpers.c")
+        deps.append(self.project_root / "tests" / "support" / "c_helpers" / "exec_cmds_helpers.c")
 
         include_dir = self.project_root / "include"
         third_party_dir = self.project_root / "tests" / "support" / "third_party"

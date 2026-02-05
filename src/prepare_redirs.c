@@ -6,19 +6,25 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:31 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:05:38 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 10:36:32 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+/*
+We treat any open failure on entry as a file related error. Either:
+	- the file does not exist (for input redirection)
+	- the file cannot be created (for output redirection)
+But we won't inform on any other error from open.
+*/
 int	open_or_exit(int *fd, char *target, t_shell *sh, t_redir_type type)
 {
 	if (type == R_IN)
 	{
 		*fd = open_wrap(target, O_RDONLY, 0);
 		if (*fd == -1)
-			return (msh_set_error(sh, OPEN_OP), 0);
+			return (msh_set_error(sh, target), 0);
 	}
 	else if (type == R_OUT_APPEND)
 	{
