@@ -3,17 +3,31 @@
 /*                                                        :::      ::::::::   */
 /*   exec_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 12:19:35 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:37:06 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/02 19:09:58 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+extern volatile sig_atomic_t	g_exit_status;
 
-extern volatile sig_atomic_t exit_status;
+// exit_utils.c
+void							stage_exit_print(t_shell *sh, t_cmd *cmd,
+									int *p, int exit_code);
+
+void	exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p)
+{
+	if (sh->last_err_op && ft_strncmp(sh->last_err_op, MALLOC_OP,
+			ft_strlen(sh->last_err_op)) == 0)
+		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
+	if (sh->last_errno == EACCES)
+		stage_exit_print(sh, cmd, p, 126);
+	msh_set_error(sh, cmd->argv[0]);
+	stage_exit_print(sh, cmd, p, 127);
+}
 
 /*
 Protects against closing invalid file descriptors.
@@ -55,4 +69,3 @@ int	get_unique_pid_of_process(t_shell *sh)
 		return (msh_set_error(NULL, CLOSE_OP), -1);
 	return (ft_atoi(buffer));
 }
-

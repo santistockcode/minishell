@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
+#    Updated: 2026/02/06 16:55:00 by mnieto-m         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = minishell
 
 # Var
@@ -37,12 +49,12 @@ exec_utils \
 crtl \
 signals \
 minishell_init \
-tuberiex \
+exec_stage \
+path_utils \
+exit_utils \
 envp/env_init \
 envp/print_env \
 envp/free_env \
-envp/export \
-envp/unset\
 lexing/lexing\
 lexing/init_lexing\
 lexing/automa_lexing\
@@ -63,7 +75,23 @@ parsing/free_suffix\
 set_exec/convert_to_exec\
 set_exec/build_argv\
 set_exec/build_redirs\
-
+builtins/export \
+builtins/env \
+builtins/unset \
+builtins/exit \
+builtins/echo \
+builtins/pwd \
+builtins_orq \
+builtins/cd \
+fds_utils \
+exec_pipeline \
+exec_simple \
+do_first_cmd \
+do_middle_cmds \
+do_last_cmd \
+prepare_redirs \
+prepare_stage_io \
+prepare_stage_io_utils
 
 
 # Files add
@@ -87,12 +115,12 @@ fsanitize: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	$(MKDIR) $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 # Compilar la libft
 $(LIBFT_NAME):

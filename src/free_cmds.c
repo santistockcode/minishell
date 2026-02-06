@@ -5,12 +5,28 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/18 18:07:15 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:07:16 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/01/31 18:04:34 by saalarco          #+#    #+#             */
+/*   Updated: 2026/02/06 16:42:20 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
+
+// free cmds
+void	free_envp(const char **envp)
+{
+	const char	**original;
+
+	if (!envp)
+		return ;
+	original = envp;
+	while (*envp)
+	{
+		free((char *)*envp);
+		envp++;
+	}
+	free((char **)original);
+}
 
 static void	free_redir(void *redir_ptr)
 {

@@ -25,6 +25,15 @@ static int mu_tests_failed = 0;
     } \
 } while (0)
 
+#define mu_assert_intcmp(msg, expected, actual) do { \
+    if ((expected) != (actual)) { \
+        printf("FAIL: %s:%d: Expected %d, got %d: %s\n", \
+               __FILE__, __LINE__, (expected), (actual), (msg)); \
+        mu_tests_failed++; \
+        return 1; \
+    } \
+} while (0)
+
 #define mu_run_test(test) do { \
     int rc = test(); \
     mu_tests_run++; \

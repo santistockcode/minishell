@@ -6,13 +6,13 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/06 12:32:48 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:47:11 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/minishell.h"
+#include "minishell.h"
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t	g_exit_status = 0;
 
 int main(int argc, char** argv, char **envp)
 {

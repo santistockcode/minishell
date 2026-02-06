@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   set_here_docs.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/16 13:33:10 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:11:08 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-extern volatile sig_atomic_t exit_status;
+
+extern volatile sig_atomic_t	g_exit_status;
 
 /*
 Note on syscalls: 
@@ -56,13 +57,15 @@ char	*process_suffix_with_pid(int suffix, t_shell *sh)
 Uses readline to fetch user input for the heredoc, and expands it
 with expand_hd. Then writes expanded line on fd.
 Returns -1 and frees line on error
+FIXME: control+c on a heredoc or multiples heredocs goes back to minishell
+FIXME: control+d on multiple heredocs must exit just one of them
 */
 int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 {
 	char	*line;
 	char	*expanded_line;
 
-	while (1 && exit_status != 130)
+	while (1)
 	{
 		line = readline_wrap("> ");
 		if (!line)
