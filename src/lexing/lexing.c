@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexing.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 22:34:47 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,14 +104,11 @@ int	lexing(t_shell *minishell)
 	lexing_ctx->buff = readline("./minishell ");
 	if (!(lexing_ctx->buff))
 		return (free_lexing(lexing_ctx), EOF);
-	if (LOG == 1)
-		printf("[LEXING] input=\"%s\"\n", lexing_ctx->buff);
 	lexing_ctx->current = NULL;
 	lexing_ctx->token_id = 0;
 	lexing_ctx->tokens = NULL;
 	if (get_tokens_list(lexing_ctx) != SUCCESS)
 		return (free_lexing(lexing_ctx), MALLOC_ERROR);
-	logger_tokens(lexing_ctx->tokens, "after tokenization");
 	if (syntax_quotes(lexing_ctx->tokens) != SUCCESS)
 		return (free_lexing(lexing_ctx), INPUT_ERROR);
 	if (lexing_ctx->tokens)

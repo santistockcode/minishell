@@ -3,26 +3,55 @@
 /*                                                        :::      ::::::::   */
 /*   build_redirs.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:15:29 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 23:38:13 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 #include "../../include/set_exec.h"
 
-/**
- * create_redir() - Create a t_redir structure from parsing io_redirect
- *
- * Converts parsing redirection format to execution format.
- * Sets appropriate fd (0 for input, 1 for output).
- */
+static int	process_file_redir(t_redir *redir, t_io_file *io_file)
+{
+	redir->type = convert_io_type(io_file->type);
+	redir->target = ft_strdup(io_file->filename);
+	if (!redir->target)
+		return (MALLOC_ERROR);
+	redir->fd = 1;
+	if (redir->type == R_IN)
+		redir->fd = 0;
+	redir->quoted = 0;
+	return (SUCCESS);
+}
+
+static int	process_heredoc_redir(t_redir *redir, t_io_here *io_here)
+{
+	char	*target;
+	int		status;
+
+	redir->type = R_HEREDOC;
+	target = ft_strdup(io_here->here_end);
+	if (!target)
+		return (MALLOC_ERROR);
+	redir->quoted = 0;
+	if (ft_strchr(target, '\'') || ft_strchr(target, '"'))
+		redir->quoted = 1;
+	if (redir->quoted)
+	{
+		status = remove_string_quotes(&target);
+		if (status != SUCCESS)
+			return (free(target), MALLOC_ERROR);
+	}
+	redir->target = target;
+	redir->fd = 0;
+	return (SUCCESS);
+}
+
 t_redir	*create_redir(t_io_redirect *io_redir)
 {
 	t_redir	*redir;
-	char	*target;
 	int		status;
 
 	if (!io_redir)
@@ -31,108 +60,38 @@ t_redir	*create_redir(t_io_redirect *io_redir)
 	if (!redir)
 		return (NULL);
 	if (io_redir->io_file)
-	{
-		redir->type = convert_io_type(io_redir->io_file->type);
-		redir->target = ft_strdup(io_redir->io_file->filename);
-		if (!redir->target)
-		{
-			free(redir);
-			return (NULL);
-		}
-		if (redir->type == R_IN)
-			redir->fd = 0;
-		else
-			redir->fd = 1;
-		redir->quoted = 0;
-	}
+		status = process_file_redir(redir, io_redir->io_file);
 	else if (io_redir->io_here)
-	{
-		redir->type = R_HEREDOC;
-		target = ft_strdup(io_redir->io_here->here_end);
-		if (!target)
-		{
-			free(redir);
-			return (NULL);
-		}
-		redir->quoted = 0;
-		if (ft_strchr(target, '\'') || ft_strchr(target, '"'))
-		{
-			redir->quoted = 1;
-			status = remove_string_quotes(&target);
-			if (status != SUCCESS)
-			{
-				free(target);
-				free(redir);
-				return (NULL);
-			}
-		}
-		redir->target = target;
-		redir->fd = 0;
-	}
+		status = process_heredoc_redir(redir, io_redir->io_here);
+	else
+		return (free(redir), NULL);
+	if (status != SUCCESS)
+		return (free(redir), NULL);
 	return (redir);
 }
 
-/**
- * add_redir_from_prefix() - Extract redirections from prefix list
- *
- * Iterates through prefix list and adds all io_redirect entries
- * to the redirs list (ignoring assignment_words).
- */
-int	add_redir_from_prefix(t_list *prefix_list, t_list **redirs)
+static int	add_redirs_from_list(t_list *list, t_list **redirs, int is_prefix)
 {
-	t_list		*node;
-	t_prefix	*prefix;
-	t_redir		*redir;
-	t_list		*new_node;
+	t_list			*node;
+	t_io_redirect	*io_redir;
+	t_redir			*redir;
+	t_list			*new_node;
 
-	node = prefix_list;
+	node = list;
 	while (node)
 	{
-		prefix = (t_prefix *)node->content;
-		if (prefix && prefix->io_redirect)
+		if (is_prefix)
+			io_redir = ((t_prefix *)node->content)->io_redirect;
+		else
+			io_redir = ((t_suffix *)node->content)->io_redirect;
+		if (io_redir)
 		{
-			redir = create_redir(prefix->io_redirect);
+			redir = create_redir(io_redir);
 			if (!redir)
 				return (MALLOC_ERROR);
 			new_node = ft_lstnew(redir);
 			if (!new_node)
-			{
 				return (free(redir->target), free(redir), MALLOC_ERROR);
-			}
-			ft_lstadd_back(redirs, new_node);
-		}
-		node = node->next;
-	}
-	return (SUCCESS);
-}
-
-/**
- * add_redir_from_suffix() - Extract redirections from suffix list
- *
- * Iterates through suffix list and adds all io_redirect entries
- * to the redirs list (ignoring words).
- */
-int	add_redir_from_suffix(t_list *suffix_list, t_list **redirs)
-{
-	t_list		*node;
-	t_suffix	*suffix;
-	t_redir		*redir;
-	t_list		*new_node;
-
-	node = suffix_list;
-	while (node)
-	{
-		suffix = (t_suffix *)node->content;
-		if (suffix && suffix->io_redirect)
-		{
-			redir = create_redir(suffix->io_redirect);
-			if (!redir)
-				return (MALLOC_ERROR);
-			new_node = ft_lstnew(redir);
-			if (!new_node)
-			{
-				return (free(redir->target), free(redir), MALLOC_ERROR);
-			}
 			ft_lstadd_back(redirs, new_node);
 		}
 		node = node->next;
@@ -156,7 +115,7 @@ t_list	*build_redirs(t_command *command)
 	redirs = NULL;
 	if (command->cmd_prefix)
 	{
-		if (add_redir_from_prefix(command->cmd_prefix, &redirs) != SUCCESS)
+		if (add_redirs_from_list(command->cmd_prefix, &redirs, 1) != SUCCESS)
 		{
 			ft_lstclear(&redirs, free);
 			return (NULL);
@@ -164,7 +123,7 @@ t_list	*build_redirs(t_command *command)
 	}
 	if (command->cmd_suffix)
 	{
-		if (add_redir_from_suffix(command->cmd_suffix, &redirs) != SUCCESS)
+		if (add_redirs_from_list(command->cmd_suffix, &redirs, 0) != SUCCESS)
 		{
 			ft_lstclear(&redirs, free);
 			return (NULL);

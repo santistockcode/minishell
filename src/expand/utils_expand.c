@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:10:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 22:34:23 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,26 +62,28 @@ char	*expand_varstr(char *string, char *value, char **var_param,
 {
 	char	*pattern;
 	char	*match;
-	char	*temp_array[4];
-	int		i;
+	char	*before;
+	char	*after;
+	char	*temp;
 
-	i = -1;
 	pattern = ft_strjoin("$", var_param[0]);
 	if (!string || !pattern)
-	{
-		free(pattern);
-		return (NULL);
-	}
+		return (free(pattern), NULL);
 	match = ft_strnstr(value, pattern, ft_strlen(string));
 	*value_offset = match - string;
-	temp_array[0] = ft_substr(string, 0, match - string);
-	temp_array[1] = ft_strdup(match + ft_strlen(pattern));
-	temp_array[2] = ft_strjoin(temp_array[0], var_param[1]);
-	temp_array[3] = ft_strjoin(temp_array[2], temp_array[1]);
+	before = ft_substr(string, 0, match - string);
+	after = ft_strdup(match + ft_strlen(pattern));
 	free(pattern);
-	while (i++ < 2)
-		free(temp_array[i]);
-	return (temp_array[3]);
+	temp = ft_strjoin(before, var_param[1]);
+	if (temp)
+	{
+		pattern = ft_strjoin(temp, after);
+		free(temp);
+		temp = pattern;
+	}
+	free(before);
+	free(after);
+	return (temp);
 }
 
 int	valid_varname(int c)

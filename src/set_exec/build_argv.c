@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   build_argv.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 16:34:56 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 23:38:13 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,38 +38,24 @@ int	count_argv_size(t_command *command)
 	return (count);
 }
 
-/**
- * build_argv() - Build argv array from command structure
- *
- * Creates a NULL-terminated array containing:
- * 1. cmd_word (if present)
- * 2. All words from suffix list (excluding redirections)
- *
- * Example: "ls -la file.txt" -> ["ls", "-la", "file.txt", NULL]
- */
-char	**build_argv(t_command *command)
+static int	add_cmd_word(char **argv, char *cmd_word)
 {
-	char		**argv;
-	int			size;
-	int			i;
+	if (!cmd_word)
+		return (0);
+	argv[0] = ft_strdup(cmd_word);
+	if (!argv[0])
+		return (-1);
+	return (1);
+}
+
+static int	add_suffix_words(char **argv, t_list *suffix_list, int start_idx)
+{
 	t_list		*node;
 	t_suffix	*suffix;
+	int			i;
 
-	if (!command)
-		return (NULL);
-	size = count_argv_size(command);
-	argv = ft_calloc(size + 1, sizeof(char *));
-	if (!argv)
-		return (NULL);
-	i = 0;
-	if (command->cmd_word)
-	{
-		argv[i] = ft_strdup(command->cmd_word);
-		if (!argv[i])
-			return (NULL);
-		i++;
-	}
-	node = command->cmd_suffix;
+	i = start_idx;
+	node = suffix_list;
 	while (node)
 	{
 		suffix = (t_suffix *)node->content;
@@ -77,17 +63,36 @@ char	**build_argv(t_command *command)
 		{
 			argv[i] = ft_strdup(suffix->word);
 			if (!argv[i])
-			{
-				while (--i >= 0)
-					free(argv[i]);
-				free(argv);
-				return (NULL);
-			}
+				return (-1);
 			i++;
 		}
 		node = node->next;
 	}
+	return (i);
+}
+
+char	**build_argv(t_command *command)
+{
+	char	**argv;
+	int		size;
+	int		i;
+
+	if (!command)
+		return (NULL);
+	size = count_argv_size(command);
+	argv = ft_calloc(size + 1, sizeof(char *));
+	if (!argv)
+		return (NULL);
+	i = add_cmd_word(argv, command->cmd_word);
+	if (i < 0)
+		return (NULL);
+	i = add_suffix_words(argv, command->cmd_suffix, i);
+	if (i < 0)
+	{
+		while (--i >= 0)
+			free(argv[i]);
+		return (free(argv), NULL);
+	}
 	argv[i] = NULL;
-	logger_argv(argv, "build_argv result");
 	return (argv);
 }

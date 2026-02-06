@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:23:35 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 22:22:00 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ int	parsing(t_shell *shell)
 		shell->cmds_start = NULL;
 		return (INPUT_ERROR);
 	}
-	logger_commands(shell->cmds_start, "after parsing");
 	return (SUCCESS);
 }
 

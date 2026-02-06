@@ -3,28 +3,44 @@
 /*                                                        :::      ::::::::   */
 /*   convert_to_exec.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:21:46 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 23:38:13 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 #include "../../include/set_exec.h"
 
-/**
- * set_to_exec() - Convert parsing structures to execution structures
- *
- * Main entry point for conversion. Iterates through shell->cmds_start
- * and creates a parallel list of t_cmd structures for execution.
- */
+static int	convert_and_add_cmd(t_shell *shell, t_command *command)
+{
+	t_cmd	*exec_cmd;
+	t_list	*exec_node;
+
+	exec_cmd = convert_command_to_cmd(command);
+	if (!exec_cmd)
+	{
+		free_cmds(shell->exec_cmds);
+		shell->exec_cmds = NULL;
+		return (MALLOC_ERROR);
+	}
+	exec_node = ft_lstnew(exec_cmd);
+	if (!exec_node)
+	{
+		free_cmds(shell->exec_cmds);
+		shell->exec_cmds = NULL;
+		return (MALLOC_ERROR);
+	}
+	ft_lstadd_back(&shell->exec_cmds, exec_node);
+	return (SUCCESS);
+}
+
 int	set_to_exec(t_shell *shell)
 {
 	t_list		*cmd_node;
 	t_command	*command;
-	t_cmd		*exec_cmd;
-	t_list		*exec_node;
+	int			status;
 
 	if (!shell || !shell->cmds_start)
 		return (INPUT_ERROR);
@@ -33,21 +49,9 @@ int	set_to_exec(t_shell *shell)
 	while (cmd_node)
 	{
 		command = (t_command *)cmd_node->content;
-		exec_cmd = convert_command_to_cmd(command);
-		if (!exec_cmd)
-		{
-			free_cmds(shell->exec_cmds);
-			shell->exec_cmds = NULL;
-			return (MALLOC_ERROR);
-		}
-		exec_node = ft_lstnew(exec_cmd);
-		if (!exec_node)
-		{
-			free_cmds(shell->exec_cmds);
-			shell->exec_cmds = NULL;
-			return (MALLOC_ERROR);
-		}
-		ft_lstadd_back(&shell->exec_cmds, exec_node);
+		status = convert_and_add_cmd(shell, command);
+		if (status != SUCCESS)
+			return (status);
 		cmd_node = cmd_node->next;
 	}
 	logger_exec_cmds(shell->exec_cmds, "after set_to_exec");

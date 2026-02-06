@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_expand_2.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:20:55 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/06 22:34:23 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,54 +15,49 @@
 int	expand_and_quotes(char **string, t_list *env)
 {
 	int	status;
-	char	*before;
 
-	before = NULL;
-	if (LOG == 1)
-		before = *string ? ft_strdup(*string) : ft_strdup("(null)");
 	status = expand_var_value(string, env);
 	if (status != SUCCESS)
-	{
-		free(before);
 		return (status);
-	}
 	status = remove_string_quotes(string);
-	if (LOG == 1)
-	{
-		printf("[EXPAND] before=\"%s\" after=\"%s\"\n",
-			before ? before : "(null)",
-			*string ? *string : "(null)");
-	}
-	free(before);
 	return (status);
+}
+
+static char	*get_var_param_value(char *varname, t_list *env)
+{
+	if (ft_strncmp("?", varname, 1) == 0)
+		return (ft_itoa(g_exit_status));
+	return (extract_varvalue(varname, env));
+}
+
+static int	update_start_with_value(char **value, char **start,
+		char **var_param, size_t *value_offset)
+{
+	char	*new_value;
+
+	new_value = expand_varstr(*start, *value, var_param, value_offset);
+	if (!new_value)
+		return (MALLOC_ERROR);
+	free(*start);
+	*start = new_value;
+	*value = *start + *value_offset;
+	return (SUCCESS);
 }
 
 int	expand_and_replace(char **value, char **start, t_list *env)
 {
 	char	*var_param[2];
-	char	*new_value;
 	size_t	value_offset;
+	int		status;
 
 	var_param[0] = extract_varname(*value);
 	if (!var_param[0])
 		return (MALLOC_ERROR);
-	if (ft_strncmp("?", var_param[0], 1) == 0)
-		var_param[1] = ft_itoa(g_exit_status);
-	else
-		var_param[1] = extract_varvalue(var_param[0], env);
-	new_value = expand_varstr(*start, *value, var_param, &value_offset);
-	if (!new_value)
-	{
-		free(var_param[0]);
-		free(var_param[1]);
-		return (MALLOC_ERROR);
-	}
-	free(*start);
-	*start = new_value;
-	*value = *start + value_offset;
+	var_param[1] = get_var_param_value(var_param[0], env);
+	status = update_start_with_value(value, start, var_param, &value_offset);
 	free(var_param[0]);
 	free(var_param[1]);
-	return (SUCCESS);
+	return (status);
 }
 
 int	remove_char_quote(char **start, char **value)
@@ -71,24 +66,18 @@ int	remove_char_quote(char **start, char **value)
 	char	*after_quote;
 	char	*temp;
 	size_t	quote_pos;
-	size_t	before_len;
-	size_t	after_len;
 
 	quote_pos = *value - *start;
 	before_quote = ft_substr(*start, 0, quote_pos);
 	after_quote = ft_strdup(*value + 1);
-	before_len = before_quote ? ft_strlen(before_quote) : 0;
-	after_len = after_quote ? ft_strlen(after_quote) : 0;
-	if (before_len == 0 && after_len == 0)
+	if (!before_quote || !after_quote)
+		return (free(before_quote), free(after_quote), MALLOC_ERROR);
+	if (!*before_quote || !*after_quote)
 		temp = ft_strdup("");
 	else
 		temp = ft_strjoin(before_quote, after_quote);
 	if (!temp)
-	{
-		free(before_quote);
-		free(after_quote);
-		return (MALLOC_ERROR);
-	}
+		return (free(before_quote), free(after_quote), MALLOC_ERROR);
 	free(*start);
 	*start = temp;
 	*value = *start + quote_pos;
