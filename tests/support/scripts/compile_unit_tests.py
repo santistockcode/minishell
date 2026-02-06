@@ -106,6 +106,10 @@ class UnitTestRunner:
             "test_builtin_echo.c": [
                 "builtins/echo.c", "syswrap.c", "logger.c", "builtins/env.c", "builtins/exit.c"
             ],
+            "test_builtin_cd.c": [
+                "builtins/echo.c", "syswrap.c", "logger.c", "builtins/env.c", "builtins/exit.c", "builtins/cd.c",
+                "envp/env_init.c", "envp/free_env.c", "builtins/export.c", "exec_errors.c"
+            ],
             "test_builtin_exit.c": [
                 "builtins/exit.c", "syswrap.c", "logger.c"
             ],

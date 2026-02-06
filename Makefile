@@ -6,7 +6,7 @@
 #    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
-#    Updated: 2026/02/06 10:39:42 by saalarco         ###   ########.fr        #
+#    Updated: 2026/02/06 15:42:01 by saalarco         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,9 @@ envp/free_env \
 builtins/export \
 builtins/env \
 builtins/unset \
+builtins/exit \
+builtins/echo \
+builtins/pwd \
 builtins_orq \
 fds_utils \
 exec_pipeline \
@@ -93,7 +96,6 @@ $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
 	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
-# FIXME: .o depends as well on includes
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	$(MKDIR) $(dir $@)

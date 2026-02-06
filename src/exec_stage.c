@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 10:58:15 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 14:45:17 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,8 @@ Before exiting:
 	- closes all file descriptors
 	- frees redirection structures
 	- frees stage_io structure
+
+FIXME: fd of pipe in use, but fd not being used, can be closed
 */
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {

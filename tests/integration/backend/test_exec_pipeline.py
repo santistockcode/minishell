@@ -352,6 +352,232 @@ def test_cat_infile_to_outfile_creates_both_files(test_runner_tty):
 
 
 
+# 'cat < in1.txt < in2.txt < in3.txt' should print only from in3.txt
+def test_cat_in1_in2_in3_prints_from3(test_runner_tty):
+
+    # Create in1.txt, in2.txt, in3.txt
+    in1_file = Path("in1.txt")
+    in1_file.write_text("Lorem ipsum dolor sit amet\n")
+
+    in2_file = Path("in2.txt")
+    in2_file.write_text("Consectetur adipiscing elit\n")
+
+    in3_file = Path("in3.txt")
+    in3_file.write_text("Sed do eiusmod tempor incididunt\n")
+
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: 
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 1
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in1.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 2
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in2.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 3
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in3.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+    test_runner_tty.expect(r"Sed do eiusmod tempor incididunt\r?\n")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    # Unlink input files
+    in1_file.unlink()
+    in2_file.unlink()
+    in3_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
+# 'echo "hello" > out1.txt >> out2.txt > out3.txt' should create all output files but only print to out3.txt
+def test_echo_hello_out1_out2_out3_creates_all(test_runner_tty):
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: echo "hello"
+    test_runner_tty.sendline('ADD_CMD 0 2 echo hello')
+    test_runner_tty.expect("OK")
+
+    # Add second command: > out1.txt
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out1.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add third command: >> out2.txt
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out2.txt 1")
+    test_runner_tty.expect("OK")
+
+    # Add fourth command: > out3.txt
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out3.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    # Assert all 3 files created but just the third one has 'hello'
+    output_file1 = Path("out1.txt")
+    output_file2 = Path("out2.txt")
+    output_file3 = Path("out3.txt")
+
+    assert output_file1.exists()
+    assert output_file2.exists()
+    assert output_file3.exists()
+
+    assert output_file1.read_text() == ""
+    assert output_file2.read_text() == ""
+    assert output_file3.read_text() == "hello\n"
+
+    output_file1.unlink()
+    output_file2.unlink()
+    output_file3.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
+
+# 'cat < in1.txt < in2.txt < in3.txt' | wc -l  should count lines only from in3.txt
+def test_cat_in1_in2_in3_pipe_wc_counts_from_in3(test_runner_tty):
+    # Create in1.txt, in2.txt, in3.txt
+    in1_file = Path("in1.txt")
+    in1_file.write_text("Line 1 from in1\nLine 2 from in1\n")
+
+    in2_file = Path("in2.txt")
+    in2_file.write_text("Line 1 from in2\nLine 2 from in2\nLine 3 from in2\n")
+
+    in3_file = Path("in3.txt")
+    in3_file.write_text("Line 1 from in3\nLine 2 from in3\nLine 3 from in3\nLine 4 from in3\n")
+
+    test_runner_tty.sendline("CREATE 2 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: cat
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 1
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in1.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 2
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in2.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add redirection 3
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 in3.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add second command: wc -l
+    test_runner_tty.sendline("ADD_CMD 1 2 wc -l")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_PIPELINE")
+    test_runner_tty.expect(r"4\r?\n")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    # Unlink input files
+    in1_file.unlink()
+    in2_file.unlink()
+    in3_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
+# 'cat < inexistant1.txt > out1.txt > out2.txt' should not create anything
+def test_cat_inexistant_infile_multiple_outputs_creates_nothing(test_runner_tty):
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: cat
+    test_runner_tty.sendline("ADD_CMD 0 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add input redirection: < inexistant1.txt
+    test_runner_tty.sendline("ADD_REDIR 0 0 0 inexistant1.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add output redirection: > out1.txt
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out1.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Add output redirection: > out2.txt
+    test_runner_tty.sendline("ADD_REDIR 0 1 0 out2.txt 0")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+    test_runner_tty.expect(r"minishell: inexistant1\.txt: No such file or directory")
+    test_runner_tty.expect("RESULT 1")
+
+    # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file1 = Path("out1.txt")
+    output_file2 = Path("out2.txt")
+
+    assert not output_file1.exists()
+    assert not output_file2.exists()
+
+    test_runner_tty.sendline("EXIT")
+
 # cat < nonexistant > out1 > out2 shouldn't create any out file
 def test_cat_nonexistent_infile_to_outfile_does_not_create_files(test_runner_tty):
     """

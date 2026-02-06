@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/04 18:59:05 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 14:43:57 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
 	printf("\n");
 }
 
+// FIXME: don't present this (does't pass norminette)
 void logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *message)
 {
 	time_t now;
@@ -156,8 +157,7 @@ void logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *mes
 // }
 
 
-// ...existing code...
-
+// FIXME: don't present this (does't pass norminette)
 void	logger_open_fds(const char *starttag, const char *endtag)
 {
     char			proc_path[64];
@@ -204,8 +204,6 @@ void	logger_open_fds(const char *starttag, const char *endtag)
     // fprintf(stderr, COLOR_CYAN "[PID %d] [%s] End of FD list\n" COLOR_RESET,
     //     pid, endtag);
 }
-
-// ...existing code...
 
 
 // Source - https://stackoverflow.com/a
