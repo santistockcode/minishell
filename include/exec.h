@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 10:41:57 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:14:30 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,8 @@ int						pwd_builtin(void);
 int						exit_builtin(char **argv, int parent, int last_status,
 							int *should_exit);
 int						env_builtin(t_list *env);
+int						cd_builtin(char **argsv, t_list **env);	
+
 
 /*
 ** Heredoc (prior to exec commands)

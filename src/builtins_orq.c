@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 09:03:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:14:50 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 int		export(t_list **env, char *var);
 void	env_unset(t_list **env, char *key);
 void	echo_builtin(char **argv);
+int 	cd_builtin(char **argsv, t_list **env);
 
 // exit utils
 void	safe_close_p(int *p);
@@ -72,8 +73,11 @@ int	is_builtin(char *cmd)
 		return (1);
 	if (ft_strncmp(cmd, "unset", 5) == 0)
 		return (1);
+	if (ft_strncmp(cmd, "cd", 2) == 0)
+		return (1);
 	return (0);
 }
+
 
 // TODO: better to treat each builtin as independant programm
 // every error has been set, every error has been printed
@@ -95,5 +99,7 @@ int	exec_builtin(t_cmd *cmd, t_shell *sh)
 		result = export(&sh->env, cmd->argv[1]);
 	if (ft_strncmp(cmd->argv[0], "unset", 5) == 0)
 		env_unset(&sh->env, cmd->argv[1]);
+	if (ft_strncmp(cmd->argv[0], "cd", 2) == 0)
+		cd_builtin(cmd->argv, &sh->env);
 	return (result);
 }

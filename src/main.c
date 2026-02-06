@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/05 16:02:27 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:10:09 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	main(int argc, char **argv, char **envp)
 	if (!init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
 	setup_signal();
-	while (g_exit_status != 130)
+	while (1)
 	{
 		// redline
 		// add_history

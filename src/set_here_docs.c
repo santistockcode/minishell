@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:21:37 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:11:08 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,15 @@ char	*process_suffix_with_pid(int suffix, t_shell *sh)
 Uses readline to fetch user input for the heredoc, and expands it
 with expand_hd. Then writes expanded line on fd.
 Returns -1 and frees line on error
+FIXME: control+c on a heredoc or multiples heredocs goes back to minishell
+FIXME: control+d on multiple heredocs must exit just one of them
 */
 int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 {
 	char	*line;
 	char	*expanded_line;
 
-	while (1 && g_exit_status != 130)
+	while (1)
 	{
 		line = readline_wrap("> ");
 		if (!line)

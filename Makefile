@@ -6,7 +6,7 @@
 #    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
-#    Updated: 2026/02/06 15:42:01 by saalarco         ###   ########.fr        #
+#    Updated: 2026/02/06 16:15:17 by saalarco         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,6 +62,7 @@ builtins/exit \
 builtins/echo \
 builtins/pwd \
 builtins_orq \
+builtins/cd \
 fds_utils \
 exec_pipeline \
 exec_simple \
