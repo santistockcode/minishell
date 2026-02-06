@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:11:55 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 12:39:39 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #include "lexing.h"
 #include "parsing.h"
 #include "expand.h"
+#include "set_exec.h"
 
 
 extern volatile sig_atomic_t exit_status;
@@ -49,13 +50,14 @@ typedef struct s_env
 
 typedef struct s_shell
 {
-	t_list	*env;
-	t_lexing *lexing;
-	t_list	*commands;
-	int		last_status; // last $? value
-	int		should_exit; // 1 if shell should exit so you can clean up
-	char	*last_err_op; // last operation that caused an error
-	int		last_errno; // last errno value
+	t_list		*env;
+	t_lexing	*lexing;
+	t_list		*commands;		// Parsing output: list of t_command
+	t_list		*exec_cmds;		// Execution input: list of t_cmd
+	int			last_status;	// last $? value
+	int			should_exit;	// 1 if shell should exit so you can clean up
+	char		*last_err_op;	// last operation that caused an error
+	int			last_errno;		// last errno value
 }			t_shell;
 
 int init_minishell(t_shell **minishell,char **envp);

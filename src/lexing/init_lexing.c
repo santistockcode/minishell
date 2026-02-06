@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:55:10 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 12:24:40 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,43 @@ int	init_new_token(t_token **new_token, int token_id)
 
 /*
 ** ============================================================================
+** PROCESS_ASSIGN_TOKEN - Procesa un token individual para asignación
+** ============================================================================
+**
+** DESCRIPCIÓN:
+**   Verifica si un token debe ser convertido a TOKEN_ASSIGN_WORD
+**
+** PARÁMETROS:
+**   - token: Token actual a procesar
+**   - prev_node: Nodo previo en la lista (NULL si es el primero)
+**
+** LÓGICA:
+**   - Si no hay nodo previo y es WORD → llama assign_var_token
+**   - Si hay previo y no es HEREDOC y es WORD → llama assign_var_token
+** ============================================================================
+*/
+
+static void	process_assign_token(t_token *token, t_list *prev_node)
+{
+	t_token	*prev;
+
+	if (!token)
+		return ;
+	if (!prev_node)
+	{
+		if (token->type == TOKEN_WORD)
+			assign_var_token(token);
+	}
+	else
+	{
+		prev = (t_token *)prev_node->content;
+		if (prev && prev->type != TOKEN_HEREDOC && token->type == TOKEN_WORD)
+			assign_var_token(token);
+	}
+}
+
+/*
+** ============================================================================
 ** REVAL_ASSIGN_TOKEN - Reasigna tipos para variables de asignación
 ** ============================================================================
 **
@@ -41,11 +78,6 @@ int	init_new_token(t_token **new_token, int token_id)
 **   - Anterior no es TOKEN_HEREDOC
 **   - Formato: nombre=valor donde nombre es alfanumérico + _
 **
-** LÓGICA:
-**   1. Iterar lista
-**   2. Si es primer token (i==0) y es WORD → call assign_var_token()
-**   3. Si no es heredoc y es WORD → call assign_var_token()
-**
 ** EJEMPLO:
 **   VÁLIDO: VAR=valor (inicio)
 **   VÁLIDO: echo VAR=valor (después de palabra)
@@ -56,7 +88,6 @@ int	init_new_token(t_token **new_token, int token_id)
 void	reval_assign_token(t_list *tokens)
 {
 	t_token	*token;
-	t_token	*prev;
 	t_list	*current;
 	t_list	*prev_node;
 
@@ -67,24 +98,8 @@ void	reval_assign_token(t_list *tokens)
 	while (current)
 	{
 		token = (t_token *)current->content;
-		if (!token)
-		{
-			prev_node = current;
-			current = current->next;
-			continue ;
-		}
-		if (!prev_node)
-		{
-			if (token->type == TOKEN_WORD)
-				assign_var_token(token);
-		}
-		else
-		{
-			prev = (t_token *)prev_node->content;
-			if (prev && prev->type != TOKEN_HEREDOC
-				&& token->type == TOKEN_WORD)
-				assign_var_token(token);
-		}
+		if (token)
+			process_assign_token(token, prev_node);
 		prev_node = current;
 		current = current->next;
 	}

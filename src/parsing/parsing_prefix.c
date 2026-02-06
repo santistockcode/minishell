@@ -6,12 +6,44 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 19:38:06 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 11:55:29 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 #include "../../include/parsing.h"
+
+/**
+ * parse_prefix_item() - Parse a single prefix token (assignment or redirection)
+ * @prefix: Prefix structure to fill
+ * @tokens: Token list
+ * @index: Current position
+ * @token_type: Type of token to parse
+ *
+ * Handles parsing of individual ASSIGN_WORD or IO_REDIRECT tokens
+ * into the prefix structure
+ */
+static int	parse_prefix_item(t_prefix *prefix, t_list *tokens, int *index,
+		t_token_type token_type)
+{
+	t_token	*token;
+
+	token = get_token_at(tokens, *index);
+	if (is_io_redirect(token_type))
+	{
+		if (parse_io_redirect_prefix(&prefix, tokens, index,
+				token_type) != SUCCESS)
+			return (INPUT_ERROR);
+	}
+	else if (token_type == TOKEN_ASSIGN_WORD)
+	{
+		prefix->assignment_word = ft_strdup(token->value);
+		if (!prefix->assignment_word)
+			return (MALLOC_ERROR);
+		consume_token(index);
+	}
+	return (SUCCESS);
+}
 
 /**
  * parse_prefix() - Parse command prefix (redirections and assignments)
@@ -20,7 +52,7 @@
  * @index: Current position
  *
  * Parses: ( ASSIGN_WORD | IO_REDIRECT )*
- * Creates a list of t_prefix structures
+ * Creates a list of t_prefix structures recursively
  */
 int	parse_prefix(t_list **prefix_list, t_list *tokens, int *index)
 {
@@ -35,19 +67,8 @@ int	parse_prefix(t_list **prefix_list, t_list *tokens, int *index)
 		return (SUCCESS);
 	if (init_prefix(&prefix) != SUCCESS)
 		return (MALLOC_ERROR);
-	if (is_io_redirect(token->type))
-	{
-		if (parse_io_redirect_prefix(&prefix, tokens, index,
-				token->type) != SUCCESS)
-			return (free(prefix), INPUT_ERROR);
-	}
-	else if (token->type == TOKEN_ASSIGN_WORD)
-	{
-		prefix->assignment_word = ft_strdup(token->value);
-		if (!prefix->assignment_word)
-			return (free(prefix), MALLOC_ERROR);
-		consume_token(index);
-	}
+	if (parse_prefix_item(prefix, tokens, index, token->type) != SUCCESS)
+		return (free(prefix), INPUT_ERROR);
 	new_node = ft_lstnew(prefix);
 	if (!new_node)
 		return (free(prefix->assignment_word), free(prefix), MALLOC_ERROR);

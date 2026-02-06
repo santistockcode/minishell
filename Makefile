@@ -59,6 +59,10 @@ parsing/parsing_prefix\
 parsing/parsing_suffix\
 parsing/utils_parsing\
 parsing/free_parsing\
+parsing/free_suffix\
+set_exec/convert_to_exec\
+set_exec/build_argv\
+set_exec/build_redirs\
 
 
 
