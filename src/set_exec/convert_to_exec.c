@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 12:39:39 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:50:25 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 /**
  * set_to_exec() - Convert parsing structures to execution structures
  *
- * Main entry point for conversion. Iterates through shell->commands
+ * Main entry point for conversion. Iterates through shell->cmds_start
  * and creates a parallel list of t_cmd structures for execution.
  */
 int	set_to_exec(t_shell *shell)
@@ -26,10 +26,10 @@ int	set_to_exec(t_shell *shell)
 	t_cmd		*exec_cmd;
 	t_list		*exec_node;
 
-	if (!shell || !shell->commands)
+	if (!shell || !shell->cmds_start)
 		return (INPUT_ERROR);
 	shell->exec_cmds = NULL;
-	cmd_node = shell->commands;
+	cmd_node = shell->cmds_start;
 	while (cmd_node)
 	{
 		command = (t_command *)cmd_node->content;

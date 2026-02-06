@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:55 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 00:55:56 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:55:29 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void free_list(t_list **env);
 
 //EXPORT
 t_env	*env_get(t_list *env, char *key);
-void	env_set(t_list **env, char *var);
+int	env_set(t_list **env, char *var);
 
 //UNSET
 void	env_unset(t_list **env, char *key);

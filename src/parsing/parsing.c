@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 19:45:46 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:49:50 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
  * @shell: Shell context with lexed tokens in shell->lexing->tokens
  *
  * Converts token list into command list using recursive descent parsing
- * Stores result in shell->commands
+ * Stores result in shell->cmds_start
  * Returns SUCCESS on success, INPUT_ERROR or MALLOC_ERROR on failure
  */
 int	parsing(t_shell *shell)
@@ -27,12 +27,12 @@ int	parsing(t_shell *shell)
 	if (!shell || !shell->lexing || !shell->lexing->tokens)
 		return (INPUT_ERROR);
 	index = 0;
-	shell->commands = NULL;
-	if (parse_pipe_sequence(&shell->commands, shell->lexing->tokens, &index,
+	shell->cmds_start = NULL;
+	if (parse_pipe_sequence(&shell->cmds_start, shell->lexing->tokens, &index,
 			shell) != SUCCESS)
 	{
-		free_commands(shell->commands);
-		shell->commands = NULL;
+		free_commands(shell->cmds_start);
+		shell->cmds_start = NULL;
 		return (INPUT_ERROR);
 	}
 	return (SUCCESS);

@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/02/06 12:39:39 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:48:07 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int init_minishell(t_shell **minishell,char **envp)
 	if(!(*minishell))
 		return (MALLOC_ERROR);
 	(*minishell)->env = init_envp(envp);
-	(*minishell)->commands = NULL;
+	(*minishell)->cmds_start = NULL;
 	(*minishell)->exec_cmds = NULL;
 	(*minishell)->lexing = NULL;
 	(*minishell)->last_status = 0;

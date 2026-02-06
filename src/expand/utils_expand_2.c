@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:50:47 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:50:13 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	expand_and_replace(char **value, char **start, t_list *env)
 	if (!var_param[0])
 		return (MALLOC_ERROR);
 	if (ft_strncmp("?", var_param[0], 1) == 0)
-		var_param[1] = ft_itoa(exit_status);
+		var_param[1] = ft_itoa(g_exit_status);
 	else
 		var_param[1] = extract_varvalue(var_param[0], env);
 	new_value = expand_varstr(*start, *value, var_param, &value_offset);
