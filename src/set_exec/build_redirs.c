@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 12:39:39 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 15:33:53 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,7 @@ int	add_redir_from_prefix(t_list *prefix_list, t_list **redirs)
 			new_node = ft_lstnew(redir);
 			if (!new_node)
 			{
-				free(redir->target);
-				free(redir);
-				return (MALLOC_ERROR);
+				return (free(redir->target), free(redir), MALLOC_ERROR);
 			}
 			ft_lstadd_back(redirs, new_node);
 		}
@@ -119,9 +117,7 @@ int	add_redir_from_suffix(t_list *suffix_list, t_list **redirs)
 			new_node = ft_lstnew(redir);
 			if (!new_node)
 			{
-				free(redir->target);
-				free(redir);
-				return (MALLOC_ERROR);
+				return (free(redir->target), free(redir), MALLOC_ERROR);
 			}
 			ft_lstadd_back(redirs, new_node);
 		}
