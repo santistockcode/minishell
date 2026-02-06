@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by s list in C       #+#    #+#             */
-/*   Updated: 2026/01/15 13:10:09 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/01/23 18:17:46 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ const char	*msh_test_get_redir_target(void *ctx, int cmd_index, int redir_index)
 int			msh_test_get_redir_type(void *ctx, int cmd_index, int redir_index);
 int			msh_test_get_redir_fd(void *ctx, int cmd_index, int redir_index);
 int			msh_test_get_redir_quoted(void *ctx, int cmd_index, int redir_index);
+const char *msh_test_get_env_value(void *ctx_void, const char *key);
 
 /* Cleanup (calls your free_cmds + frees env + ctx itself) */
 void		msh_test_ctx_destroy(void *ctx);

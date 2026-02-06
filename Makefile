@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
+#    Updated: 2026/02/06 16:15:17 by saalarco         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = minishell
 
 # Var
@@ -37,13 +49,29 @@ exec_utils \
 crtl \
 signals \
 minishell_init \
-tuberiex \
+exec_stage \
+path_utils \
+exit_utils \
 envp/env_init \
 envp/print_env \
 envp/free_env \
-envp/export \
-envp/unset
-
+builtins/export \
+builtins/env \
+builtins/unset \
+builtins/exit \
+builtins/echo \
+builtins/pwd \
+builtins_orq \
+builtins/cd \
+fds_utils \
+exec_pipeline \
+exec_simple \
+do_first_cmd \
+do_middle_cmds \
+do_last_cmd \
+prepare_redirs \
+prepare_stage_io \
+prepare_stage_io_utils
 
 
 # Files add
@@ -67,12 +95,12 @@ fsanitize: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	$(MKDIR) $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 # Compilar la libft
 $(LIBFT_NAME):

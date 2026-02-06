@@ -1,4 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   free_cmds.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/31 18:04:34 by saalarco          #+#    #+#             */
+/*   Updated: 2026/01/31 18:04:35 by saalarco         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
+
+// free cmds
+void	free_envp(const char **envp)
+{
+	const char	**original;
+
+	if (!envp)
+		return ;
+	original = envp;
+	while (*envp)
+	{
+		free((char *)*envp);
+		envp++;
+	}
+	free((char **)original);
+}
 
 static void	free_redir(void *redir_ptr)
 {

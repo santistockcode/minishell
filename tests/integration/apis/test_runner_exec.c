@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-volatile sig_atomic_t exit_status = 0;
+volatile sig_atomic_t   g_exit_status = 0;
 
 /*
  * Protocol:
@@ -308,6 +308,25 @@ static void handle_get_redir_target(int cmd_idx, int redir_idx)
     fflush(stdout);
 }
 
+static void handle_get_env_value(const char *args)
+{
+    char key[256];
+    sscanf(args, "%255s", key);
+    if (!g_ctx)
+    {
+        printf("ERROR: No context\n");
+        fflush(stdout);
+        return;
+    }
+
+    const char *value = msh_test_get_env_value(g_ctx, (const char *) key);
+    if (value)
+        printf("VALUE %s\n", value);
+    else
+        printf("VALUE_NULL\n");
+    fflush(stdout);
+}
+
 static void cleanup_builder(void)
 {
     for (int i = 0; i < g_builder.cmd_count; i++)
@@ -332,7 +351,7 @@ int main(void)
 {
     char line[4096];
     
-    while (fgets(line, sizeof(line), stdin) && exit_status != 130)
+    while (fgets(line, sizeof(line), stdin) && g_exit_status != 130)
     {
         // Remove newline
         line[strcspn(line, "\n")] = 0;
@@ -377,6 +396,10 @@ int main(void)
             sscanf(line + 17, "%d %d", &cmd_idx, &redir_idx);
             handle_get_redir_target(cmd_idx, redir_idx);
         }
+        else if (strncmp(line, "GET_ENV ", 8) == 0)
+        {
+            handle_get_env_value(line + 8);
+        }
         else if (strcmp(line, "DESTROY") == 0)
         {
             if (g_ctx)
@@ -394,12 +417,12 @@ int main(void)
         }
         else
         {
-            printf("ERROR: Unknown command: %s\n", line);
+            printf("ERROR: Unknown command test runner: %s\n", line);
             fflush(stdout);
         }
     }
 
-    if (exit_status == 130)
+    if (g_exit_status == 130)
     {
         // Interrupted by signal
         printf("EXITED_SIGNAL\n");
