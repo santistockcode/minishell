@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 13:08:53 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 09:03:19 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 // builtins
 int		export(t_list **env, char *var);
 void	env_unset(t_list **env, char *key);
-void	echo(char **argv);
+void	echo_builtin(char **argv);
 
 // exit utils
 void	safe_close_p(int *p);
@@ -51,7 +51,7 @@ void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
 	logger_open_fds( "🔥[builtin_orq.c]builtin_stage_exit🔥", "[builtin_orq.c]builtin_stage_exit");
-	exit(exit_code & 0xff);
+	exit(exit_code);
 }
 
 /*
@@ -61,6 +61,12 @@ void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 int	is_builtin(char *cmd)
 {
 	if (ft_strncmp(cmd, "echo", 4) == 0)
+		return (1);
+	if (ft_strncmp(cmd, "env", 3) == 0)
+		return (1);
+	if (ft_strncmp(cmd, "pwd", 3) == 0)
+		return (1);
+	if (ft_strncmp(cmd, "exit", 4) == 0)
 		return (1);
 	if (ft_strncmp(cmd, "export", 6) == 0)
 		return (1);
@@ -78,7 +84,13 @@ int	exec_builtin(t_cmd *cmd, t_shell *sh)
 
 	result = 0;
 	if (ft_strncmp(cmd->argv[0], "echo", 4) == 0)
-		echo(cmd->argv);
+		echo_builtin(cmd->argv);
+	if (ft_strncmp(cmd->argv[0], "env", 3) == 0)
+		env_builtin(sh->env);
+	if (ft_strncmp(cmd->argv[0], "pwd", 3) == 0)
+		pwd_builtin();
+	if (ft_strncmp(cmd->argv[0], "exit", 4) == 0)
+		exit_builtin(cmd->argv, 0, sh->last_status, &sh->should_exit);
 	if (ft_strncmp(cmd->argv[0], "export", 6) == 0)
 		result = export(&sh->env, cmd->argv[1]);
 	if (ft_strncmp(cmd->argv[0], "unset", 5) == 0)

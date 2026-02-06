@@ -40,7 +40,7 @@ class UnitTestRunner:
     
     def discover_test_sources(self) -> List[Path]:
         """Find all test_*.c files."""
-        return sorted(self.test_dir.glob("test_exec_cmds.c"))
+        return sorted(self.test_dir.glob("test_*.c"))
     
     def get_dependencies_for_test(self, test_file: Path) -> List[Path]:
         """Map test files to their source dependencies."""
@@ -60,10 +60,10 @@ class UnitTestRunner:
                 "exec_utils.c", "logger.c", "tuberiex.c", "exec_stage.c",
                 "path_utils.c", "exit_utils.c", "builtins/export.c",
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c",
-                "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
+                "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c", "builtins/pwd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
                 "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
-                "builtins/echo.c"
+                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "../tests/support/c_helpers/exec_cmds_helpers.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c", "logger.c"
@@ -76,7 +76,8 @@ class UnitTestRunner:
                 "tuberiex.c", "exec_utils.c", "exec_errors.c", "exec_stage.c",
                 "builtins/export.c", "path_utils.c", "exit_utils.c",
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c",
-                "builtins/unset.c"
+                "builtins/unset.c", "builtins/env.c", "builtins/exit.c", "builtins/pwd.c",
+                "builtins/echo.c"
             ],
             "test_exec_errors.c": [
                 "exec_errors.c", "syswrap.c", "logger.c"
@@ -84,11 +85,13 @@ class UnitTestRunner:
             "test_exec_stage.c": [
                 "exec_stage.c", "syswrap.c", "logger.c", 
                 "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
-                "builtins/export.c", "path_utils.c", "exit_utils.c",
+                "path_utils.c", "exit_utils.c",
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
                 "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
-                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c"
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
+                "builtins/exit.c", "builtins/pwd.c", "builtins/export.c", "builtins/env.c",
+                "builtins/echo.c"
             ],
             "test_exec_simple.c": [
                 "exec_stage.c", "syswrap.c", "logger.c", 
@@ -98,20 +101,24 @@ class UnitTestRunner:
                 "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
                 "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
-                "builtins/echo.c"
+                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "builtins/pwd.c"
             ],
             "test_builtin_echo.c": [
-                "builtins/echo.c", "syswrap.c", "logger.c"
+                "builtins/echo.c", "syswrap.c", "logger.c", "builtins/env.c", "builtins/exit.c"
+            ],
+            "test_builtin_exit.c": [
+                "builtins/exit.c", "syswrap.c", "logger.c"
             ],
             "test_exec_pipeline.c": [
                 "syswrap.c", "logger.c",
                 "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
-                "exec_stage.c","builtins/echo.c",
+                "exec_stage.c","builtins/echo.c", "builtins/env.c",
                 "builtins/export.c", "path_utils.c", "exit_utils.c",
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
-                "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
-                "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
-                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c"
+                "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "prepare_redirs.c",
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
+                "builtins/pwd.c",
+                "builtins/exit.c", "do_first_cmd.c", "do_middle_cmds.c", "do_last_cmd.c",
             ]
         }
         
@@ -127,7 +134,6 @@ class UnitTestRunner:
         
         deps = self.get_dependencies_for_test(test_file)
         deps.append(self.project_root / "tests" / "support" / "c_helpers" / "test_helpers.c")
-        deps.append(self.project_root / "tests" / "support" / "c_helpers" / "exec_cmds_helpers.c")
 
         include_dir = self.project_root / "include"
         third_party_dir = self.project_root / "tests" / "support" / "third_party"

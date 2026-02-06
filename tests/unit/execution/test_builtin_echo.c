@@ -3,23 +3,9 @@
 #include "../../support/third_party/minunit.h"
 #include "../../support/c_helpers/test_helpers.h"
 
-int open_temp_file(void)
-{
-    int fd = open("tests/unit/mock-files/tmp_helper_builtins.txt", O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if (fd == -1)
-        perror("open");
-    return fd;
-}
 
-char *read_temp_file(int fd)
-{
-    lseek(fd, 0, SEEK_SET);
-    char buf[1024];
-    ssize_t n = read(fd, buf, sizeof(buf)-1);
-    if (n < 0) n = 0;
-    buf[n] = '\0';
-    return strdup(buf);
-}
+int open_temp_file(void);
+char *read_temp_file(int fd);
 
 static int test_echo_no_flags_prints_correctly(void)
 {
@@ -30,7 +16,7 @@ static int test_echo_no_flags_prints_correctly(void)
 
     dup2(fd, STDOUT_FILENO);
 
-    echo(args);
+    echo_builtin(args);
 
 
     char *output = read_temp_file(fd);
@@ -52,7 +38,7 @@ static int test_echo_with_n_flag(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-n", "hello", "world", NULL};
-    echo(args);
+    echo_builtin(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -74,7 +60,7 @@ static int test_echo_multiple_n_flags(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-n", "-n", "-n", "test", NULL};
-    echo(args);
+    echo_builtin(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -96,7 +82,7 @@ static int test_echo_combined_n_flags(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-nnn", "test", NULL};
-    echo(args);
+    echo_builtin(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -118,7 +104,7 @@ static int test_echo_invalid_flag(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", "-x", "test", NULL};
-    echo(args);
+    echo_builtin(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -140,7 +126,7 @@ static int test_echo_empty_args(void)
     dup2(fd, STDOUT_FILENO);
     
     char *args[] = {"echo", NULL};
-    echo(args);
+    echo_builtin(args);
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);

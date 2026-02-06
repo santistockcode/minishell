@@ -103,7 +103,6 @@ y
 Y pasa lo mismo con un builtin como 'echo' en vez de 'head' pasa lo mismo, entonces, sí, un SIGPIPE que me aparece es estandar bash behaviour. Lo importante es que no levanta ningún error, ni informa de ninguna forma de que esto ha pasado.
 
 
-
 ## Si libero p en los builtins existosos obtengo SIGPIPES, si no lo libero, el extremo que no se usa del pipe en uso queda dangling.
 
 No tengo claro si es un problema o no, en todo caso son restaurados correctamente en el parent. 
@@ -131,4 +130,7 @@ LAST
 [PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 0 -> pipe:[14024916]
 [PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 1 -> /dev/pts/8
 [PID 2823546] 🔥[builtin_orq.c]builtin_stage_exit🔥  fd 2 -> /dev/pts/9
+
+
+El problema es que ESTO SÍ ES UN DANGLING FD, y viene derivado de que primero preparo redirs y stage_io y limpio y LUEGO hago el dup2. Pendiente en el execve_wrap (hacer un execve_wrap nuevo) meter una limpieza de los fds y los pipes que no se usen (ese calculo si se hace antes de dup2 da problemas) (FIXME).
 

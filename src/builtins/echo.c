@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:45:54 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 17:47:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 09:27:45 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	count_n_flags(char **argv)
 argv[0] = 'echo'
 Don't start printing until n flags end
 */
-void	echo(char **argv)
+void	echo_builtin(char **argv)
 {
 	char	*to_print;
 	int		flag;

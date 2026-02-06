@@ -6,11 +6,11 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/01/31 18:05:00 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 16:02:27 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/minishell.h"
+#include "minishell.h"
 
 volatile sig_atomic_t	g_exit_status = 0;
 
@@ -23,7 +23,7 @@ int	main(int argc, char **argv, char **envp)
 	if (!init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
 	setup_signal();
-	while (1)
+	while (g_exit_status != 130)
 	{
 		// redline
 		// add_history

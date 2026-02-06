@@ -1234,6 +1234,7 @@ static int test_pipeline_external_open_fails_second_in(void)
 static int test_pipeline_external_open_fails_third_in(void)
 {
     return (0);
+    // echo hello | cat | cat < inexistant
     printf("Test: external | external | external_in open fails\n");
     t_shell *sh = create_test_shell(test_env, 0);
     

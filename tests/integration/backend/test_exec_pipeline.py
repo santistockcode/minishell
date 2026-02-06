@@ -464,6 +464,81 @@ def test_echo_hello_invalid_command_cat(test_runner_tty):
 
     test_runner_tty.sendline("EXIT")
 
+
+def test_exit_on_child_pipeline_doesnt_exit(test_runner_tty):
+    test_runner_tty.sendline("CREATE 3 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: echo "hello"
+    test_runner_tty.sendline('ADD_CMD 0 2 echo hello')
+    test_runner_tty.expect("OK")
+
+    # Add second command: invalid
+    test_runner_tty.sendline("ADD_CMD 1 1 invalid")
+    test_runner_tty.expect("OK")
+
+    # Add third command: cat
+    test_runner_tty.sendline("ADD_CMD 2 1 cat")
+    test_runner_tty.expect("OK")
+
+    # Add redir to third command
+    test_runner_tty.sendline("ADD_REDIR 2 1 0 outfile 1")
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_PIPELINE")
+    test_runner_tty.expect(r"invalid: command not found")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
+    output_file = Path("outfile")
+
+    assert output_file.exists()
+
+    output_file.unlink()
+
+    test_runner_tty.sendline("EXIT")
+
+def test_exit_on_parent_simple_exits_and_prints(test_runner_tty):
+    test_runner_tty.sendline("CREATE 1 0")
+    test_runner_tty.expect("OK")
+
+    # Add first command: echo "hello"
+    test_runner_tty.sendline('ADD_CMD 0 1 exit')
+    test_runner_tty.expect("OK")
+
+    # Set environment variables
+    test_runner_tty.sendline(
+        "CREATE_ENVP PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    )
+    test_runner_tty.expect("OK")
+
+    # Build the context
+    test_runner_tty.sendline("BUILD_CONTEXT")
+    test_runner_tty.expect("OK")
+
+    # Execute the pipeline
+    test_runner_tty.sendline("EXEC_SIMPLE")
+    test_runner_tty.expect(r"exit")
+    test_runner_tty.expect("RESULT 0")
+
+    # # Cleanup
+    test_runner_tty.sendline("DESTROY")
+    test_runner_tty.expect("OK")
+
 # cmd > output1 > output2 creates both files
 @pytest.mark.skip("Not implemented yet")
 def test_cmd_concatenated_outputs_redirections_creates_files():

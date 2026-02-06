@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:01:07 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 10:53:49 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,26 +44,37 @@ int	dup2_stage_io_parent(t_shell *sh, t_cmd *cmd)
 	return (0);
 }
 
+/*
+Custom exit because of norminette
+*/
+int	ebip_exit(t_shell *sh, t_list *redirs)
+{
+	msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
+	safe_close_rd_fds(redirs);
+	return (-1);
+}
+
 int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 {
 	t_list	*redirs;
 	int		status;
 
 	redirs = cmd->redirs;
+	status = 0;
 	if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		return (msh_restore_fds(sh->save_in, sh->save_out, sh->save_err), msh_set_error(sh, DUP_OP), -1);
+		return (msh_set_error(sh, DUP_OP), ebip_exit(sh, redirs));
 	if (prepare_redirs(redirs, sh) == -1)
-		return (msh_restore_fds(sh->save_in, sh->save_out, sh->save_err),
-			safe_close_rd_fds(redirs), (-1));
+		return (ebip_exit(sh, redirs));
 	cmd->stage_io = prepare_stage_io(LAST, redirs, -1, NULL);
 	if (cmd->stage_io == NULL)
-		return (msh_restore_fds(sh->save_in, sh->save_out, sh->save_err),
-			safe_close_rd_fds(redirs), msh_set_error(sh, MALLOC_OP), (-1));
+		return (msh_set_error(sh, MALLOC_OP), ebip_exit(sh, redirs));
 	if (dup2_stage_io_parent(sh, cmd) == (-1))
-		return (safe_close_rd_fds(redirs), safe_close_stage_io(cmd->stage_io),
-			msh_restore_fds(sh->save_in, sh->save_out, sh->save_err),
-			free(cmd->stage_io), (-1));
-	status = exec_builtin(cmd, sh);
+		return (safe_close_stage_io(cmd->stage_io),
+			free(cmd->stage_io), ebip_exit(sh, redirs));
+	if (ft_strncmp(cmd->argv[0], "exit", 4) == 0)
+		exit_builtin(cmd->argv, 1, sh->last_status, &sh->should_exit);
+	else
+		status = exec_builtin(cmd, sh);
 	safe_close_rd_fds(redirs);
 	safe_close_stage_io(cmd->stage_io);
 	free(cmd->stage_io);
@@ -82,6 +93,8 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 	{
 		// fprintf(stderr, "[simple] PID %d, parent %d, cmd=%s\n",
 		// 	getpid(), getppid(), cmd->argv[0]);
+		// while(1)
+		// 	sleep(50);
 		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		redirs = cmd->redirs;
@@ -91,7 +104,7 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 		if (!cmd->stage_io)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		msh_exec_stage(sh, cmd, env, NULL);
-		logger_open_fds( "🔥[exec_simple.c]run_simple🔥", "[exec_simple.c]run_simple");
+		logger_open_fds("🔥[exec_simple.c]run_simple🔥", "[exec_simple.c]run_simple");
 		exit(EXIT_FAILURE);
 	}
 	return (0);

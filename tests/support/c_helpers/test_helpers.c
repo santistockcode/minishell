@@ -214,3 +214,22 @@ int create_mock_pipe_with_data(const char *data)
     close(temp_pipe[1]);
     return temp_pipe[0];
 }
+
+
+int open_temp_file(void)
+{
+    int fd = open("tests/unit/mock-files/tmp_helper_builtins.txt", O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1)
+        perror("open");
+    return fd;
+}
+
+char *read_temp_file(int fd)
+{
+    lseek(fd, 0, SEEK_SET);
+    char buf[1024];
+    ssize_t n = read(fd, buf, sizeof(buf)-1);
+    if (n < 0) n = 0;
+    buf[n] = '\0';
+    return strdup(buf);
+}

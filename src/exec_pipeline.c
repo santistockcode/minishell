@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 13:09:39 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 10:43:49 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,10 @@
 void	safe_close_rd_fds(t_list *redirs);
 int		msh_save_fds(int *save_in, int *save_out, int *save_err);
 void	msh_restore_fds(int save_in, int save_out, int save_err);
-int	require_standard_fds(t_shell *sh);
-
+int		require_standard_fds(t_shell *sh);
 
 // exit utils
 void	safe_close_p(int *p);
-
 
 /* EXEC_PIPELINE */
 
@@ -47,7 +45,8 @@ int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 	while (nstages-- > 2)
 	{
 		if (pipe_wrap(p) == -1)
-			return (safe_close_p(p), safe_close(in_fd), msh_set_error(sh, PIPE_OP), -1);
+			return (safe_close_p(p), safe_close(in_fd),
+				msh_set_error(sh, PIPE_OP), -1);
 		if (do_middle_commands(sh, (t_cmd *)current_cmd_node->content, p,
 				in_fd) == -1)
 			return (-1);

@@ -36,5 +36,8 @@ grep -a "FILE DESCRIPTORS:" tests/unit/execution/bin/valgrind-fds-results/*.log 
 grep -a "total heap" tests/unit/execution/bin/valgrind-fds-results/*.log \
   | sed -E 's#^.*(total heap.*)$#\1#'
 
+grep -a "total heap" tests/unit/execution/bin/valgrind-leaks-results/*.log \
+  | sed -E 's#^.*(total heap.*)$#\1#'
+
 echo "The extra fd is Valgrind’s own log file. That’s normal. No app fd leaks here."
 echo "If more than 4 present inspect file to check if they come from my code"

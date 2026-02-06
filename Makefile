@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
+#    Updated: 2026/02/06 10:39:42 by saalarco         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = minishell
 
 # Var
@@ -44,6 +56,7 @@ envp/env_init \
 envp/print_env \
 envp/free_env \
 builtins/export \
+builtins/env \
 builtins/unset \
 builtins_orq \
 fds_utils \
@@ -78,12 +91,13 @@ fsanitize: $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT_NAME)
 	$(MKDIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_NAME) $(LDFLAGS) -o $@
 
+# FIXME: .o depends as well on includes
 # Comp .O
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	$(MKDIR) $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 # Compilar la libft
 $(LIBFT_NAME):

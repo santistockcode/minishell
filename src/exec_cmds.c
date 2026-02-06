@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/04 20:03:44 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/05 14:02:17 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,8 @@ Returns the exit status of the last command executed in the pipeline.
 // FIXME: bad smell exec_cmds and set_here_docs admiten los mismos parámetros,
 // esto es por que nos hemos dividido así el trabajo pero en verdad,
 	here_docs debería ir fuera de exec
-// va a devolvver el estado real de las cosas, no?
+// devuelve -1 si ha habido un error previo a child o builtin
+// en cualquier otro caso devuelve el estado de salida del último comando
 */
 int	exec_cmds(t_shell *sh, t_list *cmd_first)
 {

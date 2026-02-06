@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:01:30 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 10:58:15 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,13 @@ void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 	builtin_stage_exit(sh, cmd, p, st);
 }
 
+void clear_saved_fds(t_shell *sh)
+{
+	safe_close(sh->save_in);
+	safe_close(sh->save_out);
+	safe_close(sh->save_err);
+}
+
 // Entry point for execution
 /*
 This function is responsible for executing a command.
@@ -197,9 +204,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		free(path);
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 	}
-	safe_close(sh->save_in);
-	safe_close(sh->save_out);
-	safe_close(sh->save_err);
+	clear_saved_fds(sh);
 	if (execve_wrap(path, cmd->argv, envp) == -1)
 	{
 		free(path);
@@ -208,8 +213,6 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		msh_set_error(sh, EXECVE_OP);
 		stage_exit_print(sh, cmd, p, st);
 	}
-	logger_open_fds( "🔥[msh_exec_stage.c]fuckedup🔥", "[msh_exec_stage.c]fuckedup");
-	exit(EXIT_FAILURE);
 }
 /*
 lr-x------ 1 saalarco 2019 64 Jan 29 17:37 0 ->

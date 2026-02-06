@@ -122,6 +122,26 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "Unit-test BUILTIN exit",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/unit/execution/bin/test_builtin_exit",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "Unit-test exec-errors",
             "type": "cppdbg",
             "request": "launch",
