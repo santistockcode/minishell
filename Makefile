@@ -105,7 +105,7 @@ all: $(NAME)
 
 # Debug rule
 debug: CFLAGS += -g3 -O0 -DDEBUG
-debug: $(NAME)
+debug: fclean $(NAME)
 
 # Fsanitize rule
 fsanitize: CFLAGS += -fsanitize=address

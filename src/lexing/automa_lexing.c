@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   automa_lexing.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:54:57 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	state_noquote(char **current, int flag)
 {
-	while ((ft_isprint(**current) && !ft_isspace(**current)
+	while ((msh_isprint(**current) && !ft_isspace(**current)
 			&& !ft_isoperator(**current) && flag == NO_QUOTE))
 	{
 		flag = state_switch(*current, flag);
@@ -32,7 +32,7 @@ int	state_noquote(char **current, int flag)
 
 int	state_singlequote(char **current, int flag)
 {
-	while ((ft_isprint(**current) && flag == SINGLE_QUOTE))
+	while ((msh_isprint(**current) && flag == SINGLE_QUOTE))
 	{
 		flag = state_switch(*current, flag);
 		if (flag != SINGLE_QUOTE)
@@ -47,7 +47,7 @@ int	state_singlequote(char **current, int flag)
 
 int	state_doublequote(char **current, int flag)
 {
-	while ((ft_isprint(**current) && flag == DOUBLE_QUOTE))
+	while ((msh_isprint(**current) && flag == DOUBLE_QUOTE))
 	{
 		flag = state_switch(*current, flag);
 		if (flag != DOUBLE_QUOTE)

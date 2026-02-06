@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_lexing.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 22:47:45 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/01 23:05:08 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,5 +19,15 @@ int	ft_isoperator(int c)
 	set = "<>|";
 	if (ft_strchr(set, c))
 		return (c);
+	return (0);
+}
+
+int	msh_isprint(int c)
+{
+	unsigned char	uc;
+
+	uc = (unsigned char)c;
+	if (uc >= 32 && uc != 127)
+		return (1);
 	return (0);
 }

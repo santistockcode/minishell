@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 16:21:19 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 16:21:19 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:25:06 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,6 @@ FIXME: cd, ~/a/b should concatenate $HOME to <path> (expand)
 */
 int	cd_builtin(char **argsv, t_list **env)
 {
-	char *cmd;
-
-	cmd = argsv[0];
 
 	if (argsv[1] && argsv[2])
 	{

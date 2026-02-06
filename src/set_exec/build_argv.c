@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   build_argv.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 12:39:39 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 16:34:56 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,5 +88,6 @@ char	**build_argv(t_command *command)
 		node = node->next;
 	}
 	argv[i] = NULL;
+	logger_argv(argv, "build_argv result");
 	return (argv);
 }

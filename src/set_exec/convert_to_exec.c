@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   convert_to_exec.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 16:50:25 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:21:46 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ int	set_to_exec(t_shell *shell)
 		ft_lstadd_back(&shell->exec_cmds, exec_node);
 		cmd_node = cmd_node->next;
 	}
+	logger_exec_cmds(shell->exec_cmds, "after set_to_exec");
 	return (SUCCESS);
 }
 

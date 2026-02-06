@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_expand_2.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 16:50:13 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:20:55 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,26 @@
 int	expand_and_quotes(char **string, t_list *env)
 {
 	int	status;
+	char	*before;
 
+	before = NULL;
+	if (LOG == 1)
+		before = *string ? ft_strdup(*string) : ft_strdup("(null)");
 	status = expand_var_value(string, env);
 	if (status != SUCCESS)
+	{
+		free(before);
 		return (status);
-	return (remove_string_quotes(string));
+	}
+	status = remove_string_quotes(string);
+	if (LOG == 1)
+	{
+		printf("[EXPAND] before=\"%s\" after=\"%s\"\n",
+			before ? before : "(null)",
+			*string ? *string : "(null)");
+	}
+	free(before);
+	return (status);
 }
 
 int	expand_and_replace(char **value, char **start, t_list *env)
@@ -56,11 +71,24 @@ int	remove_char_quote(char **start, char **value)
 	char	*after_quote;
 	char	*temp;
 	size_t	quote_pos;
+	size_t	before_len;
+	size_t	after_len;
 
 	quote_pos = *value - *start;
 	before_quote = ft_substr(*start, 0, quote_pos);
 	after_quote = ft_strdup(*value + 1);
-	temp = ft_strjoin(before_quote, after_quote);
+	before_len = before_quote ? ft_strlen(before_quote) : 0;
+	after_len = after_quote ? ft_strlen(after_quote) : 0;
+	if (before_len == 0 && after_len == 0)
+		temp = ft_strdup("");
+	else
+		temp = ft_strjoin(before_quote, after_quote);
+	if (!temp)
+	{
+		free(before_quote);
+		free(after_quote);
+		return (MALLOC_ERROR);
+	}
 	free(*start);
 	*start = temp;
 	*value = *start + quote_pos;

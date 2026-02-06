@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_stage_io.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:06:54 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 13:06:53 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:28:50 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,12 +123,10 @@ t_stage_io	*prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd,
 		int *p)
 {
 	t_stage_io	*rdr_spec;
-	int			out_redir_fd;
 
 	rdr_spec = malloc(sizeof(t_stage_io));
 	if (!rdr_spec)
 		return (NULL);
-	out_redir_fd = get_r_out_redir_fd(redirs);
 	if (pos == FIRST)
 		assign_first(&rdr_spec, redirs, p);
 	else if (pos == MIDDLE)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   build_redirs.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 15:33:53 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:15:29 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 t_redir	*create_redir(t_io_redirect *io_redir)
 {
 	t_redir	*redir;
+	char	*target;
+	int		status;
 
 	if (!io_redir)
 		return (NULL);
@@ -46,14 +48,26 @@ t_redir	*create_redir(t_io_redirect *io_redir)
 	else if (io_redir->io_here)
 	{
 		redir->type = R_HEREDOC;
-		redir->target = ft_strdup(io_redir->io_here->here_end);
-		if (!redir->target)
+		target = ft_strdup(io_redir->io_here->here_end);
+		if (!target)
 		{
 			free(redir);
 			return (NULL);
 		}
-		redir->fd = 0;
 		redir->quoted = 0;
+		if (ft_strchr(target, '\'') || ft_strchr(target, '"'))
+		{
+			redir->quoted = 1;
+			status = remove_string_quotes(&target);
+			if (status != SUCCESS)
+			{
+				free(target);
+				free(redir);
+				return (NULL);
+			}
+		}
+		redir->target = target;
+		redir->fd = 0;
 	}
 	return (redir);
 }

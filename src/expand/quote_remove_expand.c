@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quote_remove_expand.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:01:07 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,9 @@ int	remove_string_quotes(char **string)
 
 int	remove_noquote(char **value, char **start, int flag)
 {
-	while ((ft_isprint(**value) && !ft_isspace(**value)
+	if (!value || !*value || flag != NO_QUOTE)
+		return (flag);
+	while ((msh_isprint(**value) && !ft_isspace(**value)
 			&& !ft_isoperator(**value) && flag == NO_QUOTE))
 	{
 		flag = state_switch(*value, flag);
@@ -56,7 +58,9 @@ int	remove_noquote(char **value, char **start, int flag)
 
 int	remove_singlequote(char **value, char **start, int flag)
 {
-	while ((ft_isprint(**value) && flag == SINGLE_QUOTE))
+	if (!value || !*value || flag != SINGLE_QUOTE)
+		return (flag);
+	while ((msh_isprint(**value) && flag == SINGLE_QUOTE))
 	{
 		flag = state_switch(*value, flag);
 		if (flag != SINGLE_QUOTE)
@@ -71,7 +75,9 @@ int	remove_singlequote(char **value, char **start, int flag)
 
 int	remove_doublequote(char **value, char **start, int flag)
 {
-	while ((ft_isprint(**value) && flag == DOUBLE_QUOTE))
+	if (!value || !*value || flag != DOUBLE_QUOTE)
+		return (flag);
+	while ((msh_isprint(**value) && flag == DOUBLE_QUOTE))
 	{
 		flag = state_switch(*value, flag);
 		if (flag != DOUBLE_QUOTE)

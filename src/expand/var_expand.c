@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   var_expand.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 16:48:21 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:23:26 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ int	expand_variables(t_shell *shell)
 
 	if (!shell)
 		return (INPUT_ERROR);
+	logger_commands(shell->cmds_start, "before expansion");
 	cmd_node = shell->cmds_start;
 	while (cmd_node)
 	{
@@ -106,5 +107,6 @@ int	expand_variables(t_shell *shell)
 			return (status);
 		cmd_node = cmd_node->next;
 	}
+	logger_commands(shell->cmds_start, "after expansion");
 	return (SUCCESS);
 }

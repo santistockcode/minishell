@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quote_state_expand.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 18:09:01 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	expand_noquote(char **value, char **start, int flag, t_list *env)
 {
-	while ((ft_isprint(**value) && !ft_isspace(**value)
+	while ((msh_isprint(**value) && !ft_isspace(**value)
 			&& !ft_isoperator(**value) && flag == NO_QUOTE))
 	{
 		flag = state_switch(*value, flag);
@@ -43,7 +43,7 @@ int	expand_noquote(char **value, char **start, int flag, t_list *env)
 
 int	expand_singlequote(char **value, int flag)
 {
-	while ((ft_isprint(**value) && flag == SINGLE_QUOTE))
+	while ((msh_isprint(**value) && flag == SINGLE_QUOTE))
 	{
 		flag = state_switch(*value, flag);
 		if (flag != SINGLE_QUOTE)
@@ -58,7 +58,7 @@ int	expand_singlequote(char **value, int flag)
 
 int	expand_doublequote(char **value, char **start, int flag, t_list *env)
 {
-	while ((ft_isprint(**value) && flag == DOUBLE_QUOTE))
+	while ((msh_isprint(**value) && flag == DOUBLE_QUOTE))
 	{
 		flag = state_switch(*value, flag);
 		if (flag != DOUBLE_QUOTE)
