@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 20:19:09 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/07 11:15:43 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,9 @@ typedef struct s_shell
 {
 	t_list		*env;
 	t_lexing	*lexing;
-	t_list		*cmds_start; // only used (maybe) for cleanining up, DO NOT USE
-	t_list		*exec_cmds;		// Execution input: list of t_cmd
+	t_list		*cmds_start; // only used (maybe) for cleanining up, DO NOT USE,
+	t_list		*pars_cmds; // Parsing cmds
+	t_list		*exec_cmds;		// Execution input: list of t_cmd,, ESTO
 	int			last_status;	// last $? value
 	int			should_exit;	// 1 if shell should exit so you can clean up
 	char		*last_err_op;	// last operation that caused an error

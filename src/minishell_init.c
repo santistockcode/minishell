@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 23:18:17 by mario             #+#    #+#             */
-/*   Updated: 2026/02/06 16:48:07 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 10:31:10 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,9 @@ int init_minishell(t_shell **minishell,char **envp)
 	(*minishell)->last_status = 0;
 	(*minishell)->last_errno = 0;
 	(*minishell)->should_exit = 0;
+	(*minishell)->save_in = 0;
+	(*minishell)->save_out = 0;
+	(*minishell)->save_err = 0;
 	(*minishell)->last_err_op = NULL;
 
 	return(SUCCESS);
