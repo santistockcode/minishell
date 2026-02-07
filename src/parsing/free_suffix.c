@@ -6,24 +6,41 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:14:47 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/07 12:42:16 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 23:15:00 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-static void	free_io_redirect(t_suffix *prefix)
+static void	free_io_redirect(t_suffix *suffix)
 {
-	if (prefix->io_redirect->io_file->filename != NULL)
-		free(prefix->io_redirect->io_file->filename);
-	if (prefix->io_redirect->io_file != NULL)
-		free(prefix->io_redirect->io_file);
-	if (prefix->io_redirect->io_here->filename != NULL)
-		free(prefix->io_redirect->io_here->filename);
-	if (prefix->io_redirect->io_here->here_end != NULL)
-		free(prefix->io_redirect->io_here->here_end);
-	if (prefix->io_redirect->io_here != NULL)
-		free(prefix->io_redirect->io_here);
+	if (!suffix || !suffix->io_redirect)
+		return ;
+	if (suffix->io_redirect->io_file)
+	{
+		free(suffix->io_redirect->io_file->filename);
+		free(suffix->io_redirect->io_file);
+	}
+	if (suffix->io_redirect->io_here)
+	{
+		free(suffix->io_redirect->io_here->filename);
+		free(suffix->io_redirect->io_here->here_end);
+		free(suffix->io_redirect->io_here);
+	}
+	free(suffix->io_redirect);
+}
+
+static void	delete_suffix(void *content)
+{
+	t_suffix	*suffix;
+
+	if (!content)
+		return ;
+	suffix = (t_suffix *)content;
+	free(suffix->word);
+	if (suffix->io_redirect)
+		free_io_redirect(suffix);
+	free(suffix);
 }
 
 /**
@@ -32,31 +49,7 @@ static void	free_io_redirect(t_suffix *prefix)
  */
 void	free_suffixes(t_list *suffix_list)
 {
-	t_list		*current;
-	t_suffix	*suffix;
-
-	current = suffix_list;
-	while (current)
-	{
-		suffix = (t_suffix *)current->content;
-		if (suffix)
-		{
-			free(suffix->word);
-			suffix->word = NULL;
-			if (suffix->io_redirect)
-			{
-				if (suffix->io_redirect->io_file)
-					free_io_redirect(suffix);
-				if (suffix->io_redirect->io_here)
-					free_io_redirect(suffix);
-				free(suffix->io_redirect);
-			}
-			free(suffix);
-		}
-		current = current->next;
-	}
-	//free(suffix_list);
-	// ft_lstclear(&suffix_list, free);
+	ft_lstclear(&suffix_list, delete_suffix);
 }
 
 /**

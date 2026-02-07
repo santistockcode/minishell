@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 23:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/07 14:07:21 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 23:18:52 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,21 @@ int	not_tokens(t_shell *minishell)
 	t_list	*first_node;
 
 	if (!minishell || !minishell->lexing || !minishell->lexing->tokens)
-		return (1);
+	{
+		if (minishell->lexing)
+			free_lexing(minishell->lexing);
+		minishell->lexing = NULL;
+		return(1);
+	}
 	first_node = minishell->lexing->tokens;
 	token = (t_token *)first_node->content;
 	if (!token || token->type == TOKEN_EOF)
-		return (1);
+	{
+		if (minishell->lexing)
+			free_lexing(minishell->lexing);
+		minishell->lexing = NULL;
+		return(1);
+	}
 	return (0);
 }
 

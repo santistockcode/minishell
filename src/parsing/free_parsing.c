@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 20:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/07 14:19:56 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 23:15:00 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,7 @@
  */
 void	free_commands(t_list *commands)
 {
-	t_list		*current;
-	t_command	*cmd;
-
-	current = commands;
-	while (current)
-	{
-		cmd = (t_command *)current->content;
-		if (cmd)
-			free_command(cmd);
-		current = current->next;
-	}
-	ft_lstclear(&commands, free);
+	ft_lstclear(&commands, (void (*)(void *))free_command);
 }
 
 /**
@@ -56,18 +45,35 @@ void	free_command(t_command *cmd)
 	free(cmd);
 }
 
-void	free_io_redirect(t_prefix *prefix)
+static void	free_io_redirect(t_prefix *prefix)
 {
-	if (prefix->io_redirect->io_file->filename != NULL)
+	if (!prefix || !prefix->io_redirect)
+		return ;
+	if (prefix->io_redirect->io_file)
+	{
 		free(prefix->io_redirect->io_file->filename);
-	if (prefix->io_redirect->io_file != NULL)
 		free(prefix->io_redirect->io_file);
-	if (prefix->io_redirect->io_here->filename != NULL)
+	}
+	if (prefix->io_redirect->io_here)
+	{
 		free(prefix->io_redirect->io_here->filename);
-	if (prefix->io_redirect->io_here->here_end != NULL)
 		free(prefix->io_redirect->io_here->here_end);
-	if (prefix->io_redirect->io_here != NULL)
 		free(prefix->io_redirect->io_here);
+	}
+	free(prefix->io_redirect);
+}
+
+static void	delete_prefix(void *content)
+{
+	t_prefix	*prefix;
+
+	if (!content)
+		return ;
+	prefix = (t_prefix *)content;
+	free(prefix->assignment_word);
+	if (prefix->io_redirect)
+		free_io_redirect(prefix);
+	free(prefix);
 }
 
 /**
@@ -76,28 +82,5 @@ void	free_io_redirect(t_prefix *prefix)
  */
 void	free_prefixes(t_list *prefix_list)
 {
-	t_list		*current;
-	t_prefix	*prefix;
-
-	current = prefix_list;
-	while (current)
-	{
-		prefix = (t_prefix *)current->content;
-		if (prefix)
-		{
-			free(prefix->assignment_word);
-			prefix->assignment_word = NULL;
-			if (prefix->io_redirect)
-			{
-				if (prefix->io_redirect->io_file)
-					free_io_redirect(prefix);
-				if (prefix->io_redirect->io_here)
-					free_io_redirect(prefix);
-				free(prefix->io_redirect);
-			}
-			free(prefix);
-		}
-		current = current->next;
-	}
-	ft_lstclear(&prefix_list, NULL);
+	ft_lstclear(&prefix_list, delete_prefix);
 }

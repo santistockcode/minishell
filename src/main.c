@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/07 14:30:42 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 23:17:51 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,12 @@ void free_main_loop(t_shell *minishell)
 {
 	if(minishell->lexing)
 		free_lexing(minishell->lexing);
-	if(minishell->cmds_start)
+	if(minishell->pars_cmds)
 		free_commands(minishell->pars_cmds);
 	if(minishell->exec_cmds)
 		free_cmds(minishell->exec_cmds);
+	minishell->lexing = NULL;
+	minishell->pars_cmds = NULL;
 	minishell->exec_cmds = NULL;
 }
 void free_shell(t_shell *sh)
@@ -91,14 +93,14 @@ int main(int argc, char** argv, char **envp)
 	t_shell	*minishell;
 	int status;
 	
-	int bucle = 0;
+	//int bucle = 0;
 	status = 0;
 	if(argc != 0 && argv[1] != NULL)
 		return(0);
 	if (init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
 	setup_signal();
-	while (bucle++ < 1 && minishell->should_exit == 0)
+	while ( minishell->should_exit == 0)
 	{
 		if (lexing(minishell) == EOF)
 			break;
