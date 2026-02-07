@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 11:14:47 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 11:18:51 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 12:42:16 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,8 @@ void	free_suffixes(t_list *suffix_list)
 		}
 		current = current->next;
 	}
-	ft_lstclear(&suffix_list, NULL);
+	//free(suffix_list);
+	// ft_lstclear(&suffix_list, free);
 }
 
 /**

@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 22:22:00 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 12:45:46 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int	expand_variables(t_shell *shell)
 
 	if (!shell)
 		return (INPUT_ERROR);
-	cmd_node = shell->cmds_start;
+	cmd_node = shell->pars_cmds;
 	while (cmd_node)
 	{
 		cmd = (t_command *)cmd_node->content;

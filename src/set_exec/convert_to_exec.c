@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 12:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 23:38:13 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/07 11:36:16 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,19 @@ static int	convert_and_add_cmd(t_shell *shell, t_command *command)
 	return (SUCCESS);
 }
 
+/*
+This function translates frontend to backend structure
+*/
 int	set_to_exec(t_shell *shell)
 {
 	t_list		*cmd_node;
 	t_command	*command;
 	int			status;
 
-	if (!shell || !shell->cmds_start)
+	if (!shell || !shell->pars_cmds)
 		return (INPUT_ERROR);
 	shell->exec_cmds = NULL;
-	cmd_node = shell->cmds_start;
+	cmd_node = shell->pars_cmds;
 	while (cmd_node)
 	{
 		command = (t_command *)cmd_node->content;
