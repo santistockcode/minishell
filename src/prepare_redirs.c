@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:31 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 10:36:32 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:45:01 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ int	open_or_exit(int *fd, char *target, t_shell *sh, t_redir_type type)
 	return (1);
 }
 
+
+// FIXME: I haven't test bash behaviour with R_IN and R_HEREDOC at the same time
 int	prepare_redirs(t_list *redirs, t_shell *sh)
 {
 	t_redir	*redir;
@@ -50,7 +52,7 @@ int	prepare_redirs(t_list *redirs, t_shell *sh)
 	while (list_redirs)
 	{
 		redir = (t_redir *)list_redirs->content;
-		if (redir && redir->type == R_IN)
+		if (redir && (redir->type == R_IN || redir->type == R_HEREDOC))
 		{
 			if (!open_or_exit(&(redir->fd), redir->target, sh, R_IN))
 				return (-1);

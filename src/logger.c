@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   logger.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/07 10:48:20 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/08 16:23:43 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,46 @@ void	logger(const char *tag, const char *message)
 	printf(COLOR_RESET);
 }
 
+
+/*
+typedef struct s_shell
+{
+	t_list		*env;
+	t_lexing	*lexing; // to be freed afte each readline iteration
+	t_list		*cmds_start; // only used (maybe) for cleanining up, DO NOT USE,
+	t_list		*pars_cmds; // Parsing cmds, to be freed afte each readline iteration
+	t_list		*exec_cmds;	 // Commands for exec part.
+	int			last_status;	// last $? value
+	int			should_exit;	// 1 if shell should exit so you can clean up
+	char		*last_err_op;	// last operation that caused an error
+	int			last_errno;		// last errno value
+	int			save_in; // only to be used by exec part
+	int			save_out; // only to be used by exec part
+	int			save_err; // only to be used by exec part
+}			t_shell;
+
+*/
+void logger_minishell_struct(t_shell *sh, const char *tag, const char *message)
+{
+	time_t	now;
+	char	time_str[26];
+
+	time(&now);
+	printf(COLOR_RESET);
+	printf(COLOR_BLUE);
+	if (LOG == 1)
+	{
+		strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S",
+			localtime(&now));
+		printf("%s [%s] (last_status: %d, last_err_op: %s): %s\n",
+			time_str, tag, sh->last_status,
+			sh->last_err_op ? sh->last_err_op : "none", message);
+	}
+	printf(COLOR_RESET);
+	if (LOG == 1)
+		printf("\n");
+}
+
 // FIXME: don't present this (does't pass norminette)
 void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
 		const char *message)
@@ -114,7 +154,8 @@ void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
 		ft_lstiter(cmd, (void (*)(void *))print_cmd_node);
 	}
 	printf(COLOR_RESET);
-	printf("\n");
+	if (LOG == 1)
+		printf("\n");
 }
 
 void	logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag,

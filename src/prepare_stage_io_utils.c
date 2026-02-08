@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:43 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 14:44:10 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/08 16:37:00 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	get_r_in_redir_fd(t_list *redirs)
 	while (redirs)
 	{
 		redir = (t_redir *)redirs->content;
-		if (redir && redir->type == R_IN)
+		if (redir && (redir->type == R_IN || redir->type == R_HEREDOC))
 			last_fd = redir->fd;
 		redirs = redirs->next;
 	}

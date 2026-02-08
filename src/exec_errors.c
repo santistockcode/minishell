@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 18:08:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 13:09:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:43:00 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ void	msh_print_last_error(t_shell *sh)
 		sh->last_err_op = NULL;
 	}
 	sh->last_errno = 0;
+	errno = 0;
 }
 
 /*
@@ -87,3 +88,11 @@ int st = msh_status_from_execve_error(e);
 msh_set_error_with_errno(sh, "execve", e);
 msh_print_last_error(sh); _exit(st);
 */
+
+
+void print_hd_eof_warning(const char *wanted_delim)
+{
+	ft_putstr_fd("bash: warning: here-document delimited by end-of-file (wanted `", 2);
+		ft_putstr_fd((char *)wanted_delim, 2);
+		ft_putstr_fd("')\n", 2);
+}

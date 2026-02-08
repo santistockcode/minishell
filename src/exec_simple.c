@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 10:53:49 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/08 19:20:12 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ int	exec_builtin_in_parent(t_shell *sh, t_cmd *cmd)
 		return (safe_close_stage_io(cmd->stage_io),
 			free(cmd->stage_io), ebip_exit(sh, redirs));
 	if (ft_strncmp(cmd->argv[0], "exit", 4) == 0)
-		exit_builtin(cmd->argv, 1, sh->last_status, &sh->should_exit);
+		status = exit_builtin(cmd->argv, 1, sh->last_status, &sh->should_exit);
 	else
 		status = exec_builtin(cmd, sh);
 	safe_close_rd_fds(redirs);

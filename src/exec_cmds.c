@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_cmds.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/07 10:28:12 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:42:28 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,17 +88,15 @@ int	exec_cmds(t_shell *sh, t_list *cmd_first)
 	if (nstages < 1)
 		return (0);
 	logger_ctx(sh, cmd_first, "msh_exec_pipeline", "Entry point");
-	// if (set_here_docs(sh, cmd_first) == (-1) || g_exit_status == 130)
-	// {
-	// 	logger("exec_cmds", "Failed to set here_docs");
-	// 	if (g_exit_status == 130)
-	// 		sh->last_status = g_exit_status;
-	// 	else
-	// 		sh->last_status = 1;
-	// 	msh_print_last_error(sh);
-	// 	unlink_hds(cmd_first);
-	// 	return (1);
-	// }
+	if (set_here_docs(sh, cmd_first) == (-1))
+	{
+		if (g_exit_status == 130)
+			return (unlink_hds(cmd_first), 130);
+		else
+			sh->last_status = 1;
+		unlink_hds(cmd_first);
+		return (1);
+	}
 	if (nstages > 1)
 		return (exec_pipeline_wrapper(sh, cmd_first, nstages));
 	return (exec_simple_wrapper(sh, cmd_first));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   log.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:17:49 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 20:21:57 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/08 16:24:20 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,5 +41,6 @@ void	logger_tokens(t_list *tokens, const char *tag);
 void	logger_commands(t_list *commands, const char *tag);
 void	logger_argv(char **argv, const char *tag);
 void	logger_exec_cmds(t_list *exec_cmds, const char *tag);
+void    logger_minishell_struct(t_shell *sh, const char *tag, const char *message);
 
 #endif

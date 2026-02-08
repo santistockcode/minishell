@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 10:43:49 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/08 19:00:23 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@ int		require_standard_fds(t_shell *sh);
 
 // exit utils
 void	safe_close_p(int *p);
+
+// signals
+void	setup_signals_ignore(void);
 
 /* EXEC_PIPELINE */
 
@@ -72,10 +75,20 @@ int	msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 	sh->cmds_start = NULL;
 	if (result == -1)
 		return (-1);
+	setup_signals_ignore();
 	wtpd_resp = waitpid(pid, &status, 0);
 	if (wtpd_resp == -1)
 		return (msh_set_error(sh, WAITPID_OP), -1);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
+	if (WIFSIGNALED(status))
+	{
+		result = 128 + WTERMSIG(status);
+		if (WTERMSIG(status) == SIGINT)
+			write(STDOUT_FILENO, "\n", 1);
+		else if (WTERMSIG(status) == SIGQUIT)
+			write(STDOUT_FILENO, "Quit\n", 5);
+	}
+	else if (WIFEXITED(status))
+		result = WEXITSTATUS(status);
+	setup_signal();
 	return (result);
 }

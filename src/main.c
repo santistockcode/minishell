@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/08 10:18:43 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:45:54 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ MARIO:
 	- segfault cuando unset es null
 	- echo $UNEXISTANT-VARIABLE se queda colgado
 	- pasar hoja de corrección de parsing y lexing (ver loggger)
+	- está fallando la ejecución expansión de $?
 */
 
 
@@ -124,6 +125,7 @@ int main(int argc, char** argv, char **envp)
 	if (init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
 	setup_signal();
+	fprintf(stderr, "[main] pid: %d\n", getpid());
 	while (minishell->should_exit == 0)
 	{
 		if (lexing(minishell) == EOF)
@@ -135,9 +137,15 @@ int main(int argc, char** argv, char **envp)
 		expand_variables(minishell);
 		set_to_exec(minishell);
 		status = exec_cmds(minishell, minishell->exec_cmds);
+		unlink_hds(minishell->exec_cmds);
 		free_main_loop(minishell);
-		// TODO: set important issues of minishell structure back to 0
+		minishell->last_errno = 0;
+		minishell->save_in = 0;
+		minishell->save_out = 0;
+		minishell->save_err = 0;
 		minishell->last_status = status;
+		g_exit_status = status;
+		logger_minishell_struct(minishell, "main_loop", "Finished main loop iteration");
 	}
 	free_shell(minishell);
 	return (status);
