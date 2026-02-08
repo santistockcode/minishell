@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:35:53 by mario             #+#    #+#             */
-/*   Updated: 2026/01/16 13:22:58 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/06 12:22:43 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,4 @@ void	print_env_list(t_list *env)
 			printf("%s=\n", var->key);
 		env = env->next;
 	}
-} 
+}

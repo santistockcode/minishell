@@ -1,38 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   free_env.c                                         :+:      :+:    :+:   */
+/*   utils_lexing.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/14 23:12:42 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 12:23:15 by mnieto-m         ###   ########.fr       */
+/*   Created: 2026/02/01 22:47:45 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/02/06 20:04:00 by mario            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-void	free_env(t_env *aux)
+int	ft_isoperator(int c)
 {
-	if (!aux)
-		return ;
-	if (aux->key)
-		free(aux->key);
-	if (aux->value)
-		free(aux->value);
-	if (aux)
-		free(aux);
+	char	*set;
+
+	set = "<>|";
+	if (ft_strchr(set, c))
+		return (c);
+	return (0);
 }
 
-void	free_list(t_list **env)
+int	msh_isprint(int c)
 {
-	t_list	*tmp;
+	unsigned char	uc;
 
-	while (*env)
-	{
-		tmp = (*env)->next;
-		free_env((*env)->content);
-		free(*env);
-		*env = tmp;
-	}
+	uc = (unsigned char)c;
+	if (uc >= 32 && uc != 127)
+		return (1);
+	return (0);
 }

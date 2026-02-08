@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
+#    By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
-#    Updated: 2026/02/06 16:15:17 by saalarco         ###   ########.fr        #
+#    Updated: 2026/02/06 16:55:00 by mnieto-m         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,6 +55,26 @@ exit_utils \
 envp/env_init \
 envp/print_env \
 envp/free_env \
+lexing/lexing\
+lexing/init_lexing\
+lexing/automa_lexing\
+lexing/assing_lexing\
+lexing/free_lexing\
+lexing/utils_lexing\
+expand/var_expand\
+expand/utils_expand\
+expand/utils_expand_2\
+expand/quote_state_expand\
+expand/quote_remove_expand\
+parsing/parsing\
+parsing/parsing_prefix\
+parsing/parsing_suffix\
+parsing/utils_parsing\
+parsing/free_parsing\
+parsing/free_suffix\
+set_exec/convert_to_exec\
+set_exec/build_argv\
+set_exec/build_redirs\
 builtins/export \
 builtins/env \
 builtins/unset \
@@ -85,7 +105,7 @@ all: $(NAME)
 
 # Debug rule
 debug: CFLAGS += -g3 -O0 -DDEBUG
-debug: $(NAME)
+debug: fclean $(NAME)
 
 # Fsanitize rule
 fsanitize: CFLAGS += -fsanitize=address

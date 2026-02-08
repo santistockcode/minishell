@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/18 18:06:44 by mnieto-m          #+#    #+#             */
+/*   Updated: 2026/02/07 14:31:02 by mnieto-m         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 #define _POSIX_C_SOURCE 200809L
@@ -13,6 +25,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 # include <fcntl.h>
 
 # include "../Libft/include/libft.h"
@@ -20,10 +33,14 @@
 #include "env.h"
 #include "exec.h"
 #include "syswrap.h"
+#include "token_struct.h"
+#include "lexing.h"
+#include "parsing.h"
+#include "expand.h"
+#include "set_exec.h"
 
 
 extern volatile sig_atomic_t g_exit_status;
-
 
 typedef struct s_env
 {
@@ -33,22 +50,24 @@ typedef struct s_env
 
 typedef struct s_shell
 {
-	t_list	*env;
-	int		last_status; // last $? value
-	int		should_exit; // 1 if shell should exit so you can clean up
-	t_list	*cmds_start; // only used (maybe) for cleanining up, DO NOT USE
-	// please note that: in case this exceeds 25 lines I can encapsule all bellow attributes in a differente structure and refactor the shit out of it. 
-	char	*last_err_op; // last operation that caused an error
-	int		last_errno; // last errno value
-	int		save_in; // only to be used by exec part
-	int		save_out; // only to be used by exec part
-	int		save_err; // only to be used by exec part
+	t_list		*env;
+	t_lexing	*lexing; // to be freed afte each readline iteration
+	t_list		*cmds_start; // only used (maybe) for cleanining up, DO NOT USE,
+	t_list		*pars_cmds; // Parsing cmds, to be freed afte each readline iteration
+	t_list		*exec_cmds;	 // Commands for exec part.
+	int			last_status;	// last $? value
+	int			should_exit;	// 1 if shell should exit so you can clean up
+	char		*last_err_op;	// last operation that caused an error
+	int			last_errno;		// last errno value
+	int			save_in; // only to be used by exec part
+	int			save_out; // only to be used by exec part
+	int			save_err; // only to be used by exec part
 }			t_shell;
 
 
 
 int init_minishell(t_shell **minishell,char **envp);
-
+int msh_isprint(int c);
 
 //SEÑALES
 void 	setup_signal();
