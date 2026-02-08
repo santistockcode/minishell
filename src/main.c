@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/08 09:52:21 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/08 10:18:43 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,21 @@ MANUAL TESTING (HAPPY PATH):
 MANUAL TESTING (UNHAPPY PATH):
 (pendiente)
 
+
+SANTI: 
+	- here_docs up and running con señales
+	- Después de entrar 1 vez en el bucle, minishell debe quedar tal que: 
+	- Todos los casos anteriores pero con --trace-child en valgrind. 
+	- hay un salto de línea raro en cada bucle
+	- exit no sale con el código que debekill -9
+	- pasar hoja de corrección de los builtins (ver logger)
+
+
+MARIO: 
+	- comillas
+	- segfault cuando unset es null
+	- echo $UNEXISTANT-VARIABLE se queda colgado
+	- pasar hoja de corrección de parsing y lexing (ver loggger)
 */
 
 
