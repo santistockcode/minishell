@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/07 23:17:51 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/08 09:52:21 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,15 @@ MANUAL TESTING (HAPPY PATH):
 
 - Todos los casos anteriores pero con --trace-child en valgrind. 
 
+- segfault cuando unset es null
+
+- echo $UNEXISTANT-VARIABLE se queda colgado
+
+- Comandos con argumento entrecomillado, este argumento no llega a la parte de ejecución.
+
+- hay un salto de línea raro en cada bucle
+
+- exit no sale con el código que debekill -9
 
 MANUAL TESTING (UNHAPPY PATH):
 (pendiente)
@@ -100,7 +109,7 @@ int main(int argc, char** argv, char **envp)
 	if (init_minishell(&minishell, envp))
 		return (MALLOC_ERROR);
 	setup_signal();
-	while ( minishell->should_exit == 0)
+	while (minishell->should_exit == 0)
 	{
 		if (lexing(minishell) == EOF)
 			break;
