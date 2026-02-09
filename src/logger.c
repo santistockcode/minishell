@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 16:22:17 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/07 10:48:20 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 18:51:46 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,8 @@ void	logger_ctx(t_shell *sh, t_list *cmd, const char *tag,
 		ft_lstiter(cmd, (void (*)(void *))print_cmd_node);
 	}
 	printf(COLOR_RESET);
-	printf("\n");
+	if (LOG == 1)
+		printf("\n");
 }
 
 void	logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag,
