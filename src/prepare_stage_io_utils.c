@@ -6,12 +6,11 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:43 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 16:37:00 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:21:13 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-
 
 int	get_r_in_redir_fd(t_list *redirs)
 {

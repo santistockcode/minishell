@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:05:31 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 17:45:01 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:27:37 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,25 +22,24 @@ int	open_or_exit(int *fd, char *target, t_shell *sh, t_redir_type type)
 {
 	if (type == R_IN)
 	{
-		*fd = open_wrap(target, O_RDONLY, 0);
+		*fd = open(target, O_RDONLY, 0);
 		if (*fd == -1)
 			return (msh_set_error(sh, target), 0);
 	}
 	else if (type == R_OUT_APPEND)
 	{
-		*fd = open_wrap(target, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		*fd = open(target, O_WRONLY | O_CREAT | O_APPEND, 0644);
 		if (*fd == -1)
 			return (msh_set_error(sh, OPEN_OP), 0);
 	}
 	else if (type == R_OUT_TRUNC)
 	{
-		*fd = open_wrap(target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		*fd = open(target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (*fd == -1)
 			return (msh_set_error(sh, OPEN_OP), 0);
 	}
 	return (1);
 }
-
 
 // FIXME: I haven't test bash behaviour with R_IN and R_HEREDOC at the same time
 int	prepare_redirs(t_list *redirs, t_shell *sh)

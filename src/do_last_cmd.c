@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:51:22 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 20:12:26 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:25:47 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@ void		free_shell_child(t_shell *sh);
 void		safe_close_p(int *p);
 
 // signals
-void	setup_signals_child(void);
+void		setup_signals_child(void);
 
+// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 void	special_last_exit(t_shell *sh, t_cmd *cmd, int in_fd)
 {
-	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	safe_close(in_fd);
 	msh_print_last_error(sh);
 	safe_close_rd_fds((cmd->redirs));
@@ -34,7 +34,8 @@ void	special_last_exit(t_shell *sh, t_cmd *cmd, int in_fd)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	logger_open_fds( "🔥[do_last_cmd.c]special_last_exit🔥", "[do_last_cmd.c]special_last_exit");
+	logger_open_fds("🔥[do_last_cmd.c]special_last_exit🔥",
+		"[do_last_cmd.c]special_last_exit");
 	exit(1);
 }
 
@@ -43,13 +44,13 @@ int	do_last_command(t_shell *sh, t_cmd *cmd, int last_fd, pid_t *pid)
 	t_list	*redirs;
 	int		*p;
 
-	*pid = fork_wrap();
+	*pid = fork();
 	p = NULL;
 	if (*pid < 0)
 		return (safe_close(last_fd), msh_set_error(sh, FORK_OP), -1);
 	if (*pid == 0)
 	{
-	    setup_signals_child();
+		setup_signals_child();
 		cmd->pos = LAST;
 		cmd->prev_in_fd = last_fd;
 		redirs = cmd->redirs;

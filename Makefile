@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+         #
+#    By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
-#    Updated: 2026/02/09 16:14:12 by mnieto-m         ###   ########.fr        #
+#    Updated: 2026/02/09 20:59:01 by saalarco         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -52,6 +52,8 @@ minishell_init \
 exec_stage \
 path_utils \
 exit_utils \
+exit_utils2 \
+close_unused_child_fds \
 envp/env_init \
 envp/print_env \
 envp/free_env \

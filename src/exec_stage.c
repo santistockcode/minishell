@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 20:16:11 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 22:02:01 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void		exit_from_no_path(t_shell *sh, t_cmd *cmd, int *p);
 void		ft_spfr(char **paths);
 const char	*get_path_envp(t_list *env);
 char		*ft_strjoin_prot(char const *str1, char const *str2);
-char	*const	*envp_from_env_list(t_list *env);
+char *const	*envp_from_env_list(t_list *env);
 char		*build_path(const char *dir, const char *file);
 
 // fds utils
@@ -38,6 +38,14 @@ void		free_envp(const char **envp);
 
 // builtins_orq
 void		builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
+
+// close unused child fds
+void		close_unused_child_fds(t_stage_type pos, t_stage_io *io, int *p,
+				int prev_in_fd);
+void		close_unused_child_fds_wrapper(t_cmd *cmd, int *p);
+
+// exit utils 2
+void		clear_saved_fds(t_shell *sh);
 
 /*
 Returns:
@@ -72,7 +80,7 @@ int	try_access(char **pre_paths, char **path, char *file, int *acc_ret)
 	*path = build_path(*pre_paths, file);
 	if (!*path)
 		return (*acc_ret = -2, (-1));
-	*acc_ret = access_wrap(*path, F_OK);
+	*acc_ret = access(*path, F_OK);
 	if (*acc_ret == -1 && errno != ENOENT)
 	{
 		free(*path);
@@ -135,7 +143,7 @@ char	*msh_resolve_path(char **args, t_list *envp, t_shell *sh)
 
 	if (!args || !args[0] || args[0][0] == '\0')
 		return (NULL);
-	acc_ret = access_wrap(args[0], 0);
+	acc_ret = access(args[0], 0);
 	if (acc_ret == 0)
 	{
 		path = ft_strdup(args[0]);
@@ -162,13 +170,6 @@ void	msh_exec_builtin_child(t_shell *sh, t_cmd *cmd, int *p)
 	builtin_stage_exit(sh, cmd, p, st);
 }
 
-void clear_saved_fds(t_shell *sh)
-{
-	safe_close(sh->save_in);
-	safe_close(sh->save_out);
-	safe_close(sh->save_err);
-}
-
 // Entry point for execution
 /*
 This function is responsible for executing a command.
@@ -187,30 +188,6 @@ Before exiting:
 	- frees stage_io structure
 
 */
-
-void close_unused_child_fds(t_stage_type pos, t_stage_io *io, int *p, int prev_in_fd)
-{
-    if (pos == FIRST) {
-        if (p) safe_close(p[0]);
-        if (p && io && io->out_fd == p[1]) safe_close(p[1]);
-    }
-    else if (pos == MIDDLE) {
-        if (p) safe_close(p[0]);
-        if (prev_in_fd != -1 && prev_in_fd != STDIN_FILENO) safe_close(prev_in_fd);
-        if (p && io && io->out_fd == p[1]) safe_close(p[1]);
-    }
-    else if (pos == LAST) {
-        if (prev_in_fd != -1 && prev_in_fd != STDIN_FILENO) safe_close(prev_in_fd);
-    }
-    if (io) {
-        if (io->in_fd != -1 && io->in_fd != STDIN_FILENO) safe_close(io->in_fd);
-        if (io->out_fd != -1 && io->out_fd != STDOUT_FILENO) safe_close(io->out_fd);
-    }
-}
-// ...existing code...
-
-//FIXME: fd of pipe in use, but fd not being used, can be closed
-
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
 	char		*path;
@@ -218,9 +195,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	char *const	*envp;
 
 	dup2_stage_io(sh, cmd, p);
-	close_unused_child_fds(cmd->pos, cmd->stage_io,
-        p,
-        (cmd->pos == MIDDLE || cmd->pos == LAST) ? cmd->prev_in_fd : -1);
+	close_unused_child_fds_wrapper(cmd, p);
 	if (is_builtin(cmd->argv[0]))
 		msh_exec_builtin_child(sh, cmd, p);
 	path = msh_resolve_path(cmd->argv, env, sh);
@@ -232,8 +207,7 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		free(path);
 		stage_exit_print(sh, cmd, p, EXIT_FAILURE);
 	}
-	clear_saved_fds(sh);
-	if (execve_wrap(path, cmd->argv, envp) == -1)
+	if (execve_wrap(sh, path, cmd->argv, envp) == -1)
 	{
 		free(path);
 		free_envp((const char **)envp);

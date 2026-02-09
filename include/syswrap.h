@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   syswrap.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:46 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/01/18 18:06:47 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:31:08 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <fcntl.h>
 # include <sys/types.h>
 # include <unistd.h>
+
+void			clear_saved_fds(t_shell *sh);
 
 /* Wrapper prototypes used across the backend (exec) code */
 int				pipe_wrap(int p[2]);
@@ -33,7 +35,7 @@ pid_t			waitpid_wrap(pid_t pid, int *wstatus, int options);
 int				chdir_wrap(const char *path);
 char			*getcwd_wrap(char *buf, size_t size);
 int				unlink_wrap(const char *path);
-int				execve_wrap(const char *path, char *const argv[],
+int				execve_wrap(t_shell *sh, const char *path, char *const argv[],
 					char *const envp[]);
 char			*readline_wrap(const char *prompt);
 

@@ -6,23 +6,23 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:38:09 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 18:24:38 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:30:09 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
 extern volatile sig_atomic_t	g_exit_status;
-void print_hd_eof_warning(const char *wanted_delim);
+void							print_hd_eof_warning(const char *wanted_delim);
 
 /*
-Note on syscalls: 
+Note on syscalls:
 Entry point set_here_docs will return (-1) on any syscall fail.
-Possible syscalls errors up to this point include: 
+Possible syscalls errors up to this point include:
 - readline
 - open
 - malloc
-Except malloc, all have been tested to not have leaks under failure. 
+Except malloc, all have been tested to not have leaks under failure.
 All malloc calls and calls to libft that makes use of malloc are protected
 */
 
@@ -47,8 +47,8 @@ char	*process_suffix_with_pid(int suffix, t_shell *sh)
 		return (free(sfx_cmd), msh_set_error(sh, MALLOC_OP), NULL);
 	result = ft_strjoin(sfx_cmd, pid_sfx);
 	if (!result)
-		return (msh_set_error(sh, MALLOC_OP),
-			free(sfx_cmd), free(pid_sfx), NULL);
+		return (msh_set_error(sh, MALLOC_OP), free(sfx_cmd), free(pid_sfx),
+			NULL);
 	free(sfx_cmd);
 	free(pid_sfx);
 	return (result);
@@ -68,7 +68,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 
 	while (1)
 	{
-		line = readline_wrap("> ");
+		line = readline("> ");
 		if (g_exit_status == 130)
 			return (free(line), (-1));
 		if (!line)
@@ -77,7 +77,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 			return (free(line), 0);
 		if (should_expand == 1)
 		{
-			expanded_line = expand_hd((const char *) line, sh);
+			expanded_line = expand_hd((const char *)line, sh);
 			if (!expanded_line)
 				return (free(line), msh_set_error(sh, MALLOC_OP), -1);
 			free(line);
@@ -93,8 +93,7 @@ int	repl_here_doc(t_shell *sh, const char *delim, int should_expand, int fd)
 Opens a file descriptor for the heredoc with unique name and
 calls repl_here_doc. On error returns -1. Else returns 0.
 */
-int	fetch_hd_from_user(t_shell *sh, char **delim,
-	int should_expand, int suffix)
+int	fetch_hd_from_user(t_shell *sh, char **delim, int should_expand, int suffix)
 {
 	int		fd;
 	char	*here_doc_name;
@@ -108,7 +107,7 @@ int	fetch_hd_from_user(t_shell *sh, char **delim,
 	if (!here_doc_name)
 		return (free(unique_sfx), msh_set_error(sh, MALLOC_OP), -1);
 	free(unique_sfx);
-	fd = open_wrap(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	fd = open(here_doc_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fd == -1)
 	{
 		free(here_doc_name);
@@ -131,22 +130,22 @@ int	process_here_doc(t_shell *sh, t_redir *redir, int suffix)
 	int	result;
 
 	g_exit_status = 0;
-    rl_done = 0;
+	rl_done = 0;
 	setup_signals_heredoc();
-	result = fetch_hd_from_user(sh, &(redir->target),
-			!(redir->quoted), suffix);
+	result = fetch_hd_from_user(sh, &(redir->target), !(redir->quoted), suffix);
 	rl_event_hook = NULL;
 	setup_signal();
 	if (result != 0)
 	{
-		logger("process_here_doc", "Failed to fetch heredoc content for cmd number");
+		logger("process_here_doc",
+			"Failed to fetch heredoc content for cmd number");
 		return (result);
 	}
 	return (0);
 }
 
 /*
-This functions iterates over commands and if finds one with redir 
+This functions iterates over commands and if finds one with redir
 R_HEREDOC, it will fetch the heredoc content from the user..
 Returns -1 on any fail, 0 on success.
 */
@@ -168,9 +167,9 @@ int	set_here_docs(t_shell *sh, t_list *cmd_first)
 			if (redir && redir->type == R_HEREDOC)
 			{
 				logger_minishell_struct(sh, "set_here_docs", "Found heredoc");
-				if (process_here_doc(sh, redir, suffix++) != 0 && g_exit_status == 130)
+				if (process_here_doc(sh, redir, suffix++) != 0
+					&& g_exit_status == 130)
 					return (-1);
-				// break ;
 			}
 			redir_list = redir_list->next;
 		}

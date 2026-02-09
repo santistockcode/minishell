@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 20:12:55 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 22:04:23 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,13 @@
 extern volatile sig_atomic_t	g_exit_status;
 
 /*
-One would think that status 126 and 127 would be exposed, but: 
-(.env) c1r6s2% echo < intexistant 
+One would think that status 126 and 127 would be exposed, but:
+(.env) c1r6s2% echo < intexistant
 zsh: no such file or directory: intexistant
 (.env) c1r6s2% echo $?
 1
 (.env) c1r6s2% echo "shall not pass" > inex
-(.env) c1r6s2% cat inex 
+(.env) c1r6s2% cat inex
 shall not pass
 (.env) c1r6s2% chmod 000 inex
 (.env) c1r6s2% echo < inex
@@ -51,6 +51,7 @@ int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 	}
 	return (last_status);
 }
+
 // msh_exec_pipeline returns -1 on syscall error (pipeline interrupted)
 int	exec_pipeline_wrapper(t_shell *sh, t_list *cmd_first, int nstages)
 {

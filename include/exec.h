@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 19:32:58 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:34:22 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,9 +69,9 @@ out_mode: output mode (pipe/truncate/append)
 */
 typedef struct s_stage_io
 {
-	int			in_fd;
-	int			out_fd;
-	t_out_mode	out_mode;
+	int					in_fd;
+	int					out_fd;
+	t_out_mode			out_mode;
 }						t_stage_io;
 
 // one simple command in a pipeline
@@ -81,11 +81,11 @@ typedef struct s_stage_io
 */
 typedef struct s_cmd
 {
-	char		**argv;
-	t_list		*redirs;
-	t_stage_io	*stage_io;
-	t_stage_type pos;
-	int		prev_in_fd;
+	char				**argv;
+	t_list				*redirs;
+	t_stage_io			*stage_io;
+	t_stage_type		pos;
+	int					prev_in_fd;
 }						t_cmd;
 
 /* Backend */
@@ -134,8 +134,7 @@ int						pwd_builtin(void);
 int						exit_builtin(char **argv, int parent, int last_status,
 							int *should_exit);
 int						env_builtin(t_list *env);
-int						cd_builtin(char **argsv, t_list **env);	
-
+int						cd_builtin(char **argsv, t_list **env);
 
 /*
 ** Heredoc (prior to exec commands)

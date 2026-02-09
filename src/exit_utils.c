@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 12:46:33 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 20:16:38 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:06:44 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,11 @@ void	safe_close_rd_fds(t_list *redirs);
 void	free_cmd_struct(void *input);
 
 // logger
-void    logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag, const char *message);
+void	logger_ctx_simple(t_shell *sh, t_cmd *cmd, const char *tag,
+			const char *message);
+
+// exit utils 2
+int		ebip_exit(t_shell *sh, t_list *redirs);
 
 void	putstr_fd_err(int n, ...);
 
@@ -60,7 +64,6 @@ void	safe_close_stage_io(t_stage_io *stage_io)
 }
 
 // TODO: function to exit child with no errors
-
 void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 {
 	if (p)
@@ -79,6 +82,7 @@ void	stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	logger_open_fds( "🔥[exit_utils.c]stage_exit_print🔥", "[exit_utils.c]stage_exit_print");
+	logger_open_fds("[exit_utils.c]stage_exit_print",
+		"[exit_utils.c]stage_exit_print");
 	exit(exit_code);
 }

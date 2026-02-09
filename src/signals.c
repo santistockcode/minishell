@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/12 14:15:00 by mario             #+#    #+#             */
-/*   Updated: 2026/02/09 20:17:10 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:08:08 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,13 +48,13 @@ This function sets up the signal handlers for the heredoc.
 
 void	setup_signals_heredoc(void)
 {
-    struct sigaction	sa;
+	struct sigaction	sa;
 
-    ft_memset(&sa, 0, sizeof(sa));
-    sa.sa_flags = 0;
-    sa.sa_handler = ft_ctrl_heredoc;
-    sigaction(SIGINT, &sa, NULL);
-    signal(SIGQUIT, SIG_IGN);
+	ft_memset(&sa, 0, sizeof(sa));
+	sa.sa_flags = 0;
+	sa.sa_handler = ft_ctrl_heredoc;
+	sigaction(SIGINT, &sa, NULL);
+	signal(SIGQUIT, SIG_IGN);
 }
 
 // ...existing code...

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 22:08:46 by mario             #+#    #+#             */
-/*   Updated: 2026/02/09 20:12:10 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:43:37 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,10 @@ void	ft_ctrl_mini(sig_atomic_t signal)
 
 void	ft_ctrl_heredoc(sig_atomic_t signal)
 {
-    (void)signal;
-    write(1, "\n", 1);
-    g_exit_status = 130;
-    ioctl(STDIN_FILENO, TIOCSTI, "\n");
+	(void)signal;
+	write(1, "\n", 1);
+	g_exit_status = 130;
+	ioctl(STDIN_FILENO, TIOCSTI, "\n");
 }
 
 // ...existing code...

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 16:14:50 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:42:29 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ int	exec_builtin(t_cmd *cmd, t_shell *sh)
 	if (ft_strncmp(cmd->argv[0], "pwd", 3) == 0)
 		pwd_builtin();
 	if (ft_strncmp(cmd->argv[0], "exit", 4) == 0)
-		exit_builtin(cmd->argv, 0, sh->last_status, &sh->should_exit);
+		result = exit_builtin(cmd->argv, 0, sh->last_status, &sh->should_exit);
 	if (ft_strncmp(cmd->argv[0], "export", 6) == 0)
 		result = export(&sh->env, cmd->argv[1]);
 	if (ft_strncmp(cmd->argv[0], "unset", 5) == 0)

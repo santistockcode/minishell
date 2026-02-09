@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 12:19:35 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 19:23:03 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:29:20 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,13 +51,13 @@ int	get_unique_pid_of_process(t_shell *sh)
 	char	buffer[256];
 	ssize_t	bytes_read;
 
-	fd = open_wrap("/proc/self/stat", O_RDONLY);
+	fd = open("/proc/self/stat", O_RDONLY);
 	if (fd == -1)
 	{
 		msh_set_error(sh, OPEN_OP);
 		return (-1);
 	}
-	bytes_read = read_wrap(fd, buffer, sizeof(buffer) - 1);
+	bytes_read = read(fd, buffer, sizeof(buffer) - 1);
 	if (bytes_read <= 0)
 	{
 		msh_set_error(sh, READ_OP);
