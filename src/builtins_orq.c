@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 21:42:29 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 22:52:10 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,12 @@ void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
 void	free_cmd_struct(void *input);
 
 // clean everything when child process ends successfully
+// if (p)
+// 	safe_close_p(p);
+// ACHTUNG: por algún motivo no cerrar p no leakea fds, es correcto.
 void	builtin_stage_exit(t_shell *sh, t_cmd *cmd, int *p, int exit_code)
 {
 	(void)p;
-	// if (p)
-	// 	safe_close_p(p);
-	// ACHTUNG: por algún motivo no cerrar p no leakea fds, es correcto.
 	safe_close_rd_fds(cmd->redirs);
 	safe_close_stage_io(cmd->stage_io);
 	free(cmd->stage_io);
