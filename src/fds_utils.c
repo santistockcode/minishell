@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:04:14 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:02:39 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:26:44 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 	rdr_spec = cmd->stage_io;
 	if (rdr_spec && rdr_spec->in_fd != -1)
 	{
-		if (dup2_wrap(rdr_spec->in_fd, STDIN_FILENO) == -1)
+		if (dup2(rdr_spec->in_fd, STDIN_FILENO) == -1)
 		{
 			msh_set_error(sh, DUP2_OP);
 			stage_exit_print(sh, cmd, p, EXIT_FAILURE);
@@ -31,7 +31,7 @@ void	dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p)
 	}
 	if (rdr_spec && rdr_spec->out_fd != -1)
 	{
-		if (dup2_wrap(rdr_spec->out_fd, STDOUT_FILENO) == -1)
+		if (dup2(rdr_spec->out_fd, STDOUT_FILENO) == -1)
 		{
 			msh_set_error(sh, DUP2_OP);
 			stage_exit_print(sh, cmd, p, EXIT_FAILURE);
@@ -82,9 +82,9 @@ void	safe_close_rd_fds(t_list *redirs)
 
 int	msh_save_fds(int *save_in, int *save_out, int *save_err)
 {
-	*save_in = dup_wrap(STDIN_FILENO);
-	*save_out = dup_wrap(STDOUT_FILENO);
-	*save_err = dup_wrap(STDERR_FILENO);
+	*save_in = dup(STDIN_FILENO);
+	*save_out = dup(STDOUT_FILENO);
+	*save_err = dup(STDERR_FILENO);
 	if (*save_in == -1 || *save_out == -1 || *save_err == -1)
 	{
 		if (*save_in != -1)

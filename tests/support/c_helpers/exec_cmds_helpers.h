@@ -64,10 +64,10 @@ t_cmd   *fd_make_cmd_redir_append(const char **argv, int argc, const char *out_f
  * ============================================================================ */
 
 typedef enum e_redir_config {
-    REDIR_NONE      = 0,
-    REDIR_IN        = 1,
-    REDIR_OUT       = 2,
-    REDIR_IN_OUT    = 3
+    REDIR_NONE_TEST      = 0,
+    REDIR_IN_TEST       = 1,
+    REDIR_OUT_TEST      = 2,
+    REDIR_IN_OUT_TEST   = 3
 } t_redir_config;
 
 /* Build a 3-stage pipeline with specified redir configs for each stage

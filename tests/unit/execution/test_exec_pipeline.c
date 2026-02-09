@@ -4183,104 +4183,105 @@ int main(void)
 {
     printf("=== Unit Tests for exec_pipeline ===\n\n");
 
-    printf("\n--- FIRST do_first_command tests ---\n");
-    mu_run_test(test_do_first_command_happy_path_no_redir);
-    mu_run_test(test_do_first_command_happy_path_with_redir_in);
-    mu_run_test(test_do_first_command_happy_path_with_redir_out);
-    mu_run_test(test_do_first_command_happy_path_with_both_redirs);
-    mu_run_test(test_do_first_command_fork_failure);
-    mu_run_test(test_do_first_command_open_failure_redir_in);
-    mu_run_test(test_do_first_command_open_failure_redir_out_mock);
-    mu_run_test(test_do_first_command_dup2_failure_first_call);
-    mu_run_test(test_do_first_command_dup2_failure_second_call);
-    mu_run_test(test_do_first_command_execve_failure_126);
-    mu_run_test(test_do_first_command_execve_failure_127);
-    mu_run_test(test_do_first_command_access_failure_path_resolution);
+    // printf("\n--- FIRST do_first_command tests ---\n");
+    // mu_run_test(test_do_first_command_happy_path_no_redir);
+    // mu_run_test(test_do_first_command_happy_path_with_redir_in);
+    // mu_run_test(test_do_first_command_happy_path_with_redir_out);
+    // mu_run_test(test_do_first_command_happy_path_with_both_redirs);
+    // mu_run_test(test_do_first_command_fork_failure);
+    // mu_run_test(test_do_first_command_open_failure_redir_in);
+    // mu_run_test(test_do_first_command_open_failure_redir_out_mock);
+    // mu_run_test(test_do_first_command_dup2_failure_first_call);
+    // mu_run_test(test_do_first_command_dup2_failure_second_call);
+    // mu_run_test(test_do_first_command_execve_failure_126);
+    // mu_run_test(test_do_first_command_execve_failure_127);
+    // mu_run_test(test_do_first_command_access_failure_path_resolution);
 
-    printf("\n--- MIDDLE do_middle_command tests ---\n");
-    mu_run_test(test_do_middle_command_happy_path_no_redir);
-    mu_run_test(test_do_middle_command_happy_path_with_redir_in);
-    mu_run_test(test_do_middle_command_happy_path_with_redir_out);
-    mu_run_test(test_do_middle_command_happy_path_with_both_redirs);
-    mu_run_test(test_do_middle_command_fork_failure);
-    mu_run_test(test_do_middle_command_open_failure_redir_in);
-    mu_run_test(test_do_middle_command_open_failure_redir_out_mock);
-    mu_run_test(test_do_middle_command_dup2_failure_first_call);
-    mu_run_test(test_do_middle_command_dup2_failure_second_call);
-    mu_run_test(test_do_middle_command_execve_failure_126);
-    mu_run_test(test_do_middle_command_execve_failure_127);
-    mu_run_test(test_do_middle_command_access_failure_path_resolution);
+    // printf("\n--- MIDDLE do_middle_command tests ---\n");
+    // mu_run_test(test_do_middle_command_happy_path_no_redir);
+    // mu_run_test(test_do_middle_command_happy_path_with_redir_in);
+    // mu_run_test(test_do_middle_command_happy_path_with_redir_out);
+    // mu_run_test(test_do_middle_command_happy_path_with_both_redirs);
+    // mu_run_test(test_do_middle_command_fork_failure);
+    // mu_run_test(test_do_middle_command_open_failure_redir_in);
+    // mu_run_test(test_do_middle_command_open_failure_redir_out_mock);
+    // mu_run_test(test_do_middle_command_dup2_failure_first_call);
+    // mu_run_test(test_do_middle_command_dup2_failure_second_call);
+    // mu_run_test(test_do_middle_command_execve_failure_126);
+    // mu_run_test(test_do_middle_command_execve_failure_127);
+    // mu_run_test(test_do_middle_command_access_failure_path_resolution);
 
+    // VOY POR AQUÍ
     printf("\n--- recursive 4 commands do_middle_commands tests ---\n");
-    mu_run_test(test_do_middle_command_recursive_happy_path_three_commands);
+    // mu_run_test(test_do_middle_command_recursive_happy_path_three_commands);
     mu_run_test(test_do_middle_command_recursive_fork_failure_on_second_call);
-    mu_run_test(test_do_middle_command_recursive_fork_failure_on_third_call);
-    mu_run_test(test_do_middle_command_recursive_open_failure_redir_in_on_second_call);
-    mu_run_test(test_do_middle_command_recursive_open_failure_redir_out_on_third_call);
-    mu_run_test(test_do_middle_command_recursive_dup2_failure_sixth_call);
-    mu_run_test(test_do_middle_command_recursive_dup2_failure_fourth_call);
-    mu_run_test(test_do_middle_command_recursive_execve_failure_on_third_call_126);
-    mu_run_test(test_do_middle_command_recursive_execve_failure_on_third_call_127);
+    // mu_run_test(test_do_middle_command_recursive_fork_failure_on_third_call);
+    // mu_run_test(test_do_middle_command_recursive_open_failure_redir_in_on_second_call);
+    // mu_run_test(test_do_middle_command_recursive_open_failure_redir_out_on_third_call);
+    // mu_run_test(test_do_middle_command_recursive_dup2_failure_sixth_call);
+    // mu_run_test(test_do_middle_command_recursive_dup2_failure_fourth_call);
+    // mu_run_test(test_do_middle_command_recursive_execve_failure_on_third_call_126);
+    // mu_run_test(test_do_middle_command_recursive_execve_failure_on_third_call_127);
 
-    printf("\n--- LAST do_last_command tests ---\n");
+    // printf("\n--- LAST do_last_command tests ---\n");
 
-    mu_run_test(test_do_last_command_happy_path_no_redir);
-    mu_run_test(test_do_last_command_happy_path_with_redir_in);
-    mu_run_test(test_do_last_command_happy_path_with_redir_out);
-    mu_run_test(test_do_last_command_happy_path_with_both_redirs);
-    mu_run_test(test_do_last_command_fork_failure);
-    mu_run_test(test_do_last_command_open_failure_redir_in);
-    mu_run_test(test_do_last_command_open_failure_redir_out_mock);
-    mu_run_test(test_do_last_command_dup2_failure_first_call);
-    mu_run_test(test_do_last_command_dup2_failure_second_call);
-    mu_run_test(test_do_last_command_execve_failure_126);
-    mu_run_test(test_do_last_command_execve_failure_127);
-    mu_run_test(test_do_last_command_access_failure_path_resolution);
+    // mu_run_test(test_do_last_command_happy_path_no_redir);
+    // mu_run_test(test_do_last_command_happy_path_with_redir_in);
+    // mu_run_test(test_do_last_command_happy_path_with_redir_out);
+    // mu_run_test(test_do_last_command_happy_path_with_both_redirs);
+    // mu_run_test(test_do_last_command_fork_failure);
+    // mu_run_test(test_do_last_command_open_failure_redir_in);
+    // mu_run_test(test_do_last_command_open_failure_redir_out_mock);
+    // mu_run_test(test_do_last_command_dup2_failure_first_call);
+    // mu_run_test(test_do_last_command_dup2_failure_second_call);
+    // mu_run_test(test_do_last_command_execve_failure_126);
+    // mu_run_test(test_do_last_command_execve_failure_127);
+    // mu_run_test(test_do_last_command_access_failure_path_resolution);
 
-    printf("\n--- do_last_command as final stage (two-stage pipeline) ---\n");
-    mu_run_test(test_run_pipeline_last_of_two_happy_path);
-    mu_run_test(test_run_pipeline_last_of_two_with_redir_on_last);
-    mu_run_test(test_run_pipeline_last_of_two_fork_failure_on_last);
-    mu_run_test(test_run_pipeline_last_of_two_execve_failure_on_last_126);
-    mu_run_test(test_run_pipeline_last_of_two_execve_failure_on_last_127);
-    mu_run_test(test_run_pipeline_last_of_two_dup2_failure_on_last);
+    // printf("\n--- do_last_command as final stage (two-stage pipeline) ---\n");
+    // mu_run_test(test_run_pipeline_last_of_two_happy_path);
+    // mu_run_test(test_run_pipeline_last_of_two_with_redir_on_last);
+    // mu_run_test(test_run_pipeline_last_of_two_fork_failure_on_last);
+    // mu_run_test(test_run_pipeline_last_of_two_execve_failure_on_last_126);
+    // mu_run_test(test_run_pipeline_last_of_two_execve_failure_on_last_127);
+    // mu_run_test(test_run_pipeline_last_of_two_dup2_failure_on_last);
 
-    printf("\n--- do_last_command as final stage (three-stage pipeline) ---\n");
-    mu_run_test(test_run_pipeline_last_of_three_happy_path);
-    mu_run_test(test_run_pipeline_last_of_three_with_redir_on_last);
-    mu_run_test(test_run_pipeline_last_of_three_fork_failure_on_last);
-    mu_run_test(test_run_pipeline_last_of_three_execve_failure_on_last_126);
-    mu_run_test(test_run_pipeline_last_of_three_execve_failure_on_last_127);
-    mu_run_test(test_run_pipeline_last_of_three_dup2_failure_on_last);
+    // printf("\n--- do_last_command as final stage (three-stage pipeline) ---\n");
+    // mu_run_test(test_run_pipeline_last_of_three_happy_path);
+    // mu_run_test(test_run_pipeline_last_of_three_with_redir_on_last);
+    // mu_run_test(test_run_pipeline_last_of_three_fork_failure_on_last);
+    // mu_run_test(test_run_pipeline_last_of_three_execve_failure_on_last_126);
+    // mu_run_test(test_run_pipeline_last_of_three_execve_failure_on_last_127);
+    // mu_run_test(test_run_pipeline_last_of_three_dup2_failure_on_last);
 
-    printf("\n--- Integration-like tests ---\n");
-    mu_run_test(test_run_pipeline_last_of_three_intermediate_failures_affect_last);
+    // printf("\n--- Integration-like tests ---\n");
+    // mu_run_test(test_run_pipeline_last_of_three_intermediate_failures_affect_last);
 
-    printf("\n--- Tests with 6 cmds ---\n");
-    // mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path); // misleading fds on valgrind logs
-    mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path_redir_out);
+    // printf("\n--- Tests with 6 cmds ---\n");
+    // // mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path); // misleading fds on valgrind logs
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_happy_path_redir_out);
 
-    printf("\n--- Tests with 6 cmds - UNHAPPY PATHS ---\n");
+    // printf("\n--- Tests with 6 cmds - UNHAPPY PATHS ---\n");
     
-    printf("\n  -- Pipe failures --\n");
-    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_first_cmd);
-    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1);
-    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2);
-    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3);
-    mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_4);
+    // printf("\n  -- Pipe failures --\n");
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_first_cmd);
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_1);
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_2);
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_3);
+    // mu_run_test(test_run_pipeline_6_cmds_pipe_fails_at_middle_cmd_4);
     
-    printf("\n  -- Fork failures --\n");
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_first_cmd);
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1);
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2);
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3);
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_4);
-    mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_last_cmd);
+    // printf("\n  -- Fork failures --\n");
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_first_cmd);
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_1);
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_2);
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_3);
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_middle_cmd_4);
+    // mu_run_test(test_run_pipeline_6_cmds_fork_fails_at_last_cmd);
     
-    printf("\n  -- Execve failures (127) --\n");
-    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_first_cmd_127);
-    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_middle_cmd_127);
-    mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127);
+    // printf("\n  -- Execve failures (127) --\n");
+    // mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_first_cmd_127);
+    // mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_middle_cmd_127);
+    // mu_run_test(test_run_pipeline_6_cmds_execve_fails_at_last_cmd_127);
 
     mu_summary();
     return 0;

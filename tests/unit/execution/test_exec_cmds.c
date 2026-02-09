@@ -864,13 +864,13 @@ static int test_pipeline_builtin_open_fails_first_in(void)
     t_pipeline_config config = {
         .argv1 = {"echo", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN,
+        .redir1 = REDIR_IN_TEST,
         .argv2 = {"echo", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"echo", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = NULL
     };
@@ -902,13 +902,13 @@ static int test_pipeline_builtin_open_fails_first_out(void)
     t_pipeline_config config = {
         .argv1 = {"echo", "test", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_OUT,
+        .redir1 = REDIR_OUT_TEST,
         .argv2 = {"cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"echo", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN_OUT,
+        .redir3 = REDIR_IN_OUT_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -944,13 +944,13 @@ static int test_pipeline_builtin_open_fails_first_in_out(void)
     t_pipeline_config config = {
         .argv1 = {"echo", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN_OUT,
+        .redir1 = REDIR_IN_OUT_TEST,
         .argv2 = {"echo", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"echo", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN_OUT,
+        .redir3 = REDIR_IN_OUT_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -986,13 +986,13 @@ static int test_pipeline_builtin_dup2_fails_middle(void)
     t_pipeline_config config = {
         .argv1 = {"echo", "hello", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_IN_OUT,
+        .redir2 = REDIR_IN_OUT_TEST,
         .argv3 = {"cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -1029,13 +1029,13 @@ static int test_pipeline_external_3_stage_ok(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/cat", FD_TEST_INPUT, NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"/usr/bin/head", "-n", "1", NULL},
         .argc2 = 3,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"/usr/bin/wc", "-c", NULL, NULL},
         .argc3 = 2,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = NULL,
         .out_file = NULL
     };
@@ -1062,13 +1062,13 @@ static int test_pipeline_external_3_stage_all_redirs_ok(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/cat", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN,
+        .redir1 = REDIR_IN_TEST,
         .argv2 = {"/usr/bin/head", "-n", "2", NULL},
         .argc2 = 3,
-        .redir2 = REDIR_IN_OUT,
+        .redir2 = REDIR_IN_OUT_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_OUT,
+        .redir3 = REDIR_OUT_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -1175,13 +1175,13 @@ static int test_pipeline_external_open_fails_first_in(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/cat", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN,
+        .redir1 = REDIR_IN_TEST,
         .argv2 = {"/usr/bin/head", "-n", "1", NULL},
         .argc2 = 3,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"/usr/bin/wc", "-c", NULL, NULL},
         .argc3 = 2,
-        .redir3 = REDIR_IN,
+        .redir3 = REDIR_IN_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = NULL
     };
@@ -1208,13 +1208,13 @@ static int test_pipeline_external_open_fails_second_in(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/echo", "hello", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"/bin/cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_IN,
+        .redir2 = REDIR_IN_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = NULL
     };
@@ -1241,13 +1241,13 @@ static int test_pipeline_external_open_fails_third_in(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/echo", "hello", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"/bin/cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN,
+        .redir3 = REDIR_IN_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = NULL
     };
@@ -1272,13 +1272,13 @@ static int test_pipeline_external_open_fails_first_out(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/echo", "test", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_OUT,
+        .redir1 = REDIR_OUT_TEST,
         .argv2 = {"/bin/cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN_OUT,
+        .redir3 = REDIR_IN_OUT_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -1309,13 +1309,13 @@ static int test_pipeline_external_open_fails_first_in_out(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/cat", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN_OUT,
+        .redir1 = REDIR_IN_OUT_TEST,
         .argv2 = {"/bin/cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN,
+        .redir3 = REDIR_IN_TEST,
         .in_file = FD_TEST_NONEXISTENT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -1350,13 +1350,13 @@ static int test_pipeline_external_dup2_fails_middle(void)
     t_pipeline_config config = {
         .argv1 = {"/bin/echo", "hello", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"/bin/cat", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_IN_OUT,
+        .redir2 = REDIR_IN_OUT_TEST,
         .argv3 = {"/bin/cat", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_IN_OUT,
+        .redir3 = REDIR_IN_OUT_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };

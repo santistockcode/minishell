@@ -27,4 +27,5 @@ Aquí buscamos que no crashee por no tener PWD basicamente.
 
 9. Resto de https://wormav.github.io/42_eval/Cursus/Minishell/index.html
 
+10. 'cat | head -n 2' no funciona igual que en bash, no espero a todos los procesos
 

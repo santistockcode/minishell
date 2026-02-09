@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:49:02 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 20:11:18 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:42:29 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,12 @@ int	exec_builtin(t_cmd *cmd, t_shell *sh)
 		env_builtin(sh->env);
 	if (ft_strncmp(cmd->argv[0], "pwd", 4) == 0)
 		pwd_builtin();
-	if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
-		exit_builtin(cmd->argv, 0, sh->last_status, &sh->should_exit);
 	if (ft_strncmp(cmd->argv[0], "export", 7) == 0)
 		result = wrap_export(&sh->env, cmd->argv);
 	if (ft_strncmp(cmd->argv[0], "unset", 6) == 0)
 		unset(&sh->env, cmd->argv);
+	if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
+		result = exit_builtin(cmd->argv, 0, sh->last_status, &sh->should_exit);
 	if (ft_strncmp(cmd->argv[0], "cd", 3) == 0)
 		cd_builtin(cmd->argv, &sh->env);
 	return (result);

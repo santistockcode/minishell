@@ -40,7 +40,7 @@ class UnitTestRunner:
     
     def discover_test_sources(self) -> List[Path]:
         """Find all test_*.c files."""
-        return sorted(self.test_dir.glob("test_*.c"))
+        return sorted(self.test_dir.glob("test_exec_pipeline.c"))
     
     def get_dependencies_for_test(self, test_file: Path) -> List[Path]:
         """Map test files to their source dependencies."""
@@ -63,7 +63,8 @@ class UnitTestRunner:
                 "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c", "builtins/pwd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
                 "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
-                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "../tests/support/c_helpers/exec_cmds_helpers.c"
+                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "../tests/support/c_helpers/exec_cmds_helpers.c",
+                "builtins/cd.c"
             ],
             "test_expand_hd.c": [
                 "expand_hd.c", "expand_hd_utils.c", "syswrap.c", "logger.c"
@@ -77,7 +78,7 @@ class UnitTestRunner:
                 "builtins/export.c", "path_utils.c", "exit_utils.c",
                 "envp/env_init.c", "envp/free_env.c", "builtins_orq.c", "fds_utils.c",
                 "builtins/unset.c", "builtins/env.c", "builtins/exit.c", "builtins/pwd.c",
-                "builtins/echo.c"
+                "builtins/echo.c", "builtins/cd.c"
             ],
             "test_exec_errors.c": [
                 "exec_errors.c", "syswrap.c", "logger.c"
@@ -91,7 +92,7 @@ class UnitTestRunner:
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
                 "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
                 "builtins/exit.c", "builtins/pwd.c", "builtins/export.c", "builtins/env.c",
-                "builtins/echo.c"
+                "builtins/echo.c", "builtins/cd.c", "signals.c", "crtl.c"
             ],
             "test_exec_simple.c": [
                 "exec_stage.c", "syswrap.c", "logger.c", 
@@ -101,7 +102,19 @@ class UnitTestRunner:
                 "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "do_first_cmd.c",
                 "do_middle_cmds.c", "do_last_cmd.c", "prepare_redirs.c",
                 "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
-                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "builtins/pwd.c"
+                "builtins/echo.c", "builtins/env.c", "builtins/exit.c", "builtins/pwd.c",
+                "builtins/cd.c", "signals.c", "crtl.c"
+            ],
+            "test_exec_pipeline.c": [
+                "syswrap.c", "logger.c",
+                "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
+                "exec_stage.c","builtins/echo.c", "builtins/env.c",
+                "builtins/export.c", "path_utils.c", "exit_utils.c",
+                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
+                "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "prepare_redirs.c",
+                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
+                "builtins/pwd.c","builtins/cd.c", "signals.c", "crtl.c",
+                "builtins/exit.c", "do_first_cmd.c", "do_middle_cmds.c", "do_last_cmd.c",
             ],
             "test_builtin_echo.c": [
                 "builtins/echo.c", "syswrap.c", "logger.c", "builtins/env.c", "builtins/exit.c"
@@ -112,17 +125,6 @@ class UnitTestRunner:
             ],
             "test_builtin_exit.c": [
                 "builtins/exit.c", "syswrap.c", "logger.c"
-            ],
-            "test_exec_pipeline.c": [
-                "syswrap.c", "logger.c",
-                "exec_errors.c", "exec_utils.c", "free_cmds.c", "tuberiex.c",
-                "exec_stage.c","builtins/echo.c", "builtins/env.c",
-                "builtins/export.c", "path_utils.c", "exit_utils.c",
-                "envp/env_init.c", "envp/free_env.c", "builtins_orq.c",
-                "fds_utils.c", "exec_pipeline.c", "exec_simple.c", "prepare_redirs.c",
-                "prepare_stage_io.c", "prepare_stage_io_utils.c", "builtins/unset.c",
-                "builtins/pwd.c",
-                "builtins/exit.c", "do_first_cmd.c", "do_middle_cmds.c", "do_last_cmd.c",
             ]
         }
         

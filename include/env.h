@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   env.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 18:06:55 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/09 20:11:30 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:34:07 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ENVP_H
-# define ENVP_H
+#ifndef ENV_H
+# define ENV_H
 
 typedef struct s_shell	t_shell;
 typedef struct s_list	t_list;
