@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:46:33 by mario             #+#    #+#             */
-/*   Updated: 2026/02/06 16:43:52 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 16:08:11 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,38 @@ int	env_set(t_list **env, char *var)
 	return (0);
 }
 
+static int	is_valid_export_name(const char *var)
+{
+	size_t	i;
+
+	if (!var || var[0] == '\0')
+		return (0);
+	if (var[0] == '=' || (!ft_isalpha(var[0]) && var[0] != '_'))
+		return (0);
+	i = 1;
+	while (var[i] && var[i] != '=')
+	{
+		if (!ft_isalnum(var[i]) && var[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 // wrap env_set to return 0 on non valid input and print errors
 int	export(t_list **env, char *var)
 {
 	int	result;
 
-	if (ft_strchr(var, '=') == NULL || ft_strlen(var) == 0)
+	if (!var)
+		return (0);
+	if (!is_valid_export_name(var))
+	{
+		putstr_fd_err(4, "minishell: export: `", var,
+			"': not a valid identifier\n");
+		return (1);
+	}
+	if (ft_strchr(var, '=') == NULL)
 		return (0);
 	result = env_set(env, var);
 	if (result == 1)

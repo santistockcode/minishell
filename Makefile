@@ -6,7 +6,7 @@
 #    By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/06 10:39:34 by saalarco          #+#    #+#              #
-#    Updated: 2026/02/06 16:55:00 by mnieto-m         ###   ########.fr        #
+#    Updated: 2026/02/09 16:14:12 by mnieto-m         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,7 @@ lexing/utils_lexing\
 expand/var_expand\
 expand/utils_expand\
 expand/utils_expand_2\
+expand/expand_utils_aux\
 expand/quote_state_expand\
 expand/quote_remove_expand\
 parsing/parsing\

@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/08 11:12:14 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 15:22:11 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,11 @@ int	expand_and_replace(char **value, char **start, t_list *env)
 	if (!var_param[0])
 		return (MALLOC_ERROR);
 	var_param[1] = get_var_param_value(var_param[0], env);
+	if (!var_param[1])
+	{
+		free(var_param[0]);
+		return (MALLOC_ERROR);
+	}
 	status = update_start_with_value(value, start, var_param, &value_offset);
 	free(var_param[0]);
 	free(var_param[1]);

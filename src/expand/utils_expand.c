@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 22:34:23 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 16:14:28 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,30 +60,22 @@ char	*extract_varvalue(char *var_name, t_list *env)
 char	*expand_varstr(char *string, char *value, char **var_param,
 		size_t *value_offset)
 {
-	char	*pattern;
 	char	*match;
 	char	*before;
 	char	*after;
-	char	*temp;
+	char	*result;
+	size_t	pattern_len;
 
-	pattern = ft_strjoin("$", var_param[0]);
-	if (!string || !pattern)
-		return (free(pattern), NULL);
-	match = ft_strnstr(value, pattern, ft_strlen(string));
-	*value_offset = match - string;
+	match = find_var_match(string, value, var_param[0], value_offset);
+	if (!match)
+		return (NULL);
+	pattern_len = ft_strlen(var_param[0]) + 1;
 	before = ft_substr(string, 0, match - string);
-	after = ft_strdup(match + ft_strlen(pattern));
-	free(pattern);
-	temp = ft_strjoin(before, var_param[1]);
-	if (temp)
-	{
-		pattern = ft_strjoin(temp, after);
-		free(temp);
-		temp = pattern;
-	}
+	after = ft_strdup(match + pattern_len);
+	result = join_parts(before, var_param[1], after);
 	free(before);
 	free(after);
-	return (temp);
+	return (result);
 }
 
 int	valid_varname(int c)
