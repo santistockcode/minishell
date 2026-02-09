@@ -40,7 +40,7 @@ class UnitTestRunner:
     
     def discover_test_sources(self) -> List[Path]:
         """Find all test_*.c files."""
-        return sorted(self.test_dir.glob("test_builtin_*.c"))
+        return sorted(self.test_dir.glob("test_exec_pipeline.c"))
     
     def get_dependencies_for_test(self, test_file: Path) -> List[Path]:
         """Map test files to their source dependencies."""

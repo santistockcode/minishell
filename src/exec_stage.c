@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:17:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 14:45:17 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:16:11 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,8 +186,31 @@ Before exiting:
 	- frees redirection structures
 	- frees stage_io structure
 
-FIXME: fd of pipe in use, but fd not being used, can be closed
 */
+
+void close_unused_child_fds(t_stage_type pos, t_stage_io *io, int *p, int prev_in_fd)
+{
+    if (pos == FIRST) {
+        if (p) safe_close(p[0]);
+        if (p && io && io->out_fd == p[1]) safe_close(p[1]);
+    }
+    else if (pos == MIDDLE) {
+        if (p) safe_close(p[0]);
+        if (prev_in_fd != -1 && prev_in_fd != STDIN_FILENO) safe_close(prev_in_fd);
+        if (p && io && io->out_fd == p[1]) safe_close(p[1]);
+    }
+    else if (pos == LAST) {
+        if (prev_in_fd != -1 && prev_in_fd != STDIN_FILENO) safe_close(prev_in_fd);
+    }
+    if (io) {
+        if (io->in_fd != -1 && io->in_fd != STDIN_FILENO) safe_close(io->in_fd);
+        if (io->out_fd != -1 && io->out_fd != STDOUT_FILENO) safe_close(io->out_fd);
+    }
+}
+// ...existing code...
+
+//FIXME: fd of pipe in use, but fd not being used, can be closed
+
 void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 {
 	char		*path;
@@ -195,6 +218,9 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 	char *const	*envp;
 
 	dup2_stage_io(sh, cmd, p);
+	close_unused_child_fds(cmd->pos, cmd->stage_io,
+        p,
+        (cmd->pos == MIDDLE || cmd->pos == LAST) ? cmd->prev_in_fd : -1);
 	if (is_builtin(cmd->argv[0]))
 		msh_exec_builtin_child(sh, cmd, p);
 	path = msh_resolve_path(cmd->argv, env, sh);
@@ -212,7 +238,6 @@ void	msh_exec_stage(t_shell *sh, t_cmd *cmd, t_list *env, int *p)
 		free(path);
 		free_envp((const char **)envp);
 		st = msh_status_from_execve_error(errno);
-		msh_set_error(sh, EXECVE_OP);
 		stage_exit_print(sh, cmd, p, st);
 	}
 }

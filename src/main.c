@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/13 17:37:50 by mario             #+#    #+#             */
-/*   Updated: 2026/02/08 17:45:54 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 18:16:56 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,11 @@ SANTI:
 	- Después de entrar 1 vez en el bucle, minishell debe quedar tal que: 
 	- Todos los casos anteriores pero con --trace-child en valgrind. 
 	- hay un salto de línea raro en cada bucle
-	- exit no sale con el código que debekill -9
 	- pasar hoja de corrección de los builtins (ver logger)
+	- hay un bug (o diferencia con bash, cuando se ejecuta algo con un slash, como ./command, no es capaz de ejecutar un script ./whatever.sh) ni diferencia en caso de error
+	- cat | head -n 2
+	- en algunos casos me imprime ./minishell dos veces ?¿?¿? de momento no he tomado nota
+
 
 
 MARIO: 

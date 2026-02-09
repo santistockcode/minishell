@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:59:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 19:00:23 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:14:54 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,13 +60,46 @@ int	run_pipeline(t_shell *sh, t_list *cmd_first, int nstages, pid_t *pid)
 			pid));
 }
 
+int	wait_all_pipeline(pid_t last_pid, int nstages)
+{
+	int		status;
+	int		last_status;
+	pid_t	pid;
+	int		reaped;
+
+	last_status = 0;
+	reaped = 0;
+	setup_signals_ignore();
+	while (reaped < nstages)
+	{
+		pid = waitpid(-1, &status, 0);
+		if (pid == -1)
+			break ;
+		reaped++;
+		if (pid == last_pid)
+		{
+			if (WIFSIGNALED(status))
+			{
+				last_status = 128 + WTERMSIG(status);
+				if (WTERMSIG(status) == SIGINT)
+					write(STDOUT_FILENO, "\n", 1);
+				else if (WTERMSIG(status) == SIGQUIT)
+					write(STDERR_FILENO, "Quit (core dumped)\n", 19);
+			}
+			else if (WIFEXITED(status))
+				last_status = WEXITSTATUS(status);
+		}
+	}
+	return (setup_signal(), last_status);
+}
+
 // returns -1 on fork error happened before last command on parent
 // it interrupted pipeline: FATAL!
 int	msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 {
 	int		result;
-	int		wtpd_resp;
-	int		status;
+	// int		wtpd_resp;
+	// int		status;
 	pid_t	pid;
 
 	if (require_standard_fds(sh) == -1)
@@ -75,20 +108,21 @@ int	msh_exec_pipeline(t_shell *sh, t_list *cmd_first, int nstages)
 	sh->cmds_start = NULL;
 	if (result == -1)
 		return (-1);
-	setup_signals_ignore();
-	wtpd_resp = waitpid(pid, &status, 0);
-	if (wtpd_resp == -1)
-		return (msh_set_error(sh, WAITPID_OP), -1);
-	if (WIFSIGNALED(status))
-	{
-		result = 128 + WTERMSIG(status);
-		if (WTERMSIG(status) == SIGINT)
-			write(STDOUT_FILENO, "\n", 1);
-		else if (WTERMSIG(status) == SIGQUIT)
-			write(STDOUT_FILENO, "Quit\n", 5);
-	}
-	else if (WIFEXITED(status))
-		result = WEXITSTATUS(status);
-	setup_signal();
-	return (result);
+	// setup_signals_ignore();
+	// wtpd_resp = waitpid(pid, &status, 0);
+	// if (wtpd_resp == -1)
+	// 	return (msh_set_error(sh, WAITPID_OP), -1);
+	// if (WIFSIGNALED(status))
+	// {
+	// 	result = 128 + WTERMSIG(status);
+	// 	if (WTERMSIG(status) == SIGINT)
+	// 		write(STDOUT_FILENO, "\n", 1);
+	// 	else if (WTERMSIG(status) == SIGQUIT)
+	// 		write(STDOUT_FILENO, "Quit\n", 5);
+	// }
+	// else if (WIFEXITED(status))
+	// 	result = WEXITSTATUS(status);
+	// setup_signal();
+	// return (result);
+	return wait_all_pipeline(pid, nstages);
 }

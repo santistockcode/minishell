@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:51:37 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:04:23 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:12:31 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@ t_stage_io	*prepare_stage_io(t_stage_type pos, t_list *redirs, int in_fd,
 void		free_cmd_struct(void *input);
 void		free_shell_child(t_shell *sh);
 void		safe_close_p(int *p);
+
+// signals
+void	setup_signals_child(void);
 
 void	special_middle_exit(t_shell *sh, t_cmd *cmd, int in_fd, int *p)
 {
@@ -49,10 +52,9 @@ int	do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 			-1);
 	if (pid == 0)
 	{
-		// fprintf(stderr, "[CHILD-m] PID %d, parent %d, cmd=%s\n",
-		// 	getpid(), getppid(), cmd->argv[0]);
-		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		// 	special_middle_exit(sh, cmd, in_fd, p);
+		setup_signals_child();
+		cmd->pos = MIDDLE;
+		cmd->prev_in_fd = in_fd;
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs, sh) == -1)
 			special_middle_exit(sh, cmd, in_fd, p);

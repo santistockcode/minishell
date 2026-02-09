@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:05:40 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 16:39:38 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 19:32:58 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,8 @@ typedef struct s_cmd
 	char		**argv;
 	t_list		*redirs;
 	t_stage_io	*stage_io;
+	t_stage_type pos;
+	int		prev_in_fd;
 }						t_cmd;
 
 /* Backend */

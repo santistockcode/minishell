@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 15:10:05 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 17:42:28 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:12:55 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 	int		last_status;
 	t_cmd	*cmd;
 
-	// FIXME: msh_exec_simple won't work on NULL cmd, check before callling
 	sh->cmds_start = cmd_first;
 	cmd = (t_cmd *)cmd_first->content;
 	logger("exec_cmds", "Executing simple command");
@@ -52,16 +51,15 @@ int	exec_simple_wrapper(t_shell *sh, t_list *cmd_first)
 	}
 	return (last_status);
 }
-
+// msh_exec_pipeline returns -1 on syscall error (pipeline interrupted)
 int	exec_pipeline_wrapper(t_shell *sh, t_list *cmd_first, int nstages)
 {
 	int	last_pipeline_st;
 
 	sh->last_errno = 0;
 	logger("exec_cmds", "Executing pipeline with more than 1 stage");
-	// msh_exec_pipeline returns -1 on syscall error (pipeline interrupted)
 	last_pipeline_st = msh_exec_pipeline(sh, cmd_first, nstages);
-	if (last_pipeline_st == -1) // error
+	if (last_pipeline_st == -1)
 	{
 		logger("exec_cmds", "Failed to execute pipeline");
 		sh->last_status = 1;

@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 19:20:12 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 19:50:32 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ void		stage_exit_print(t_shell *sh, t_cmd *cmd, int *p, int exit_code);
 void		safe_close_stage_io(t_stage_io *stage_io);
 void		dup2_stage_io(t_shell *sh, t_cmd *cmd, int *p);
 int			require_standard_fds(t_shell *sh);
+
+// signals
+void	setup_signals_ignore(void);
 
 int	dup2_stage_io_parent(t_shell *sh, t_cmd *cmd)
 {
@@ -95,6 +98,8 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 		// 	getpid(), getppid(), cmd->argv[0]);
 		// while(1)
 		// 	sleep(50);
+		cmd->pos = LAST;
+		cmd->prev_in_fd = -1;
 		if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
 			stage_exit_print(sh, cmd, NULL, EXIT_FAILURE);
 		redirs = cmd->redirs;
@@ -110,6 +115,29 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 	return (0);
 }
 
+static int wait_one_child(pid_t pid)
+{
+    int status, last_status = 0;
+
+    setup_signals_ignore();
+    if (waitpid(pid, &status, 0) > 0)
+    {
+        if (WIFSIGNALED(status))
+        {
+            int sig = WTERMSIG(status);
+            last_status = 128 + sig;
+            if (sig == SIGINT)
+                write(STDOUT_FILENO, "\n", 1);
+            else if (sig == SIGQUIT)
+                write(STDERR_FILENO, "Quit (core dumped)\n", 19);
+        }
+        else if (WIFEXITED(status))
+            last_status = WEXITSTATUS(status);
+    }
+    setup_signal();
+    return last_status;
+}
+
 // returns -1 on any error not related to builtins (so caller should print)
 // if error happened in builtin in parent,
 // is builtin who managed print and returns
@@ -117,7 +145,7 @@ int	run_simple(t_shell *sh, t_cmd *cmd, t_list *env, pid_t *pid)
 int	msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
 {
 	int		result;
-	int		status;
+	// int		status;
 	pid_t	pid;
 
 	logger_ctx_simple(sh, cmd, "EXEC_SIMPLE", "[line 772]");
@@ -128,9 +156,6 @@ int	msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
 	result = run_simple(sh, cmd, env, &pid);
 	if (result == -1)
 		return (-1);
-	if (waitpid(pid, &status, 0) == -1)
-		return (msh_set_error(sh, WAITPID_OP), -1);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
+	wait_one_child(pid);
 	return (result);
 }

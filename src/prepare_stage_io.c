@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:06:54 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/08 18:49:34 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:17:05 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void	assign_last(t_stage_io **rdr_spec, t_list *redirs, int in_fd)
 	if (in_redir_fd != -1 && in_redir_fd != in_fd)
 	{
 		(*rdr_spec)->in_fd = in_redir_fd;
-		safe_close(in_fd);
 	}
 	else
 		(*rdr_spec)->in_fd = in_fd;
@@ -71,7 +70,6 @@ void	assign_middle(t_stage_io **rdr_spec, t_list *redirs, int *p, int in_fd) // 
 	if (in_redir_fd != -1 && in_redir_fd != in_fd)
 	{
 		(*rdr_spec)->in_fd = in_redir_fd;
-		safe_close(in_fd);
 	}
 	else
 	{
@@ -81,16 +79,15 @@ void	assign_middle(t_stage_io **rdr_spec, t_list *redirs, int *p, int in_fd) // 
 	{
 		(*rdr_spec)->out_fd = out_redir_fd;
 		(*rdr_spec)->out_mode = get_r_out_mode(redirs);
-		safe_close(p[1]); 
-		safe_close(p[0]);
+
 	}
 	else
 	{
 		(*rdr_spec)->out_fd = p[1];
 		(*rdr_spec)->out_mode = 0;
-		safe_close(p[0]);
 	}
 }
+
 
 /*
 If there is an input redirection, use it; otherwise, default -1
@@ -106,8 +103,6 @@ void	assign_first(t_stage_io **rdr_spec, t_list *redirs, int *p)
 	{
 		(*rdr_spec)->out_fd = out_redir_fd;
 		(*rdr_spec)->out_mode = get_r_out_mode(redirs);
-		safe_close(p[1]);
-		safe_close(p[0]);
 	}
 	else
 	{
