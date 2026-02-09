@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/08 11:12:14 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 15:22:11 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,11 @@ int	expand_and_replace(char **value, char **start, t_list *env)
 	if (!var_param[0])
 		return (MALLOC_ERROR);
 	var_param[1] = get_var_param_value(var_param[0], env);
+	if (!var_param[1])
+	{
+		free(var_param[0]);
+		return (MALLOC_ERROR);
+	}
 	status = update_start_with_value(value, start, var_param, &value_offset);
 	free(var_param[0]);
 	free(var_param[1]);
@@ -70,7 +75,10 @@ int	remove_char_quote(char **start, char **value)
 	quote_pos = *value - *start;
 	before_quote = ft_substr(*start, 0, quote_pos);
 	after_quote = ft_strdup(*value + 1);
-	temp = ft_strjoin(before_quote, after_quote);
+	if (before_quote && after_quote && ft_strlen(before_quote) == 0 && ft_strlen(after_quote) == 0)
+		temp = ft_strdup("");
+	else
+		temp = ft_strjoin(before_quote, after_quote);
 	if (!temp)
 		return (free(before_quote), free(after_quote), MALLOC_ERROR);
 	free(*start);

@@ -31,15 +31,17 @@ static int	process_quote_removal(char **value, char **start, int flag,
 int	remove_noquote(char **value, char **start, int flag)
 {
 	if (!value || !*value || flag != NO_QUOTE)
+	{
 		return (flag);
+	}
 	while ((msh_isprint(**value) && !ft_isspace(**value)
-			&& !ft_isoperator(**value)))
+			&& !ft_isoperator(**value) && flag == NO_QUOTE))
 	{
 		flag = state_switch(*value, flag);
 		if (flag != NO_QUOTE && flag != BREAK)
 		{
 			remove_char_quote(start, value);
-			continue ;
+			break ;
 		}
 		(*value)++;
 	}
@@ -62,15 +64,22 @@ int	remove_string_quotes(char **string)
 	int		flag;
 
 	if (!string || !*string)
+	{
 		return (SUCCESS);
+	}
 	value = *string;
 	start = value;
 	flag = NO_QUOTE;
+	int loop_count = 0;
 	while (*value && flag != BREAK)
 	{
 		if (flag == NO_QUOTE)
 			flag = remove_noquote(&value, &start, flag);
 		flag = remove_quote_types(&value, &start, flag);
+		loop_count++;
+		if (loop_count > 1000) {
+			break;
+		}
 	}
 	*string = start;
 	return (SUCCESS);

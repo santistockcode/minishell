@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:00:07 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/09 19:50:32 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:24:26 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,11 @@ int	msh_exec_simple(t_shell *sh, t_cmd *cmd, t_list *env)
 	pid_t	pid;
 
 	logger_ctx_simple(sh, cmd, "EXEC_SIMPLE", "[line 772]");
+	if (!cmd || !cmd->argv || !cmd->argv[0] || cmd->argv[0][0] == '\0')
+	{
+		ft_putstr_fd("minishell: : command not found\n", STDERR_FILENO);
+		return (STATUS_CMD_NOT_FOUND);
+	}
 	if (require_standard_fds(sh) == -1)
 		return (-1);
 	if (is_builtin(cmd->argv[0]))
