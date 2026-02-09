@@ -303,7 +303,10 @@ void	logger_open_fds(const char *starttag, const char *endtag)
 	char			path[256];
 	char			link_target[256];
 	ssize_t		len;
+	const char		*fd_prefix;
+	size_t			avail;
 
+	fd_prefix = "/proc/self/fd/";
 	if (LOG != 1)
 		return ;
 	printf("[OPEN_FDS] %s\n", starttag ? starttag : "(start)");
@@ -319,7 +322,9 @@ void	logger_open_fds(const char *starttag, const char *endtag)
 	{
 		if (entry->d_name[0] != '.')
 		{
-			snprintf(path, sizeof(path), "/proc/self/fd/%s", entry->d_name);
+			avail = sizeof(path) - ft_strlen(fd_prefix) - 1;
+			snprintf(path, sizeof(path), "%s%.*s",
+				fd_prefix, (int)avail, entry->d_name);
 			len = readlink(path, link_target, sizeof(link_target) - 1);
 			if (len >= 0)
 			{

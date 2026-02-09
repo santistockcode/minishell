@@ -70,7 +70,10 @@ int	remove_char_quote(char **start, char **value)
 	quote_pos = *value - *start;
 	before_quote = ft_substr(*start, 0, quote_pos);
 	after_quote = ft_strdup(*value + 1);
-	temp = ft_strjoin(before_quote, after_quote);
+	if (before_quote && after_quote && ft_strlen(before_quote) == 0 && ft_strlen(after_quote) == 0)
+		temp = ft_strdup("");
+	else
+		temp = ft_strjoin(before_quote, after_quote);
 	if (!temp)
 		return (free(before_quote), free(after_quote), MALLOC_ERROR);
 	free(*start);
