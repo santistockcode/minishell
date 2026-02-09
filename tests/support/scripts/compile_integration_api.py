@@ -77,6 +77,7 @@ def compile_shared_library(project_root: Path, runner: bool = False, debug: bool
         src_dir / "builtins/env.c",
         src_dir / "builtins/exit.c",
         src_dir / "builtins/pwd.c",
+        src_dir / "builtins/cd.c",
         src_dir / "envp/env_init.c",
         src_dir / "envp/free_env.c",
         src_dir / "builtins_orq.c",

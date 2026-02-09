@@ -153,13 +153,13 @@ static t_cmd *build_cmd_with_redir(const char **argv, int argc,
                                     t_redir_config redir,
                                     const char *in_file, const char *out_file)
 {
-    if (redir == REDIR_NONE)
+    if (redir == REDIR_NONE_TEST)
         return (fd_make_cmd(argv, argc));
-    else if (redir == REDIR_IN)
+    else if (redir == REDIR_IN_TEST)
         return (fd_make_cmd_redir_in(argv, argc, in_file));
-    else if (redir == REDIR_OUT)
+    else if (redir == REDIR_OUT_TEST)
         return (fd_make_cmd_redir_out(argv, argc, out_file));
-    else if (redir == REDIR_IN_OUT)
+    else if (redir == REDIR_IN_OUT_TEST)
         return (fd_make_cmd_redir_in_out(argv, argc, in_file, out_file));
     return (NULL);
 }
@@ -189,13 +189,13 @@ t_pipeline_config fd_config_builtin_3_stage(void)
     t_pipeline_config config = {
         .argv1 = {"echo", "hello", NULL, NULL},
         .argc1 = 2,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"echo", "world", NULL, NULL},
         .argc2 = 2,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"echo", "done", NULL, NULL},
         .argc3 = 2,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = NULL,
         .out_file = NULL
     };
@@ -207,13 +207,13 @@ t_pipeline_config fd_config_builtin_3_stage_all_redirs(void)
     t_pipeline_config config = {
         .argv1 = {"echo", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN,
+        .redir1 = REDIR_IN_TEST,
         .argv2 = {"echo", NULL, NULL, NULL},
         .argc2 = 1,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"echo", NULL, NULL, NULL},
         .argc3 = 1,
-        .redir3 = REDIR_OUT,
+        .redir3 = REDIR_OUT_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };
@@ -225,13 +225,13 @@ t_pipeline_config fd_config_external_3_stage(void)
     t_pipeline_config config = {
         .argv1 = {"cat", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_NONE,
+        .redir1 = REDIR_NONE_TEST,
         .argv2 = {"head", "-n", "1", NULL},
         .argc2 = 3,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"wc", "-c", NULL, NULL},
         .argc3 = 2,
-        .redir3 = REDIR_NONE,
+        .redir3 = REDIR_NONE_TEST,
         .in_file = NULL,
         .out_file = NULL
     };
@@ -243,13 +243,13 @@ t_pipeline_config fd_config_external_3_stage_all_redirs(void)
     t_pipeline_config config = {
         .argv1 = {"cat", NULL, NULL, NULL},
         .argc1 = 1,
-        .redir1 = REDIR_IN,
+        .redir1 = REDIR_IN_TEST,
         .argv2 = {"head", "-n", "1", NULL},
         .argc2 = 3,
-        .redir2 = REDIR_NONE,
+        .redir2 = REDIR_NONE_TEST,
         .argv3 = {"wc", "-c", NULL, NULL},
         .argc3 = 2,
-        .redir3 = REDIR_OUT,
+        .redir3 = REDIR_OUT_TEST,
         .in_file = FD_TEST_INPUT,
         .out_file = FD_TEST_OUTPUT
     };

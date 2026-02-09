@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/27 19:41:34 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:14:31 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:25:51 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,12 @@ void		free_cmd_struct(void *input);
 void		free_shell_child(t_shell *sh);
 void		safe_close_p(int *p);
 
+// signals
+void		setup_signals_child(void);
+
+// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 void	special_first_exit(t_shell *sh, t_cmd *cmd, int *p)
 {
-	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	if (p)
 		safe_close_p(p);
 	msh_print_last_error(sh);
@@ -32,7 +35,8 @@ void	special_first_exit(t_shell *sh, t_cmd *cmd, int *p)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	logger_open_fds( "[do_first_cmd.c]special_first_exit🔥", "[do_first_cmd.c]special_first_exit");
+	logger_open_fds("[do_first_cmd.c]special_first_exit🔥",
+		"[do_first_cmd.c]special_first_exit");
 	exit(1);
 }
 
@@ -41,15 +45,14 @@ int	do_first_command(t_shell *sh, t_cmd *cmd, int *p)
 	pid_t		pid;
 	t_stage_io	*rdr_spec;
 
-	pid = fork_wrap();
+	pid = fork();
 	if (pid < 0)
 		return (safe_close_p(p), msh_set_error(sh, FORK_OP), -1);
 	if (pid == 0)
 	{
-		// fprintf(stderr, "[CHILD-l] PID %d, parent %d, cmd=%s\n",
-		// 	getpid(), getppid(), cmd->argv[0]);
-		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		// 	special_first_exit(sh, cmd, p);
+		setup_signals_child();
+		cmd->pos = FIRST;
+		cmd->prev_in_fd = -1;
 		if (prepare_redirs(cmd->redirs, sh) == -1)
 			special_first_exit(sh, cmd, p);
 		rdr_spec = prepare_stage_io(FIRST, cmd->redirs, -1, p);

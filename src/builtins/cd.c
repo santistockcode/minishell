@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mario <mario@student.42.fr>                +#+  +:+       +#+        */
+/*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 16:21:19 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/06 20:25:06 by mario            ###   ########.fr       */
+/*   Updated: 2026/02/09 20:41:29 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,12 +108,12 @@ int	handle_cd_oldpwd(t_list **env)
 	ft_putstr_fd(oldpwd->value, STDOUT_FILENO);
 	return (update_pwd(env));
 }
+
 /*
 FIXME: cd, ~/a/b should concatenate $HOME to <path> (expand)
 */
 int	cd_builtin(char **argsv, t_list **env)
 {
-
 	if (argsv[1] && argsv[2])
 	{
 		ft_putstr_fd("minishell: cd: too many arguments\n", STDERR_FILENO);

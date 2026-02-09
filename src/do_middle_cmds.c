@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 17:51:37 by saalarco          #+#    #+#             */
-/*   Updated: 2026/02/05 12:04:23 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:25:56 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,12 @@ void		free_cmd_struct(void *input);
 void		free_shell_child(t_shell *sh);
 void		safe_close_p(int *p);
 
+// signals
+void		setup_signals_child(void);
+
+// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 void	special_middle_exit(t_shell *sh, t_cmd *cmd, int in_fd, int *p)
 {
-	// msh_restore_fds(sh->save_in, sh->save_out, sh->save_err);
 	if (p)
 		safe_close_p(p);
 	safe_close(in_fd);
@@ -33,7 +36,8 @@ void	special_middle_exit(t_shell *sh, t_cmd *cmd, int in_fd, int *p)
 	else
 		free_cmd_struct(cmd);
 	free_shell_child(sh);
-	logger_open_fds( "🔥[do_middle_cmds.c]special_middle_exit🔥", "[do_middle_cmds.c]special_middle_exit");
+	logger_open_fds("🔥[do_middle_cmds.c]special_middle_exit🔥",
+		"[do_middle_cmds.c]special_middle_exit");
 	exit(1);
 }
 
@@ -43,16 +47,15 @@ int	do_middle_commands(t_shell *sh, t_cmd *cmd, int *p, int in_fd)
 	t_list		*redirs;
 	t_stage_io	*rdr_spec;
 
-	pid = fork_wrap();
+	pid = fork();
 	if (pid < 0)
 		return (safe_close_p(p), safe_close(in_fd), msh_set_error(sh, FORK_OP),
 			-1);
 	if (pid == 0)
 	{
-		// fprintf(stderr, "[CHILD-m] PID %d, parent %d, cmd=%s\n",
-		// 	getpid(), getppid(), cmd->argv[0]);
-		// if (msh_save_fds(&sh->save_in, &sh->save_out, &sh->save_err) == -1)
-		// 	special_middle_exit(sh, cmd, in_fd, p);
+		setup_signals_child();
+		cmd->pos = MIDDLE;
+		cmd->prev_in_fd = in_fd;
 		redirs = cmd->redirs;
 		if (prepare_redirs(redirs, sh) == -1)
 			special_middle_exit(sh, cmd, in_fd, p);

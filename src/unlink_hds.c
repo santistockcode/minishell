@@ -6,7 +6,7 @@
 /*   By: saalarco <saalarco@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 18:21:59 by saalarco          #+#    #+#             */
-/*   Updated: 2026/01/31 18:22:04 by saalarco         ###   ########.fr       */
+/*   Updated: 2026/02/09 21:29:54 by saalarco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	unlink_hds(t_list *cmds)
 			{
 				logger("unlink_hds", "Unlinking here_doc file");
 				if (redir->target)
-					unlink_wrap(redir->target);
+					unlink(redir->target);
 			}
 			redir_node = redir_node->next;
 		}
