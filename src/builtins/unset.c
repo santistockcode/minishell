@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:50:36 by mario             #+#    #+#             */
-/*   Updated: 2026/02/06 16:44:04 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:11:36 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,5 +47,20 @@ void	env_unset(t_list **env, char *key)
 		}
 		prev = aux;
 		aux = aux->next;
+	}
+}
+
+// wrapper de env_uset
+void	unset(t_list **env, char **argv)
+{
+	int	i;
+
+	if (!argv)
+		return ;
+	i = 1;
+	while (argv[i])
+	{
+		env_unset(env, argv[i]);
+		i++;
 	}
 }

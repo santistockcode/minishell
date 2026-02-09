@@ -6,13 +6,13 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 15:46:33 by mario             #+#    #+#             */
-/*   Updated: 2026/02/09 16:08:11 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:11:26 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/minishell.h"
 
-void	putstr_fd_err(int n, ...);
+void		putstr_fd_err(int n, ...);
 
 /*
  * Get an environment variable by key.
@@ -102,4 +102,19 @@ int	export(t_list **env, char *var)
 		return (1);
 	}
 	return (0);
+}
+
+int	wrap_export(t_list **env, char **argv)
+{
+	int	result;
+	int	i;
+
+	i = 1;
+	result = 0;
+	while (argv[i])
+	{
+		result = export(env, argv[i]);
+		i++;
+	}
+	return (result);
 }

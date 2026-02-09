@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/06 22:34:23 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:14:09 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ int	remove_string_quotes(char **string)
 	char	*start;
 	char	*value;
 	int		flag;
+	int		loop_count;
 
 	if (!string || !*string)
 	{
@@ -70,16 +71,15 @@ int	remove_string_quotes(char **string)
 	value = *string;
 	start = value;
 	flag = NO_QUOTE;
-	int loop_count = 0;
+	loop_count = 0;
 	while (*value && flag != BREAK)
 	{
 		if (flag == NO_QUOTE)
 			flag = remove_noquote(&value, &start, flag);
 		flag = remove_quote_types(&value, &start, flag);
 		loop_count++;
-		if (loop_count > 1000) {
-			break;
-		}
+		if (loop_count > 1000)
+			break ;
 	}
 	*string = start;
 	return (SUCCESS);

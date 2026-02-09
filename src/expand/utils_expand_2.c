@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/09 15:22:11 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 20:13:56 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,8 @@ int	remove_char_quote(char **start, char **value)
 	quote_pos = *value - *start;
 	before_quote = ft_substr(*start, 0, quote_pos);
 	after_quote = ft_strdup(*value + 1);
-	if (before_quote && after_quote && ft_strlen(before_quote) == 0 && ft_strlen(after_quote) == 0)
+	if (before_quote && after_quote && ft_strlen(before_quote) == 0
+		&& ft_strlen(after_quote) == 0)
 		temp = ft_strdup("");
 	else
 		temp = ft_strjoin(before_quote, after_quote);
