@@ -35,5 +35,7 @@ int						env_set(t_list **env, char *var);
 
 // UNSET
 void					env_unset(t_list **env, char *key);
+void					unset(t_list **env, char **argv);
+int						wrap_export(t_list **env, char **argv);
 
 #endif
