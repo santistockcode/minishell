@@ -98,6 +98,7 @@ int	expand_variables(t_shell *shell)
 	if (!shell)
 		return (INPUT_ERROR);
 	cmd_node = shell->pars_cmds;
+	int cmd_idx = 0;
 	while (cmd_node)
 	{
 		cmd = (t_command *)cmd_node->content;
@@ -105,6 +106,7 @@ int	expand_variables(t_shell *shell)
 		if (status != SUCCESS)
 			return (status);
 		cmd_node = cmd_node->next;
+		cmd_idx++;
 	}
 	return (SUCCESS);
 }

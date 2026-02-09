@@ -6,7 +6,7 @@
 /*   By: mnieto-m <mnieto-m@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 18:00:00 by mnieto-m          #+#    #+#             */
-/*   Updated: 2026/02/04 00:55:56 by mnieto-m         ###   ########.fr       */
+/*   Updated: 2026/02/09 16:14:25 by mnieto-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,9 @@ char	*extract_varname(char *value);
 char	*extract_varvalue(char *var_name, t_list *env);
 char	*expand_varstr(char *string, char *value, char **var_param,
 			size_t *value_offset);
+char	*find_var_match(char *string, char *value, char *var_name,
+			size_t *offset);
+char	*join_parts(char *before, char *var_val, char *after);
 int		valid_varname(int c);
 
 int		remove_string_quotes(char **string);
